@@ -1,7 +1,7 @@
 Overview
 ==================
 
-Explore mobile API is Mentalab's open-source biosignal acquisition API for working with Mentalab Explore device. Amongst many things, it provides the following features:
+Explore Java API is Mentalab's open-source biosignal acquisition API for working with Mentalab Explore device. The code can also be adapted to use in Andrid echosystem. Amongst many things, it provides the following features:
 
 * Real-time streaming of ExG, orientation and environmental data
 * Explore device configuration
@@ -49,7 +49,7 @@ Please check troubleshooting section of this document in case any problem occurs
 Documentation
 =============
 
-For the full documentation of the API, please visit <https://github.com/mentalab-hub/explore-mobile-api/blob/main/docs>`
+For the full documentation of the API, please visit <https://github.com/Mentalab-hub/explore-java/tree/master/docs>
 
 Troubleshooting
 ===============
