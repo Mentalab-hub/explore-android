@@ -1,5 +1,5 @@
-[![Release](https://jitpack.io/v/Mentalab-hub/explore-java.svg)]
-(https://jitpack.io/#User/Repo)
+![Release](https://jitpack.io/v/Mentalab-hub/explore-java.svg)
+
 
 Overview
 ==================
