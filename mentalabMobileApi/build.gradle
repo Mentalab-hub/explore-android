@@ -37,6 +37,11 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }
 
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
 task javadoc(type: Javadoc) {
     options.charSet = 'UTF-8'
     failOnError  false
@@ -50,5 +55,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 artifacts {
+    archives sourcesJar
     archives javadocJar
 }
+
