@@ -27,10 +27,10 @@ maven { url ‘https://jitpack.io’ }
 
 * In your app’s build.gradle add the dependency
 ```
-implementation 'com.github.salman2135:mentlabMobileApi:V__0.1'
+implementation 'com.github.Mentalab-hub:explore-java:v_0.1'
 ```
 
-![alt text](https://github.com/salman2135/mentlabMobileApi/blob/master/screenshots/app.png?raw=true)
+![alt text](https://github.com/Mentalab-hub/explore-java/blob/master/screenshots/app.png?raw=true)
 
 * Add the following line in your anderoid manifest:
 ```
@@ -43,7 +43,7 @@ A demo Android application is availble here:
 
 [![SC2 Video](https://img.youtube.com/vi/nP57MqztEUI/0.jpg)](https://youtu.be/nP57MqztEUI)
 
-A demo android application which used explore-java library is available [here](https://github.com/Mentalab-hub/explore-demo-app)
+A demo Android application which used explore-java library is available [here](https://github.com/Mentalab-hub/explore-demo-app)
 Please check troubleshooting section of this document in case any problem occurs.
 
 Usage Example
