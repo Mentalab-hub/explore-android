@@ -1,10 +1,13 @@
+[![Release](https://jitpack.io/v/User/Repo.svg)]
+(https://jitpack.io/#User/Repo)
+
 Overview
 ==================
 
 Explore Java API is Mentalab's open-source biosignal acquisition API for working with Mentalab Explore device. The code can also be adapted to use in Andrid echosystem. Amongst many things, it provides the following features:
 
 * Real-time streaming of ExG, orientation and environmental data
-* Explore device configuration
+* Connect, pair and search with Explore device via Bluetooth 
 
 Requirements
 ==================
