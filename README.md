@@ -52,7 +52,7 @@ Please check troubleshooting section of this document in case any problem occurs
 Usage Example
 =============
 
-The following code sniipet shows how to scan, connect and get data stream from Explore device:
+The following code snippet shows how to scan, connect and get data stream from Explore device:
 
 ```java
 Set<String> deviceList = MentalabCommands.scan();
@@ -68,7 +68,7 @@ Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 Documentation
 =============
 
-For the full documentation of the API, please visit <https://github.com/Mentalab-hub/explore-java/tree/master/docs>
+For the full documentation of the API, please visit our [Javadoc page](https://javadoc.jitpack.io/com/github/Mentalab-hub/explore-java/v_1.0/javadoc/)
 
 Troubleshooting
 ===============
