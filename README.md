@@ -1,4 +1,4 @@
-![Release](https://jitpack.io/v/Mentalab-hub/explore-java.svg)
+![Release](https://jitpack.io/v/Mentalab-hub/explore-android.svg)
 
 
 Overview
@@ -33,7 +33,7 @@ maven { url ‘https://jitpack.io’ }
 implementation 'com.github.Mentalab-hub:explore-android:v_0.1'
 ```
 
-![alt text](https://github.com/Mentalab-hub/explore-java/blob/master/screenshots/app.png?raw=true)
+![alt text](https://github.com/Mentalab-hub/explore-android/blob/master/screenshots/app.png?raw=true)
 
 * Add the following line in your anderoid manifest:
 ```
@@ -86,4 +86,4 @@ Authors
 
 License
 =======
-This project is licensed under the MIT license at <https://github.com/Mentalab-hub/explore-java/blob/master/LICENSE>. You can reach us at contact@mentalab.com.
+This project is licensed under the MIT license at <https://github.com/Mentalab-hub/explore-android/blob/master/LICENSE>. You can reach us at contact@mentalab.com.
