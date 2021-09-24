@@ -26,7 +26,7 @@ To add the library to your project:
 maven { url ‘https://jitpack.io’ }
 ```
 
-![alt text](https://github.com/salman2135/mentlabMobileApi/blob/master/screenshots/maven.png?raw=true)
+![alt text](https://github.com/Mentalab-hub/explore-android/blob/master/screenshots/maven.png?raw=true)
 
 * In your app’s build.gradle add the dependency
 ```
