@@ -35,7 +35,7 @@ implementation 'com.github.Mentalab-hub:explore-android:v_0.1'
 
 ![alt text](https://github.com/Mentalab-hub/explore-android/blob/master/screenshots/app.png?raw=true)
 
-* Add the following line in your anderoid manifest:
+* Add the following line in your android manifest:
 ```
 <uses-permission android:name="android.permission.BLUETOOTH" />
 ```
