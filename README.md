@@ -30,7 +30,7 @@ maven { url ‘https://jitpack.io’ }
 
 * In your app’s build.gradle add the dependency
 ```
-implementation 'com.github.Mentalab-hub:explore-android:v_0.1'
+implementation 'com.github.Mentalab-hub:explore-android:V_0.1'
 ```
 
 ![alt text](https://github.com/Mentalab-hub/explore-android/blob/master/screenshots/app.png?raw=true)
