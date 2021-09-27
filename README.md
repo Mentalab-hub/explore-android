@@ -68,7 +68,7 @@ Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 Documentation
 =============
 
-For the full documentation of the API, please visit our [Javadoc page](https://javadoc.jitpack.io/com/github/Mentalab-hub/explore-android/v_1.0/javadoc/)
+For the full documentation of the API, please visit our [Javadoc page](https://javadoc.jitpack.io/com/github/Mentalab-hub/explore-android/V_0.1/javadoc/)
 
 Troubleshooting
 ===============
