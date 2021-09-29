@@ -4,10 +4,11 @@
 Overview
 ==================
 
-Explore Android API is Mentalab's open-source biosignal acquisition API for working with Mentalab Explore device. The code can also be adapted to use in Andrid echosystem. Amongst many things, it provides the following features:
+Explore Android API is Mentalab's open-source biosignal acquisition API for use with Mentalab Explore devices. The code can also be adapted to use in Android ecosystems. Among others, it provides the following key features: :
+
 
 * Real-time streaming of ExG, orientation and environmental data
-* Connect, pair and search with Explore device via Bluetooth 
+* Connect, pair and search Explore device via Bluetooth
 
 Requirements
 ==================
@@ -47,7 +48,7 @@ A demo Android application is availble here:
 [![SC2 Video](https://img.youtube.com/vi/nP57MqztEUI/0.jpg)](https://youtu.be/nP57MqztEUI)
 
 A demo Android application which used explore-java library is available [here](https://github.com/Mentalab-hub/explore-demo-app)
-Please check troubleshooting section of this document in case any problem occurs.
+Please check troubleshooting section of this document in case of issues.
 
 Usage Example
 =============
@@ -73,7 +74,7 @@ For the full documentation of the API, please visit our [Javadoc page](https://j
 Troubleshooting
 ===============
 
-* If your phone is not recognized by Andoid Studio, make sure that USB debugging is turned on from your Android device.
+* If your phone is not recognized by Android Studio, make sure that USB debugging is turned on on your Android device.
 
 You can also create a new issue in the GitHub repository.
 
