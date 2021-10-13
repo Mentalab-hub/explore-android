@@ -89,6 +89,9 @@ public class MentalabCodec {
           floats.offerFirst(((DataPacket) packet).convertedSamples.get(index));
         }
       }
+      //Lsl Packet Subscriber implemetation
+
+      PubSubManager.getInstance().publish("ExG", packet);
     } else if (packet instanceof InfoPacket) {
 
       int channelCount = packet.getDataCount();
@@ -116,6 +119,7 @@ public class MentalabCodec {
     }
 
     public void run() {
+      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
       int pId = 0;
       while (true) {
         try {

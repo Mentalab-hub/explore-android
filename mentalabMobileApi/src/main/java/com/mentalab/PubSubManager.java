@@ -19,7 +19,6 @@ class PubSubManager {
     return pubSubSingleton;
   }
 
-  @RequiresApi(api = VERSION_CODES.N)
   public <T> void publish(String topic, T message) {
     ArrayList<Consumer<?>> subscribers = this.topicsSubscribers.get(topic);
     if (subscribers == null) return;

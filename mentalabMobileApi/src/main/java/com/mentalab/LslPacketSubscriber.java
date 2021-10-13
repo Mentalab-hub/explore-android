@@ -1,13 +1,13 @@
 package com.mentalab;
 
 import android.util.Log;
-import com.mentalab.PubSubManager;
 
 public class LslPacketSubscriber {
 
   private static final String TAG = "EXPLORE_LSL_DEV";
 
   public LslPacketSubscriber() {
+    Log.d(TAG, "Subscribing!!");
     PubSubManager.getInstance().subscribe("ExG", this::packetCallback);
   }
 
