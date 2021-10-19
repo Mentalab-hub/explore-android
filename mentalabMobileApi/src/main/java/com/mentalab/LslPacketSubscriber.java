@@ -28,7 +28,7 @@ public class LslPacketSubscriber{
     }
     lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-    lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 8, 250, LslLoader.ChannelFormat.float32, "Orn");
+    lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 9, 20, LslLoader.ChannelFormat.float32, "Orn");
     if (lslStreamInfoOrn == null) {
       throw new IOException("Stream Info is Null!!");
     }
