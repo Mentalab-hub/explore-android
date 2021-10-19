@@ -37,12 +37,13 @@ public class LslPacketSubscriber {
 
   public void packetCallbackExG(Packet packet) {
     Log.d("TAG", "packetCallbackExG");
-    lslStreamOutletExg.push_sample(convertArraylistToFloatArray(packet));
-    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
+    //lslStreamOutletExg.push_sample(convertArraylistToFloatArray(packet));
+
   }
 
   public void packetCallbackOrn(Packet packet) {
     Log.d("TAG", "packetCallbackOrn");
+    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
