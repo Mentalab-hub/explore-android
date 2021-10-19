@@ -31,8 +31,9 @@ public class LslPacketSubscriber {
     lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
     Log.d(TAG, "Subscribing!!");
-    PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
     PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
+
+    PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
 
   }
 
@@ -49,6 +50,7 @@ public class LslPacketSubscriber {
 
   float[] convertArraylistToFloatArray(Packet packet) {
     ArrayList<Float> packetVoltageValues = packet.getData();
+    Log.d(TAG, packet.toString());
     float[] floatArray = new float[packetVoltageValues.size()];
     Object[] array = packetVoltageValues.toArray();
     for (int index = 0; index < packetVoltageValues.size(); index++) {
