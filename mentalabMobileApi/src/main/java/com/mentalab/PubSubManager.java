@@ -28,7 +28,7 @@ class PubSubManager {
     }
   }
 
-  public <T> void subscribe(String topicName, Consumer<T> subscriberCallback) {
+  public synchronized <T> void subscribe(String topicName, Consumer<T> subscriberCallback) {
     ArrayList<Consumer<?>> subscribers = this.topicsSubscribers.get(topicName);
     if (subscribers == null) {
       subscribers = new ArrayList<Consumer<?>>();
