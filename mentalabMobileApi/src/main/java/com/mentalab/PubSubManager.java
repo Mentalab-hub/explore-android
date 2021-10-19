@@ -16,7 +16,10 @@ class PubSubManager {
       new HashMap<String, ArrayList<Consumer<?>>>();
 
   public static PubSubManager getInstance() {
-    return pubSubSingleton;
+    synchronized (pubSubSingleton){
+      return pubSubSingleton;
+    }
+
   }
 
   public <T> void publish(String topic, T message) {

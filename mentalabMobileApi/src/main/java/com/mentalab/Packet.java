@@ -11,6 +11,8 @@ import java.util.ListIterator;
 
 /** Root packet interface */
 abstract class Packet {
+  //TO DO add constant field
+  //TO DO Better Logging method
   private static final String TAG = "Explore";
   private byte[] byteBuffer = null;
   private int dataCount;
@@ -51,6 +53,13 @@ abstract class Packet {
 
   /** Number of element in each packet */
   public abstract int getDataCount();
+
+  /**
+   * Get data values from packet structure
+   */
+  public ArrayList<Float> getData() {
+    return null;
+  }
 
   enum PacketId {
     ORIENTATION(13) {
@@ -212,7 +221,7 @@ abstract class DataPacket extends Packet {
 
 /** Interface for packets related to device information */
 abstract class InfoPacket extends Packet {
-  List<Float> convertedSamples = null;
+  ArrayList<Float> convertedSamples = null;
   ArrayList<String> attributes;
 }
 
@@ -361,6 +370,7 @@ class Eeg99s extends DataPacket {
 class Orientation extends InfoPacket {
   ArrayList<Float> listValues = new ArrayList<Float>();
   public Orientation() {
+    super();
     attributes =
         new ArrayList<String>(
             Arrays.asList(
@@ -411,6 +421,12 @@ class Orientation extends InfoPacket {
   @Override
   public int getDataCount() {
     return 9;
+  }
+
+  /** Number of element in each packet */
+  @Override
+  public ArrayList<Float> getData() {
+    return this.convertedSamples;
   }
 }
 

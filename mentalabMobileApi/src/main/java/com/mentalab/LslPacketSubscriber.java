@@ -48,8 +48,14 @@ public class LslPacketSubscriber {
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
-    ArrayList<Float> packetVoltageValues = new ArrayList<Float>();
-    if (packet instanceof DataPacket) {
+    ArrayList<Float> packetVoltageValues = packet.getData();
+    float[] floatArray = new float[packetVoltageValues.size()];
+    Object[] array = packetVoltageValues.toArray();
+    for (int index = 0; index < packetVoltageValues.size(); index++) {
+      floatArray[index] = ((Float) packetVoltageValues.get(index)).floatValue();
+    }
+    return floatArray;
+    /*if (packet instanceof DataPacket) {
       packetVoltageValues = ((DataPacket) packet).getVoltageValues();
       float[] floatArray = new float[packetVoltageValues.size()];
       Object[] array = packetVoltageValues.toArray();
@@ -66,6 +72,6 @@ public class LslPacketSubscriber {
       }
       return floatArray;
     }
-    return null;
+    return null;*/
   }
 }
