@@ -82,7 +82,7 @@ public class MentalabCodec {
 
       for (int index = 0; index < channelCount; index++) {
         synchronized (decodedDataMap) {
-          ArrayList<Float> convertedSamples = ((DataPacket) packet).getVoltageValues();
+          ArrayList<Float> convertedSamples = ((DataPacket) packet).getData();
           String channelKey = "Channel_" + String.valueOf(index + 1);
           if (decodedDataMap.get(channelKey) == null) {
             decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
