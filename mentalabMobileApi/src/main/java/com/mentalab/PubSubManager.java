@@ -1,13 +1,9 @@
 package com.mentalab;
 
-import android.os.Build.VERSION_CODES;
-import androidx.annotation.RequiresApi;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-
-
 
 class PubSubManager {
   private static final PubSubManager pubSubSingleton = new PubSubManager();
@@ -16,10 +12,7 @@ class PubSubManager {
       new HashMap<String, ArrayList<Consumer<?>>>();
 
   public static PubSubManager getInstance() {
-    synchronized (pubSubSingleton){
-      return pubSubSingleton;
-    }
-
+    return pubSubSingleton;
   }
 
   public <T> void publish(String topic, T message) {

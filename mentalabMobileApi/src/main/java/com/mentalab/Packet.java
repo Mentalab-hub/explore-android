@@ -1,5 +1,6 @@
 package com.mentalab;
 
+import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -58,6 +59,7 @@ abstract class Packet {
    * Get data values from packet structure
    */
   public ArrayList<Float> getData(){
+    Log.d(TAG, "Calling BASE method----");
     return null;
   };
 
