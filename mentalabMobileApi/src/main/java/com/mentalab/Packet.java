@@ -205,7 +205,7 @@ abstract class DataPacket extends Packet {
     DataPacket.channelMask = channelMask;
   }
 
-  ArrayList<Float> getVoltageValues() {
+  public ArrayList<Float> getVoltageValues() {
     return convertedSamples;
   }
 }
