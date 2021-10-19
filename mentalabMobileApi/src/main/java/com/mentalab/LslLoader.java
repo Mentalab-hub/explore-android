@@ -66,7 +66,6 @@ public class LslLoader {
   public LslLoader() {
 
     Log.d("Lsl loader class", "Loading LSL library!!");
-    System.loadLibrary("lsl");
 
     instance = (lslLibLoader) Native
         .load("lsl", lslLibLoader.class);
