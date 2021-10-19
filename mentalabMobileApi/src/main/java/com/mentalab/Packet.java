@@ -57,9 +57,9 @@ abstract class Packet {
   /**
    * Get data values from packet structure
    */
-  public ArrayList<Float> getData() {
+  public ArrayList<Float> getData(){
     return null;
-  }
+  };
 
   enum PacketId {
     ORIENTATION(13) {
@@ -172,7 +172,7 @@ abstract class Packet {
 abstract class DataPacket extends Packet {
   private static final String TAG = "Explore";
   private static byte channelMask;
-  protected ArrayList<Float> convertedSamples;
+  public ArrayList<Float> convertedSamples;
 
   static double[] toInt32(byte[] byteArray) throws InvalidDataException, IOException {
     if (byteArray.length % 3 != 0)
@@ -214,7 +214,7 @@ abstract class DataPacket extends Packet {
     DataPacket.channelMask = channelMask;
   }
 
-  public ArrayList<Float> getVoltageValues() {
+  public ArrayList<Float> getData() {
     return convertedSamples;
   }
 }
