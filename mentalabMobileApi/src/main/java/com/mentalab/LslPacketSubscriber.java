@@ -22,6 +22,9 @@ public class LslPacketSubscriber {
 
 
     lslStreamInfo = new StreamInfo("Explore_XXXX_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
+    if (lslStreamInfo == null) {
+      throw new IOException("Stream Info is Null!!");
+    }
     lslStreamOutlet = new LslLoader.StreamOutlet(lslStreamInfo);
 
     Log.d(TAG, "Subscribing!!");
