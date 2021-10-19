@@ -10,7 +10,7 @@ import com.sun.jna.Pointer;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class LslPacketSubscriber {
+public class LslPacketSubscriber{
 
   private static final String TAG = "EXPLORE_LSL_DEV";
   static LslLoader.StreamOutlet lslStreamOutlet;
@@ -21,7 +21,7 @@ public class LslPacketSubscriber {
   public LslPacketSubscriber() throws IOException {
 
 
-    lslStreamInfo = new StreamInfo("Explore_XXXX_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
+    lslStreamInfo = new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
     if (lslStreamInfo == null) {
       throw new IOException("Stream Info is Null!!");
     }
