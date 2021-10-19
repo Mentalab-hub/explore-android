@@ -2,6 +2,7 @@ package com.mentalab;
 
 import android.util.Log;
 
+import com.mentalab.LslLoader.StreamInfo;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
@@ -14,11 +15,13 @@ public class LslPacketSubscriber {
   private static final String TAG = "EXPLORE_LSL_DEV";
   static LslLoader.StreamOutlet lslStreamOutlet;
   private LslLoader.StreamInfo lslStreamInfo;
+  static LslLoader lslLoader = new LslLoader();
 
 
   public LslPacketSubscriber() throws IOException {
 
-    lslStreamInfo = new LslLoader.StreamInfo("Explore_XXXX_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
+
+    lslStreamInfo = new StreamInfo("Explore_XXXX_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
     lslStreamOutlet = new LslLoader.StreamOutlet(lslStreamInfo);
 
     Log.d(TAG, "Subscribing!!");

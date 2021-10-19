@@ -8,6 +8,15 @@ import java.io.IOException;
 
 public class LslLoader {
   static lslLibLoader instance;
+  static{
+
+    Log.d("Lsl loader class", "Loading LSL library!!");
+
+    instance = (lslLibLoader) Native
+        .load("lsl", lslLibLoader.class);
+
+
+  }
   public class ChannelFormat {
     public static final int float32 = 1;
   }
@@ -62,14 +71,4 @@ public class LslLoader {
     private Pointer obj;
   }
 
-
-  public LslLoader() {
-
-    Log.d("Lsl loader class", "Loading LSL library!!");
-
-    instance = (lslLibLoader) Native
-        .load("lsl", lslLibLoader.class);
-
-
-  }
 }
