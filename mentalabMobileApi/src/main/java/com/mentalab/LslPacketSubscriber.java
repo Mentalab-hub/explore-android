@@ -45,12 +45,35 @@ public class LslPacketSubscriber{
   public void packetCallback(Packet packet) {
     Log.d(TAG, "Getting data in LSL callback!!");
     if (packet instanceof DataPacket){
-      ArrayList<Float> packetVoltageValues = ((DataPacket)packet).getVoltageValues();
-      lslStreamOutletExg.push_sample(packetVoltageValues.stream().mapToDouble(i-> i).toArray());
+      lslStreamOutletExg.push_sample(convertArraylistToFloatArray(packet));
     }
     else if (packet instanceof Orientation){
-      lslStreamOutletOrn.push_sample(((Orientation)packet).listValues.stream().mapToDouble(i-> i).toArray());
+
+      lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
     }
 
+  }
+
+  float[] convertArraylistToFloatArray(Packet packet){
+    ArrayList<Float> packetVoltageValues= new ArrayList<Float>();
+    if (packet instanceof DataPacket){
+    packetVoltageValues = ((DataPacket)packet).getVoltageValues();
+    float[] floatArray = new float[packetVoltageValues.size()];
+    Object[] array = packetVoltageValues.toArray();
+    for (int index = 0; index < packetVoltageValues.size(); index ++){
+      floatArray[index] = ((Float) packetVoltageValues.get(index)).floatValue();
+    }
+    return floatArray;
+  }
+    else if(packet instanceof Orientation){
+      packetVoltageValues = ((Orientation)packet).listValues;
+      float[] floatArray = new float[packetVoltageValues.size()];
+      Object[] array = packetVoltageValues.toArray();
+      for (int index = 0; index < packetVoltageValues.size(); index ++){
+        floatArray[index] = ((Float) packetVoltageValues.get(index)).floatValue();
+      }
+      return floatArray;
+    }
+    return null;
   }
 }

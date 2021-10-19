@@ -359,7 +359,7 @@ class Eeg99s extends DataPacket {
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class Orientation extends InfoPacket {
-  List<Float> listValues = new ArrayList<Float>();;
+  ArrayList<Float> listValues = new ArrayList<Float>();;
   public Orientation() {
     attributes =
         new ArrayList<String>(

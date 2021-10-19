@@ -29,6 +29,7 @@ public class LslLoader {
     Pointer lsl_get_info(Pointer obj);
     void lsl_destroy_outlet(Pointer obj);
     int lsl_push_sample_f(Pointer obj, double[] data);
+    int lsl_push_sample_f(Pointer obj, float[] data);
   }
 
   public static class StreamOutlet {
@@ -53,6 +54,7 @@ public class LslLoader {
     }
 
     public void push_sample(double[] data) { instance.lsl_push_sample_f(obj, data); }
+    public void push_sample(float[] data) { instance.lsl_push_sample_f(obj, data); }
 
     public StreamInfo info() { return new StreamInfo(instance.lsl_get_info(obj)); }
 
