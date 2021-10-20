@@ -111,7 +111,9 @@ public class MentalabCodec {
           floats.offerFirst(((InfoPacket) packet).convertedSamples.get(index));
         }
       }
-      PubSubManager.getInstance().publish("Orn", packet);
+      if(packet instanceof Orientation){
+        PubSubManager.getInstance().publish("Orn", packet);
+      }
     }
   }
 
