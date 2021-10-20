@@ -126,11 +126,10 @@ public class MentalabCodec {
     }
 
     public void run() {
-      try {
-        LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
-      } catch (IOException exception) {
-        exception.printStackTrace();
-      }
+
+      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
+      lslSubscriber.start();
+
       int pId = 0;
       while (true) {
         try {

@@ -5,7 +5,7 @@ import com.mentalab.LslLoader.StreamInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class LslPacketSubscriber {
+public class LslPacketSubscriber extends Thread{
 
   private static final String TAG = "EXPLORE_LSL_DEV";
   static LslLoader.StreamOutlet lslStreamOutletExg;
@@ -14,26 +14,32 @@ public class LslPacketSubscriber {
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
 
-  public LslPacketSubscriber() throws IOException {
+  @Override
+  public void run() {
+    super.run();
+    try{
+      lslStreamInfoExg =
+          new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
+      if (lslStreamInfoExg == null) {
+        throw new IOException("Stream Info is Null!!");
+      }
+      lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-    lslStreamInfoExg =
-        new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
-    if (lslStreamInfoExg == null) {
-      throw new IOException("Stream Info is Null!!");
+      lslStreamInfoOrn =
+          new StreamInfo("Explore_Orn", "Orn", 9, 20, LslLoader.ChannelFormat.float32, "Orn");
+      if (lslStreamInfoOrn == null) {
+        throw new IOException("Stream Info is Null!!");
+      }
+      lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
+      Log.d(TAG, "Subscribing!!");
+      PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
+
+      PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
     }
-    lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
-
-    lslStreamInfoOrn =
-        new StreamInfo("Explore_Orn", "Orn", 9, 20, LslLoader.ChannelFormat.float32, "Orn");
-    if (lslStreamInfoOrn == null) {
-      throw new IOException("Stream Info is Null!!");
+    catch (IOException exception){
+      exception.printStackTrace();
     }
-    lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
-    Log.d(TAG, "Subscribing!!");
-    PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
-
-    PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
   }
 
   public void packetCallbackExG(Packet packet) {
