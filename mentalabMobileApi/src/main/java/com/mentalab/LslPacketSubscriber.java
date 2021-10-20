@@ -31,9 +31,9 @@ public class LslPacketSubscriber {
     lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
     Log.d(TAG, "Subscribing!!");
-    //PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
+    PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
 
-    PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
+    //PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
 
   }
 

@@ -15,7 +15,7 @@ class PubSubManager {
     return pubSubSingleton;
   }
 
-  public <T> void publish(String topic, T message) {
+  public synchronized <T> void publish(String topic, T message) {
     ArrayList<Consumer<?>> subscribers = this.topicsSubscribers.get(topic);
     if (subscribers == null) return;
 
