@@ -12,10 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
+  private static final int NTHREADPOOL = 100;
+  private static final Executor executor = Executors.newFixedThreadPool(NTHREADPOOL);
   public static Map<String, Queue<Float>> decodedDataMap = null;
   // Device info properties to be used further
   int channelCount = -1;
@@ -43,8 +47,9 @@ public class MentalabCodec {
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    ConnectedThread thread = new ConnectedThread(stream);
-    thread.start();
+    executor.execute(new ConnectedThread(stream));
+//    ConnectedThread thread = new ConnectedThread(stream);
+//    thread.start();
     return decodedDataMap;
   }
 
