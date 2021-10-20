@@ -16,10 +16,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
+  public static Map<String, Queue<Float>> decodedDataMap = null;
   // Device info properties to be used further
   int channelCount = -1;
   int samplingRate = 0;
-  public static Map<String, Queue<Float>> decodedDataMap = null;
 
   /**
    * Decodes a device raw data stream
@@ -93,7 +93,7 @@ public class MentalabCodec {
           floats.offerFirst(((DataPacket) packet).convertedSamples.get(index));
         }
       }
-      //Lsl Packet Subscriber implementation
+      // Lsl Packet Subscriber implementation
       PubSubManager.getInstance().publish("ExG", packet);
 
     } else if (packet instanceof InfoPacket) {
