@@ -16,7 +16,6 @@ public class LslPacketSubscriber extends Thread{
 
   @Override
   public void run() {
-    super.run();
     try{
       lslStreamInfoExg =
           new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
