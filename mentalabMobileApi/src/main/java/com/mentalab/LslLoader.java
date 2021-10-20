@@ -37,7 +37,7 @@ public class LslLoader {
 
     int lsl_push_sample_f(Pointer obj, float[] data);
 
-    int lsl_push_chunk_f(Pointer obj, float[] data, int data_elements);
+    int lsl_push_chunk_f(Pointer obj, float[] data, int dataElements);
   }
 
   public static class StreamOutlet {
