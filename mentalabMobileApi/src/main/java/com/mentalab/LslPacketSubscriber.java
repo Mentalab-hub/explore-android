@@ -1,11 +1,12 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.LslLoader.ChannelFormat;
 import com.mentalab.LslLoader.StreamInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class LslPacketSubscriber {
+public class LslPacketSubscriber extends Thread {
 
   private static final String TAG = "EXPLORE_LSL_DEV";
   static LslLoader.StreamOutlet lslStreamOutletExg;
@@ -14,26 +15,28 @@ public class LslPacketSubscriber {
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
 
-  public LslPacketSubscriber() throws IOException {
+  @Override
+  public void run() {
+    try {
+      lslStreamInfoExg =
+          new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
+      if (lslStreamInfoExg == null) {
+        throw new IOException("Stream Info is empty");
+      }
+      lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-    lslStreamInfoExg =
-        new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
-    if (lslStreamInfoExg == null) {
-      throw new IOException("Stream Info is Null!!");
+      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.int16, "Orn");
+      if (lslStreamInfoOrn == null) {
+        throw new IOException("Stream Info is Null!!");
+      }
+      lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
+      Log.d(TAG, "Subscribing!!");
+      PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
+
+      PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
+    } catch (IOException exception) {
+      exception.printStackTrace();
     }
-    lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
-
-    lslStreamInfoOrn =
-        new StreamInfo("Explore_Orn", "Orn", 9, 20, LslLoader.ChannelFormat.float32, "Orn");
-    if (lslStreamInfoOrn == null) {
-      throw new IOException("Stream Info is Null!!");
-    }
-    lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
-
-    Log.d(TAG, "Subscribing!!");
-    // PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
-
-    PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
   }
 
   public void packetCallbackExG(Packet packet) {
@@ -43,12 +46,11 @@ public class LslPacketSubscriber {
 
   public void packetCallbackOrn(Packet packet) {
     Log.d("TAG", "packetCallbackOrn");
-    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
+    lslStreamOutletOrn.push_chunk(convertArraylistToFloatArray(packet));
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
     ArrayList<Float> packetVoltageValues = packet.getData();
-    Log.d(TAG, packet.toString());
     float[] floatArray = new float[packetVoltageValues.size()];
     Object[] array = packetVoltageValues.toArray();
     for (int index = 0; index < packetVoltageValues.size(); index++) {

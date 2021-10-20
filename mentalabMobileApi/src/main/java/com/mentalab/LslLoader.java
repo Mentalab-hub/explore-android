@@ -36,6 +36,8 @@ public class LslLoader {
     int lsl_push_sample_f(Pointer obj, double[] data);
 
     int lsl_push_sample_f(Pointer obj, float[] data);
+
+    int lsl_push_chunk_f(Pointer obj, float[] data, int dataElements);
   }
 
   public static class StreamOutlet {
@@ -67,6 +69,10 @@ public class LslLoader {
 
     public void push_sample(float[] data) {
       instance.lsl_push_sample_f(obj, data);
+    }
+
+    public void push_chunk(float[] data) {
+      instance.lsl_push_chunk_f(obj, data, data.length);
     }
 
     public StreamInfo info() {
@@ -105,5 +111,6 @@ public class LslLoader {
 
   public class ChannelFormat {
     public static final int float32 = 1;
+    public static final int int16 = 5;
   }
 }

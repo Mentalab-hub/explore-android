@@ -12,10 +12,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
+  private static final int NTHREADPOOL = 100;
+  private static final Executor executor = Executors.newFixedThreadPool(NTHREADPOOL);
+
   public static Map<String, Queue<Float>> decodedDataMap = null;
   // Device info properties to be used further
   int channelCount = -1;
@@ -38,13 +43,14 @@ public class MentalabCodec {
    * }<pre>
    *
    * @throws InvalidDataException throws when invalid data is received
-   * @parameter InputStream of device bytes
+   * @stream InputStream of device bytes
    * @return Immutable Map of Queues of Numbers
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    ConnectedThread thread = new ConnectedThread(stream);
-    thread.start();
+    executor.execute(new ConnectedThread(stream));
+    //    ConnectedThread thread = new ConnectedThread(stream);
+    //    thread.start();
     return decodedDataMap;
   }
 
@@ -58,12 +64,13 @@ public class MentalabCodec {
     return new byte[10]; // Some example while stub
   }
 
-  private static Packet parsePayloadData(int pId, byte[] byteBuffer) throws InvalidDataException {
+  private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
+      throws InvalidDataException {
 
     for (Packet.PacketId packetId : Packet.PacketId.values()) {
       if (packetId.getNumVal() == pId) {
         Log.d(TAG, "Converting data for Explore");
-        Packet packet = packetId.createInstance();
+        Packet packet = packetId.createInstance(timeStamp);
         if (packet != null) {
           packet.convertData(byteBuffer);
           Log.d(TAG, "Data decoded is " + packet.toString());
@@ -71,7 +78,6 @@ public class MentalabCodec {
         }
       }
     }
-    return null;
   }
 
   private static void pushDataInQueue(Packet packet) {
@@ -111,7 +117,9 @@ public class MentalabCodec {
           floats.offerFirst(((InfoPacket) packet).convertedSamples.get(index));
         }
       }
-      PubSubManager.getInstance().publish("Orn", packet);
+      if (packet instanceof Orientation) {
+        PubSubManager.getInstance().publish("Orn", packet);
+      }
     }
   }
 
@@ -124,11 +132,10 @@ public class MentalabCodec {
     }
 
     public void run() {
-      try {
-        LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
-      } catch (IOException exception) {
-        exception.printStackTrace();
-      }
+      executor.execute(new LslPacketSubscriber());
+      //      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
+      //      lslSubscriber.start();
+
       int pId = 0;
       while (true) {
         try {
@@ -151,7 +158,8 @@ public class MentalabCodec {
 
           // reading timestamp
           mmInStream.read(buffer, 0, 4);
-          int timeStamp = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          double timeStamp =
+              ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
 
           Log.d(TAG, "pid .." + pId + " payload is : " + payload);
 
@@ -161,7 +169,7 @@ public class MentalabCodec {
           Log.d(TAG, "reading count is ...." + read);
           // parsing payload data
 
-          Packet packet = parsePayloadData(pId, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+          parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
 
         } catch (IOException | InvalidDataException exception) {
           exception.printStackTrace();
