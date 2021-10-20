@@ -397,7 +397,7 @@ class Orientation extends InfoPacket {
         }
       }
     }
-    this.convertedSamples = new ArrayList<>(listValues);
+    this.convertedSamples = new ArrayList<>(listValues);Log.d("Explore", this.convertedSamples.toString());
   }
 
   @Override
