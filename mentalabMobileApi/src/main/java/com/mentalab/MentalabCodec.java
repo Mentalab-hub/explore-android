@@ -130,9 +130,9 @@ public class MentalabCodec {
     }
 
     public void run() {
-
-      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
-      lslSubscriber.start();
+      executor.execute(new LslPacketSubscriber());
+//      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
+//      lslSubscriber.start();
 
       int pId = 0;
       while (true) {
