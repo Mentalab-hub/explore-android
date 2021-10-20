@@ -17,6 +17,11 @@ abstract class Packet {
   private static final String TAG = "Explore";
   private byte[] byteBuffer = null;
   private int dataCount;
+  private double timeStamp;
+
+  public Packet(double timeStamp) {
+    this.timeStamp = timeStamp;
+  }
 
   /** String representation of attributes */
   static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {
@@ -65,91 +70,92 @@ abstract class Packet {
   enum PacketId {
     ORIENTATION(13) {
       @Override
-      public Packet createInstance() {
-        return new Orientation();
+      public Packet createInstance(double timeStamp) {
+
+        return new Orientation(timeStamp);
       }
     },
     ENVIRONMENT(19) {
       @Override
-      public Packet createInstance() {
-        return new Environment();
+      public Packet createInstance(double timeStamp) {
+        return new Environment(timeStamp);
       }
     },
     TIMESTAMP(27) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     DISCONNECT(25) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     INFO(99) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG94(144) {
       @Override
-      public Packet createInstance() {
-        return new Eeg94();
+      public Packet createInstance(double timeStamp) {
+        return new Eeg94(timeStamp);
       }
     },
     EEG98(146) {
       @Override
-      public Packet createInstance() {
-        return new Eeg98();
+      public Packet createInstance(double timeStamp) {
+        return new Eeg98(timeStamp);
       }
     },
     EEG99S(30) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG99(62) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG94R(208) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG98R(210) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     CMDRCV(192) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     CMDSTAT(193) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     MARKER(194) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     CALIBINFO(195) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     };
@@ -164,7 +170,7 @@ abstract class Packet {
       return value;
     }
 
-    public abstract Packet createInstance();
+    public abstract Packet createInstance(double timeStamp);
   }
 }
 ;
@@ -174,6 +180,10 @@ abstract class DataPacket extends Packet {
   private static final String TAG = "Explore";
   private static byte channelMask;
   public ArrayList<Float> convertedSamples;
+
+  public DataPacket(double timeStamp) {
+    super(timeStamp);
+  }
 
   static double[] toInt32(byte[] byteArray) throws InvalidDataException, IOException {
     if (byteArray.length % 3 != 0)
@@ -224,17 +234,29 @@ abstract class DataPacket extends Packet {
 abstract class InfoPacket extends Packet {
   ArrayList<Float> convertedSamples = null;
   ArrayList<String> attributes;
+
+  public InfoPacket(double timeStamp) {
+    super(timeStamp);
+  }
 }
 
 /** Interface for packets related to device synchronization */
 abstract class UtilPacket extends Packet {
 
   protected ArrayList<Float> convertedSamples;
+
+  public UtilPacket(double timeStamp) {
+    super(timeStamp);
+  }
 }
 
 // class Eeg implements DataPacket {}
 class Eeg98 extends DataPacket {
   private static int channelNumber = 8;
+
+  public Eeg98(double timeStamp) {
+    super(timeStamp);
+  }
 
   @Override
   public void convertData(byte[] byteBuffer) {
@@ -278,6 +300,11 @@ class Eeg98 extends DataPacket {
 class Eeg94 extends DataPacket {
 
   private final int channelNumber = 4;
+
+  public Eeg94(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -324,6 +351,11 @@ class Eeg94 extends DataPacket {
 }
 
 class Eeg99 extends DataPacket {
+
+  public Eeg99(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -346,6 +378,11 @@ class Eeg99 extends DataPacket {
 }
 
 class Eeg99s extends DataPacket {
+
+  public Eeg99s(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -371,8 +408,9 @@ class Eeg99s extends DataPacket {
 class Orientation extends InfoPacket {
   ArrayList<Float> listValues = new ArrayList<Float>();
 
-  public Orientation() {
-    super();
+  public Orientation(double timeStamp) {
+    super(timeStamp);
+
     attributes =
         new ArrayList<String>(
             Arrays.asList(
@@ -435,6 +473,11 @@ class Orientation extends InfoPacket {
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class DeviceInfoPacket extends InfoPacket {
+
+  public DeviceInfoPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   @Override
   public void convertData(byte[] byteBuffer) {}
 
@@ -455,6 +498,11 @@ class DeviceInfoPacket extends InfoPacket {
  * device
  */
 class AckPacket extends InfoPacket {
+
+  public AckPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   @Override
   public void convertData(byte[] byteBuffer) {}
 
@@ -471,6 +519,11 @@ class AckPacket extends InfoPacket {
 
 /** Packet sent from the device to sync clocks */
 class TimeStampPacket extends UtilPacket {
+
+  public TimeStampPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   @Override
   public void convertData(byte[] byteBuffer) {}
 
@@ -488,6 +541,11 @@ class TimeStampPacket extends UtilPacket {
 
 /** Disconnection packet is sent when the host machine is disconnected from the device */
 class DisconnectionPacket extends UtilPacket {
+
+  public DisconnectionPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -512,7 +570,8 @@ class DisconnectionPacket extends UtilPacket {
 class Environment extends InfoPacket {
   float temperature, light, battery;
 
-  public Environment() {
+  public Environment(double timeStamp) {
+    super(timeStamp);
     super.attributes = new ArrayList(Arrays.asList("Temperature ", "Light ", "Battery "));
   }
   /**

@@ -58,12 +58,12 @@ public class MentalabCodec {
     return new byte[10]; // Some example while stub
   }
 
-  private static Packet parsePayloadData(int pId, byte[] byteBuffer) throws InvalidDataException {
+  private static void parsePayloadData(int pId,  double timeStamp, byte[] byteBuffer) throws InvalidDataException {
 
     for (Packet.PacketId packetId : Packet.PacketId.values()) {
       if (packetId.getNumVal() == pId) {
         Log.d(TAG, "Converting data for Explore");
-        Packet packet = packetId.createInstance();
+        Packet packet = packetId.createInstance(timeStamp);
         if (packet != null) {
           packet.convertData(byteBuffer);
           Log.d(TAG, "Data decoded is " + packet.toString());
@@ -71,7 +71,6 @@ public class MentalabCodec {
         }
       }
     }
-    return null;
   }
 
   private static void pushDataInQueue(Packet packet) {
@@ -152,7 +151,7 @@ public class MentalabCodec {
 
           // reading timestamp
           mmInStream.read(buffer, 0, 4);
-          int timeStamp = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          double timeStamp = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
 
           Log.d(TAG, "pid .." + pId + " payload is : " + payload);
 
@@ -162,7 +161,7 @@ public class MentalabCodec {
           Log.d(TAG, "reading count is ...." + read);
           // parsing payload data
 
-          Packet packet = parsePayloadData(pId, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+          parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
 
         } catch (IOException | InvalidDataException exception) {
           exception.printStackTrace();

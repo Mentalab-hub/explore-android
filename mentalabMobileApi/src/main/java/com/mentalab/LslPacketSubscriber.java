@@ -1,6 +1,7 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.LslLoader.ChannelFormat;
 import com.mentalab.LslLoader.StreamInfo;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,12 +21,12 @@ public class LslPacketSubscriber extends Thread{
       lslStreamInfoExg =
           new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
       if (lslStreamInfoExg == null) {
-        throw new IOException("Stream Info is Null!!");
+        throw new IOException("Stream Info is empty");
       }
       lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
       lslStreamInfoOrn =
-          new StreamInfo("Explore_Orn", "Orn", 9, 20, LslLoader.ChannelFormat.float32, "Orn");
+          new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.int16, "Orn");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
@@ -48,12 +49,11 @@ public class LslPacketSubscriber extends Thread{
 
   public void packetCallbackOrn(Packet packet) {
     Log.d("TAG", "packetCallbackOrn");
-    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
+    lslStreamOutletOrn.push_chunk(convertArraylistToFloatArray(packet));
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
     ArrayList<Float> packetVoltageValues = packet.getData();
-    Log.d(TAG, packet.toString());
     float[] floatArray = new float[packetVoltageValues.size()];
     Object[] array = packetVoltageValues.toArray();
     for (int index = 0; index < packetVoltageValues.size(); index++) {
