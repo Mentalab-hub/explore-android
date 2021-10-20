@@ -42,14 +42,14 @@ public class MentalabCodec {
    * }<pre>
    *
    * @throws InvalidDataException throws when invalid data is received
-   * @parameter InputStream of device bytes
+   * @stream InputStream of device bytes
    * @return Immutable Map of Queues of Numbers
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
     executor.execute(new ConnectedThread(stream));
-//    ConnectedThread thread = new ConnectedThread(stream);
-//    thread.start();
+    //    ConnectedThread thread = new ConnectedThread(stream);
+    //    thread.start();
     return decodedDataMap;
   }
 
@@ -63,7 +63,8 @@ public class MentalabCodec {
     return new byte[10]; // Some example while stub
   }
 
-  private static void parsePayloadData(int pId,  double timeStamp, byte[] byteBuffer) throws InvalidDataException {
+  private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
+      throws InvalidDataException {
 
     for (Packet.PacketId packetId : Packet.PacketId.values()) {
       if (packetId.getNumVal() == pId) {
@@ -115,7 +116,7 @@ public class MentalabCodec {
           floats.offerFirst(((InfoPacket) packet).convertedSamples.get(index));
         }
       }
-      if(packet instanceof Orientation){
+      if (packet instanceof Orientation) {
         PubSubManager.getInstance().publish("Orn", packet);
       }
     }
@@ -131,8 +132,8 @@ public class MentalabCodec {
 
     public void run() {
       executor.execute(new LslPacketSubscriber());
-//      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
-//      lslSubscriber.start();
+      //      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
+      //      lslSubscriber.start();
 
       int pId = 0;
       while (true) {
@@ -156,7 +157,8 @@ public class MentalabCodec {
 
           // reading timestamp
           mmInStream.read(buffer, 0, 4);
-          double timeStamp = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          double timeStamp =
+              ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
 
           Log.d(TAG, "pid .." + pId + " payload is : " + payload);
 

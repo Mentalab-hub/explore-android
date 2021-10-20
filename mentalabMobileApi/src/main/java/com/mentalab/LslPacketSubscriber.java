@@ -6,7 +6,7 @@ import com.mentalab.LslLoader.StreamInfo;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class LslPacketSubscriber extends Thread{
+public class LslPacketSubscriber extends Thread {
 
   private static final String TAG = "EXPLORE_LSL_DEV";
   static LslLoader.StreamOutlet lslStreamOutletExg;
@@ -17,7 +17,7 @@ public class LslPacketSubscriber extends Thread{
 
   @Override
   public void run() {
-    try{
+    try {
       lslStreamInfoExg =
           new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
       if (lslStreamInfoExg == null) {
@@ -25,8 +25,7 @@ public class LslPacketSubscriber extends Thread{
       }
       lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-      lslStreamInfoOrn =
-          new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.int16, "Orn");
+      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.int16, "Orn");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
@@ -35,11 +34,9 @@ public class LslPacketSubscriber extends Thread{
       PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
 
       PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
-    }
-    catch (IOException exception){
+    } catch (IOException exception) {
       exception.printStackTrace();
     }
-
   }
 
   public void packetCallbackExG(Packet packet) {

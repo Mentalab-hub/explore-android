@@ -71,7 +71,9 @@ public class LslLoader {
       instance.lsl_push_sample_f(obj, data);
     }
 
-    public void push_chunk(float[] data) { instance.lsl_push_chunk_f(obj, data, data.length); }
+    public void push_chunk(float[] data) {
+      instance.lsl_push_chunk_f(obj, data, data.length);
+    }
 
     public StreamInfo info() {
       return new StreamInfo(instance.lsl_get_info(obj));
