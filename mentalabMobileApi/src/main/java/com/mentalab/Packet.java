@@ -12,8 +12,8 @@ import java.util.ListIterator;
 
 /** Root packet interface */
 abstract class Packet {
-  //TO DO add constant field
-  //TO DO Better Logging method
+  // TO DO add constant field
+  // TO DO Better Logging method
   private static final String TAG = "Explore";
   private byte[] byteBuffer = null;
   private int dataCount;
@@ -55,13 +55,12 @@ abstract class Packet {
   /** Number of element in each packet */
   public abstract int getDataCount();
 
-  /**
-   * Get data values from packet structure
-   */
-  public ArrayList<Float> getData(){
+  /** Get data values from packet structure */
+  public ArrayList<Float> getData() {
     Log.d(TAG, "Calling BASE method----");
     return null;
-  };
+  }
+  ;
 
   enum PacketId {
     ORIENTATION(13) {
@@ -371,6 +370,7 @@ class Eeg99s extends DataPacket {
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class Orientation extends InfoPacket {
   ArrayList<Float> listValues = new ArrayList<Float>();
+
   public Orientation() {
     super();
     attributes =

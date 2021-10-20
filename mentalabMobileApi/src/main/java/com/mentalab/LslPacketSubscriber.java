@@ -9,10 +9,10 @@ public class LslPacketSubscriber {
 
   private static final String TAG = "EXPLORE_LSL_DEV";
   static LslLoader.StreamOutlet lslStreamOutletExg;
-  private LslLoader.StreamInfo lslStreamInfoExg;
   static LslLoader.StreamOutlet lslStreamOutletOrn;
-  private LslLoader.StreamInfo lslStreamInfoOrn;
   static LslLoader lslLoader = new LslLoader();
+  private LslLoader.StreamInfo lslStreamInfoExg;
+  private LslLoader.StreamInfo lslStreamInfoOrn;
 
   public LslPacketSubscriber() throws IOException {
 
@@ -31,16 +31,14 @@ public class LslPacketSubscriber {
     lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
     Log.d(TAG, "Subscribing!!");
-    //PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
+    // PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
 
     PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
-
   }
 
   public void packetCallbackExG(Packet packet) {
     Log.d("TAG", "packetCallbackExG");
     lslStreamOutletExg.push_sample(convertArraylistToFloatArray(packet));
-
   }
 
   public void packetCallbackOrn(Packet packet) {
