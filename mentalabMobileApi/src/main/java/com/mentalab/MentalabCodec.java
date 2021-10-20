@@ -20,6 +20,7 @@ public class MentalabCodec {
   private static final String TAG = "Explore";
   private static final int NTHREADPOOL = 100;
   private static final Executor executor = Executors.newFixedThreadPool(NTHREADPOOL);
+
   public static Map<String, Queue<Float>> decodedDataMap = null;
   // Device info properties to be used further
   int channelCount = -1;

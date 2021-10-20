@@ -410,7 +410,6 @@ class Orientation extends InfoPacket {
 
   public Orientation(double timeStamp) {
     super(timeStamp);
-
     attributes =
         new ArrayList<String>(
             Arrays.asList(
