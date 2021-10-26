@@ -25,7 +25,7 @@ public class LslPacketSubscriber extends Thread {
       }
       lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.int16, "Orn");
+      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.float32, "Orn");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
@@ -41,12 +41,12 @@ public class LslPacketSubscriber extends Thread {
 
   public void packetCallbackExG(Packet packet) {
     Log.d("TAG", "packetCallbackExG");
-    lslStreamOutletExg.push_sample(convertArraylistToFloatArray(packet));
+    lslStreamOutletExg.push_chunk(convertArraylistToFloatArray(packet));
   }
 
   public void packetCallbackOrn(Packet packet) {
     Log.d("TAG", "packetCallbackOrn");
-    lslStreamOutletOrn.push_chunk(convertArraylistToFloatArray(packet));
+    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
