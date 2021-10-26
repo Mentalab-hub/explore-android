@@ -186,7 +186,7 @@ public class MentalabCodec {
     }
   }
 
-  static void pushToLsl(){
+  public static void pushToLsl(){
     executor.execute(new LslPacketSubscriber());
   }
 }
