@@ -46,7 +46,7 @@ public class LslPacketSubscriber extends Thread {
 
   public void packetCallbackOrn(Packet packet) {
     Log.d("TAG", "packetCallbackOrn");
-    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
+    lslStreamOutletOrn.push_chunk(convertArraylistToFloatArray(packet));
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
