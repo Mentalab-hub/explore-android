@@ -125,9 +125,7 @@ public class MentalabCommands {
           try {
             mmSocket.close();
           } catch (Exception exception) {
-            Log.d(
-                TAG,
-                "mmSocket.close()  failed with message:" + e.getMessage());
+            Log.d(TAG, "mmSocket.close()  failed with message:" + e.getMessage());
             throw new CommandFailedException("Connection to device failed", exception);
           }
         }

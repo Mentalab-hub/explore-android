@@ -17,7 +17,6 @@ public class LslPacketSubscriber extends Thread {
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
 
-
   @Override
   public void run() {
     try {
@@ -28,7 +27,14 @@ public class LslPacketSubscriber extends Thread {
       }
       lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", dataCountOrientation, nominalSamplingRateOrienation, ChannelFormat.float32, "Orn");
+      lslStreamInfoOrn =
+          new StreamInfo(
+              "Explore_Orn",
+              "Orn",
+              dataCountOrientation,
+              nominalSamplingRateOrienation,
+              ChannelFormat.float32,
+              "Orn");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }

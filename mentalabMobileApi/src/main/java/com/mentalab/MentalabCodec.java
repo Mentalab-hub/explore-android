@@ -123,6 +123,10 @@ public class MentalabCodec {
     }
   }
 
+  public static void pushToLsl() {
+    executor.execute(new LslPacketSubscriber());
+  }
+
   private static class ConnectedThread extends Thread {
     private final InputStream mmInStream;
 
@@ -184,9 +188,5 @@ public class MentalabCodec {
         decodedDataMap = new HashMap<>();
       }
     }
-  }
-
-  public static void pushToLsl(){
-    executor.execute(new LslPacketSubscriber());
   }
 }

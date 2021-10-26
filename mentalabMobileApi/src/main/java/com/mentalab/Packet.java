@@ -1,6 +1,5 @@
 package com.mentalab;
 
-import android.icu.text.IDNA.Info;
 import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
@@ -11,9 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
+/** Placeholder class for publishable packets */
+interface PublishablePacket {
+  String getPacketTopic();
+}
+
 /** Root packet interface */
 abstract class Packet {
-
 
   // TO DO add constant field
   // TO DO Better Logging method
@@ -176,13 +179,8 @@ abstract class Packet {
   }
 }
 
-/** Placeholder class for publishable packets */
-interface PublishablePacket{
-  String getPacketTopic();
-}
-
 /** Interface for different EEG packets */
-abstract class DataPacket extends Packet implements PublishablePacket{
+abstract class DataPacket extends Packet implements PublishablePacket {
   private static final String TAG = "Explore";
   private static byte channelMask;
   public ArrayList<Float> convertedSamples;
@@ -416,7 +414,7 @@ class Eeg99s extends DataPacket {
 }
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-class Orientation extends InfoPacket implements PublishablePacket{
+class Orientation extends InfoPacket implements PublishablePacket {
   ArrayList<Float> listValues = new ArrayList<Float>();
 
   public Orientation(double timeStamp) {
@@ -494,8 +492,7 @@ class DeviceInfoPacket extends InfoPacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
-  }
+  public void convertData(byte[] byteBuffer) {}
 
   @Override
   public String toString() {
@@ -672,7 +669,7 @@ class Environment extends InfoPacket {
     return (float) parcentage;
   }
 
-  class MarkerPacket extends InfoPacket implements PublishablePacket{
+  class MarkerPacket extends InfoPacket implements PublishablePacket {
     float markerCode;
 
     public MarkerPacket(double timeStamp) {
@@ -690,17 +687,13 @@ class Environment extends InfoPacket {
       markerCode = (float) convertedRawValues[0];
     }
 
-    /**
-     * String representation of attributes
-     */
+    /** String representation of attributes */
     @Override
     public String toString() {
       return null;
     }
 
-    /**
-     * Number of element in each packet
-     */
+    /** Number of element in each packet */
     @Override
     public int getDataCount() {
       return 1;
@@ -711,5 +704,4 @@ class Environment extends InfoPacket {
       return "Marker";
     }
   }
-
 }
