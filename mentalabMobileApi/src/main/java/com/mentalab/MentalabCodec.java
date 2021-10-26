@@ -132,7 +132,7 @@ public class MentalabCodec {
     }
 
     public void run() {
-      executor.execute(new LslPacketSubscriber());
+
       //      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
       //      lslSubscriber.start();
 
@@ -184,5 +184,9 @@ public class MentalabCodec {
         decodedDataMap = new HashMap<>();
       }
     }
+  }
+
+  static void pushToLsl(){
+    executor.execute(new LslPacketSubscriber());
   }
 }
