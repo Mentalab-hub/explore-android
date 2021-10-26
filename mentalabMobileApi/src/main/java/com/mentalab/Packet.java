@@ -1,5 +1,6 @@
 package com.mentalab;
 
+import android.icu.text.IDNA.Info;
 import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.util.ListIterator;
 
 /** Root packet interface */
 abstract class Packet {
+
+
   // TO DO add constant field
   // TO DO Better Logging method
   private static final String TAG = "Explore";
@@ -62,7 +65,6 @@ abstract class Packet {
 
   /** Get data values from packet structure */
   public ArrayList<Float> getData() {
-    Log.d(TAG, "Calling BASE method----");
     return null;
   }
   ;
@@ -173,10 +175,14 @@ abstract class Packet {
     public abstract Packet createInstance(double timeStamp);
   }
 }
-;
+
+/** Placeholder class for publishable packets */
+interface PublishablePacket{
+  String getPacketTopic();
+}
 
 /** Interface for different EEG packets */
-abstract class DataPacket extends Packet {
+abstract class DataPacket extends Packet implements PublishablePacket{
   private static final String TAG = "Explore";
   private static byte channelMask;
   public ArrayList<Float> convertedSamples;
@@ -227,6 +233,11 @@ abstract class DataPacket extends Packet {
 
   public ArrayList<Float> getData() {
     return convertedSamples;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "ExG";
   }
 }
 
@@ -405,7 +416,7 @@ class Eeg99s extends DataPacket {
 }
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-class Orientation extends InfoPacket {
+class Orientation extends InfoPacket implements PublishablePacket{
   ArrayList<Float> listValues = new ArrayList<Float>();
 
   public Orientation(double timeStamp) {
@@ -468,6 +479,11 @@ class Orientation extends InfoPacket {
   public ArrayList<Float> getData() {
     return this.convertedSamples;
   }
+
+  @Override
+  public String getPacketTopic() {
+    return "Orn";
+  }
 }
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
@@ -478,7 +494,8 @@ class DeviceInfoPacket extends InfoPacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {}
+  public void convertData(byte[] byteBuffer) {
+  }
 
   @Override
   public String toString() {
@@ -654,4 +671,45 @@ class Environment extends InfoPacket {
 
     return (float) parcentage;
   }
+
+  class MarkerPacket extends InfoPacket implements PublishablePacket{
+    float markerCode;
+
+    public MarkerPacket(double timeStamp) {
+      super(timeStamp);
+    }
+
+    /**
+     * Converts binary data stream to human readable voltage values
+     *
+     * @param byteBuffer
+     */
+    @Override
+    public void convertData(byte[] byteBuffer) throws InvalidDataException {
+      double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
+      markerCode = (float) convertedRawValues[0];
+    }
+
+    /**
+     * String representation of attributes
+     */
+    @Override
+    public String toString() {
+      return null;
+    }
+
+    /**
+     * Number of element in each packet
+     */
+    @Override
+    public int getDataCount() {
+      return 1;
+    }
+
+    @Override
+    public String getPacketTopic() {
+      return "Marker";
+    }
+  }
+
 }

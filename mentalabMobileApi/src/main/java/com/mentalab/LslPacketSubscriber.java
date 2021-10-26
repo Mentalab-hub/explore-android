@@ -9,11 +9,14 @@ import java.util.ArrayList;
 public class LslPacketSubscriber extends Thread {
 
   private static final String TAG = "EXPLORE_LSL_DEV";
+  private static final int nominalSamplingRateOrienation = 20;
+  private static final int dataCountOrientation = 9;
   static LslLoader.StreamOutlet lslStreamOutletExg;
   static LslLoader.StreamOutlet lslStreamOutletOrn;
   static LslLoader lslLoader = new LslLoader();
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
+
 
   @Override
   public void run() {
@@ -25,7 +28,7 @@ public class LslPacketSubscriber extends Thread {
       }
       lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
 
-      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", 9, 20, ChannelFormat.float32, "Orn");
+      lslStreamInfoOrn = new StreamInfo("Explore_Orn", "Orn", dataCountOrientation, nominalSamplingRateOrienation, ChannelFormat.float32, "Orn");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
@@ -57,23 +60,5 @@ public class LslPacketSubscriber extends Thread {
       floatArray[index] = ((Float) packetVoltageValues.get(index)).floatValue();
     }
     return floatArray;
-    /*if (packet instanceof DataPacket) {
-      packetVoltageValues = ((DataPacket) packet).getVoltageValues();
-      float[] floatArray = new float[packetVoltageValues.size()];
-      Object[] array = packetVoltageValues.toArray();
-      for (int index = 0; index < packetVoltageValues.size(); index++) {
-        floatArray[index] = ((Float) packetVoltageValues.get(index)).floatValue();
-      }
-      return floatArray;
-    } else if (packet instanceof Orientation) {
-      packetVoltageValues = ((Orientation) packet).listValues;
-      float[] floatArray = new float[packetVoltageValues.size()];
-      Object[] array = packetVoltageValues.toArray();
-      for (int index = 0; index < packetVoltageValues.size(); index++) {
-        floatArray[index] = ((Float) packetVoltageValues.get(index)).floatValue();
-      }
-      return floatArray;
-    }
-    return null;*/
   }
 }
