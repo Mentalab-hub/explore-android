@@ -1,7 +1,6 @@
 package com.mentalab;
 
 import android.util.Log;
-import com.mentalab.LslLoader.StreamOutlet;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -16,11 +15,13 @@ interface PublishablePacket {
   String getPacketTopic();
 }
 
+interface QueueablePacket {}
+
 /** Root packet interface */
 abstract class Packet {
 
-  // TO DO add constant field
-  // TO DO Better Logging method
+  // TODO refactor with Enum class
+  // TODO Have release build before final release
   protected static final String TAG = "Explore";
   private byte[] byteBuffer = null;
   private int dataCount;
@@ -251,7 +252,7 @@ abstract class InfoPacket extends Packet {
 }
 
 /** Interface for packets related to device synchronization */
-abstract class UtilPacket extends Packet {
+abstract class UtilPacket extends Packet implements PublishablePacket {
 
   protected ArrayList<Float> convertedSamples;
 
@@ -521,7 +522,7 @@ class DeviceInfoPacket extends InfoPacket {
  * Acknowledgement packet is sent when a configuration command is successfully executed on the
  * device
  */
-class AckPacket extends InfoPacket {
+class AckPacket extends UtilPacket {
 
   public AckPacket(double timeStamp) {
     super(timeStamp);
@@ -539,10 +540,15 @@ class AckPacket extends InfoPacket {
   public int getDataCount() {
     return 0;
   }
+
+  @Override
+  public String getPacketTopic() {
+    return "Command";
+  }
 }
 
 /** Packet sent from the device to sync clocks */
-class TimeStampPacket extends UtilPacket {
+class TimeStampPacket extends Packet {
 
   public TimeStampPacket(double timeStamp) {
     super(timeStamp);
@@ -564,7 +570,7 @@ class TimeStampPacket extends UtilPacket {
 }
 
 /** Disconnection packet is sent when the host machine is disconnected from the device */
-class DisconnectionPacket extends UtilPacket {
+class DisconnectionPacket extends Packet {
 
   public DisconnectionPacket(double timeStamp) {
     super(timeStamp);
@@ -685,7 +691,7 @@ class MarkerPacket extends InfoPacket implements PublishablePacket {
 
   int markerCode;
 
-  //super.att = new ArrayList<String>(Arrays.asList("Marker"));
+  // super.att = new ArrayList<String>(Arrays.asList("Marker"));
 
   public MarkerPacket(double timeStamp) {
     super(timeStamp);
@@ -728,7 +734,7 @@ class MarkerPacket extends InfoPacket implements PublishablePacket {
   }
 }
 
-class CommandReceivedPacket extends InfoPacket implements PublishablePacket {
+class CommandReceivedPacket extends UtilPacket {
   float markerCode;
 
   public CommandReceivedPacket(double timeStamp) {
@@ -749,7 +755,7 @@ class CommandReceivedPacket extends InfoPacket implements PublishablePacket {
   /** String representation of attributes */
   @Override
   public String toString() {
-    return null;
+    return "Command Received with marker code: " + markerCode;
   }
 
   /** Number of element in each packet */
@@ -764,7 +770,7 @@ class CommandReceivedPacket extends InfoPacket implements PublishablePacket {
   }
 }
 
-class CommandStatusPacket extends InfoPacket implements PublishablePacket {
+class CommandStatusPacket extends UtilPacket {
   boolean commandStatus;
 
   public CommandStatusPacket(double timeStamp) {
@@ -787,7 +793,7 @@ class CommandStatusPacket extends InfoPacket implements PublishablePacket {
   /** String representation of attributes */
   @Override
   public String toString() {
-    return null;
+    return "Command status" + commandStatus;
   }
 
   /** Number of element in each packet */

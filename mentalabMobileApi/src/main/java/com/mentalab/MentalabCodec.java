@@ -79,7 +79,7 @@ public class MentalabCodec {
       }
     }
   }
-
+  // TODO refactor packet class to expose uniform methods
   private static void pushDataInQueue(Packet packet) {
 
     if (packet instanceof DataPacket) {
@@ -127,6 +127,7 @@ public class MentalabCodec {
     }
   }
 
+  // TODO Decouple executor class from Codec class
   public static void pushToLsl() {
     executor.execute(new LslPacketSubscriber());
   }
@@ -140,9 +141,6 @@ public class MentalabCodec {
     }
 
     public void run() {
-
-      //      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
-      //      lslSubscriber.start();
 
       int pId = 0;
       while (true) {
