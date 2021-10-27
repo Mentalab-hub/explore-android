@@ -143,13 +143,13 @@ abstract class Packet {
     CMDRCV(192) {
       @Override
       public Packet createInstance(double timeStamp) {
-        return null;
+        return new CommandReceivedPacket(timeStamp);
       }
     },
     CMDSTAT(193) {
       @Override
       public Packet createInstance(double timeStamp) {
-        return null;
+        return new CommandStatusPacket(timeStamp);
       }
     },
     MARKER(194) {
@@ -500,8 +500,8 @@ class DeviceInfoPacket extends InfoPacket {
             .order(ByteOrder.LITTLE_ENDIAN)
             .getInt();
     samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
-    Log.d(TAG, "sampling rate: " + samplingRate + "ads is ..." + adsMask);
     adsMask = byteBuffer[3];
+    Log.d(TAG, "sampling rate: " + samplingRate + "ads is ..." + adsMask);
   }
 
   @Override
@@ -713,5 +713,79 @@ class MarkerPacket extends InfoPacket implements PublishablePacket {
   @Override
   public String getPacketTopic() {
     return "Marker";
+  }
+}
+
+class CommandReceivedPacket extends InfoPacket implements PublishablePacket {
+  float markerCode;
+
+  public CommandReceivedPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
+  /**
+   * Converts binary data stream to human readable voltage values
+   *
+   * @param byteBuffer
+   */
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
+    markerCode = (float) convertedRawValues[0];
+  }
+
+  /** String representation of attributes */
+  @Override
+  public String toString() {
+    return null;
+  }
+
+  /** Number of element in each packet */
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "Command";
+  }
+}
+
+class CommandStatusPacket extends InfoPacket implements PublishablePacket {
+  boolean commandStatus;
+
+  public CommandStatusPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
+  /**
+   * Converts binary data stream to human readable voltage values
+   *
+   * @param byteBuffer
+   */
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
+    short status =
+        ByteBuffer.wrap(new byte[] {byteBuffer[5], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    commandStatus = status != 0;
+  }
+
+  /** String representation of attributes */
+  @Override
+  public String toString() {
+    return null;
+  }
+
+  /** Number of element in each packet */
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "Command";
   }
 }
