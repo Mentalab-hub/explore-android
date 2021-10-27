@@ -20,7 +20,7 @@ abstract class Packet {
 
   // TO DO add constant field
   // TO DO Better Logging method
-  private static final String TAG = "Explore";
+  protected static final String TAG = "Explore";
   private byte[] byteBuffer = null;
   private int dataCount;
   private double timeStamp;
@@ -486,13 +486,22 @@ class Orientation extends InfoPacket implements PublishablePacket {
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class DeviceInfoPacket extends InfoPacket {
-
+  byte adsMask;
+  int samplingRate;
   public DeviceInfoPacket(double timeStamp) {
     super(timeStamp);
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {}
+  public void convertData(byte[] byteBuffer) {
+    int samplingRateMultiplier = ByteBuffer.wrap(
+        new byte[] {byteBuffer[2], 0, 0, 0})
+        .order(ByteOrder.LITTLE_ENDIAN)
+        .getInt();
+    samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
+    Log.d(TAG, "sampling rate: "+ samplingRate + "ads is ..." + adsMask);
+    adsMask = byteBuffer[3];
+  }
 
   @Override
   public String toString() {

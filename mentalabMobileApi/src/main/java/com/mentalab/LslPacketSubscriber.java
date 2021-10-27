@@ -20,12 +20,7 @@ public class LslPacketSubscriber extends Thread {
   @Override
   public void run() {
     try {
-      lslStreamInfoExg =
-          new StreamInfo("Explore_ExG", "ExG", 8, 250, LslLoader.ChannelFormat.float32, "ExG");
-      if (lslStreamInfoExg == null) {
-        throw new IOException("Stream Info is empty");
-      }
-      lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
+
 
       lslStreamInfoOrn =
           new StreamInfo(
@@ -49,6 +44,18 @@ public class LslPacketSubscriber extends Thread {
   }
 
   public void packetCallbackExG(Packet packet) {
+    if (lslStreamInfoExg == null){
+      lslStreamInfoExg =
+          new StreamInfo("Explore_ExG", "ExG", packet.getDataCount(), 250, LslLoader.ChannelFormat.float32, "ExG");
+      if (lslStreamInfoExg != null) {
+        try {
+          lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
+        } catch (IOException exception) {
+          exception.printStackTrace();
+        }
+      }
+
+    }
     Log.d("TAG", "packetCallbackExG");
     lslStreamOutletExg.push_chunk(convertArraylistToFloatArray(packet));
   }
