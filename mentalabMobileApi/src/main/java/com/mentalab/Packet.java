@@ -1,6 +1,7 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.LslLoader.StreamOutlet;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -681,10 +682,14 @@ class Environment extends InfoPacket {
 }
 
 class MarkerPacket extends InfoPacket implements PublishablePacket {
+
   int markerCode;
+
+  //super.att = new ArrayList<String>(Arrays.asList("Marker"));
 
   public MarkerPacket(double timeStamp) {
     super(timeStamp);
+    attributes = new ArrayList<String>(Arrays.asList("Marker"));
   }
 
   /**
