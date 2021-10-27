@@ -72,7 +72,8 @@ public class MentalabCommands {
    */
   public static void connect(String deviceName)
       throws CommandFailedException, NoBluetoothException, NoConnectionException {
-    UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    final String uuidBluetoothSpp = "00001101-0000-1000-8000-00805f9b34fb";
+    UUID uuid = UUID.fromString(uuidBluetoothSpp);
     final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
 
     if (btAdapter == null) {
@@ -124,9 +125,7 @@ public class MentalabCommands {
           try {
             mmSocket.close();
           } catch (Exception exception) {
-            Log.d(
-                TAG,
-                "mmSocket.close()  failed after failed connection with message:" + e.getMessage());
+            Log.d(TAG, "mmSocket.close()  failed with message:" + e.getMessage());
             throw new CommandFailedException("Connection to device failed", exception);
           }
         }

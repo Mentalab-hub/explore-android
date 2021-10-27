@@ -79,7 +79,7 @@ public class MentalabCodec {
       }
     }
   }
-
+  // TODO refactor packet class to expose uniform methods
   private static void pushDataInQueue(Packet packet) {
 
     if (packet instanceof DataPacket) {
@@ -120,7 +120,16 @@ public class MentalabCodec {
       if (packet instanceof Orientation) {
         PubSubManager.getInstance().publish("Orn", packet);
       }
+
+      if (packet instanceof MarkerPacket) {
+        PubSubManager.getInstance().publish("Marker", packet);
+      }
     }
+  }
+
+  // TODO Decouple executor class from Codec class
+  public static void pushToLsl() {
+    executor.execute(new LslPacketSubscriber());
   }
 
   private static class ConnectedThread extends Thread {
@@ -132,9 +141,6 @@ public class MentalabCodec {
     }
 
     public void run() {
-      executor.execute(new LslPacketSubscriber());
-      //      LslPacketSubscriber lslSubscriber = new LslPacketSubscriber();
-      //      lslSubscriber.start();
 
       int pId = 0;
       while (true) {
