@@ -701,6 +701,7 @@ class MarkerPacket extends InfoPacket implements PublishablePacket {
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
     markerCode =
         ByteBuffer.wrap(new byte[] {byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    convertedSamples = new ArrayList<Float>(Arrays.asList((float) markerCode));
   }
 
   /** String representation of attributes */
