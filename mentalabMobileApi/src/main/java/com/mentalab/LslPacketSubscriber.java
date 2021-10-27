@@ -39,6 +39,10 @@ public class LslPacketSubscriber extends Thread {
       lslStreamInfoMarker =
           new StreamInfo("Explore_Marker", "Marker", 1, 0, ChannelFormat.float32, "Marker");
 
+      if (lslStreamInfoMarker == null) {
+        throw new IOException("Stream Info is Null!!");
+      }
+      lslStreamOutletMarker = new LslLoader.StreamOutlet(lslStreamInfoMarker);
       Log.d(TAG, "Subscribing!!");
       PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
 
