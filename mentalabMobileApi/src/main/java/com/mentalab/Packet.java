@@ -681,7 +681,7 @@ class Environment extends InfoPacket {
 }
 
 class MarkerPacket extends InfoPacket implements PublishablePacket {
-  float markerCode;
+  int markerCode;
 
   public MarkerPacket(double timeStamp) {
     super(timeStamp);
@@ -694,20 +694,26 @@ class MarkerPacket extends InfoPacket implements PublishablePacket {
    */
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
-    markerCode = (float) convertedRawValues[0];
+    markerCode =
+        ByteBuffer.wrap(new byte[] {byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
   }
 
   /** String representation of attributes */
   @Override
   public String toString() {
-    return null;
+    return "Marker: " + markerCode;
   }
 
   /** Number of element in each packet */
   @Override
   public int getDataCount() {
     return 1;
+  }
+
+  /** Get data values from packet structure */
+  @Override
+  public ArrayList<Float> getData() {
+    return new ArrayList<Float>(markerCode);
   }
 
   @Override

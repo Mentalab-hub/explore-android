@@ -120,6 +120,10 @@ public class MentalabCodec {
       if (packet instanceof Orientation) {
         PubSubManager.getInstance().publish("Orn", packet);
       }
+
+      if (packet instanceof MarkerPacket) {
+        PubSubManager.getInstance().publish("Marker", packet);
+      }
     }
   }
 
