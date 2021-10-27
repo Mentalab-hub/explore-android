@@ -101,7 +101,7 @@ abstract class Packet {
     INFO(99) {
       @Override
       public Packet createInstance(double timeStamp) {
-        return null;
+        return new DeviceInfoPacket(timeStamp);
       }
     },
     EEG94(144) {
@@ -155,7 +155,7 @@ abstract class Packet {
     MARKER(194) {
       @Override
       public Packet createInstance(double timeStamp) {
-        return null;
+        return new MarkerPacket(timeStamp);
       }
     },
     CALIBINFO(195) {
@@ -488,18 +488,19 @@ class Orientation extends InfoPacket implements PublishablePacket {
 class DeviceInfoPacket extends InfoPacket {
   byte adsMask;
   int samplingRate;
+
   public DeviceInfoPacket(double timeStamp) {
     super(timeStamp);
   }
 
   @Override
   public void convertData(byte[] byteBuffer) {
-    int samplingRateMultiplier = ByteBuffer.wrap(
-        new byte[] {byteBuffer[2], 0, 0, 0})
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .getInt();
+    int samplingRateMultiplier =
+        ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .getInt();
     samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
-    Log.d(TAG, "sampling rate: "+ samplingRate + "ads is ..." + adsMask);
+    Log.d(TAG, "sampling rate: " + samplingRate + "ads is ..." + adsMask);
     adsMask = byteBuffer[3];
   }
 
@@ -677,40 +678,40 @@ class Environment extends InfoPacket {
 
     return (float) parcentage;
   }
+}
 
-  class MarkerPacket extends InfoPacket implements PublishablePacket {
-    float markerCode;
+class MarkerPacket extends InfoPacket implements PublishablePacket {
+  float markerCode;
 
-    public MarkerPacket(double timeStamp) {
-      super(timeStamp);
-    }
+  public MarkerPacket(double timeStamp) {
+    super(timeStamp);
+  }
 
-    /**
-     * Converts binary data stream to human readable voltage values
-     *
-     * @param byteBuffer
-     */
-    @Override
-    public void convertData(byte[] byteBuffer) throws InvalidDataException {
-      double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
-      markerCode = (float) convertedRawValues[0];
-    }
+  /**
+   * Converts binary data stream to human readable voltage values
+   *
+   * @param byteBuffer
+   */
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
+    markerCode = (float) convertedRawValues[0];
+  }
 
-    /** String representation of attributes */
-    @Override
-    public String toString() {
-      return null;
-    }
+  /** String representation of attributes */
+  @Override
+  public String toString() {
+    return null;
+  }
 
-    /** Number of element in each packet */
-    @Override
-    public int getDataCount() {
-      return 1;
-    }
+  /** Number of element in each packet */
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
 
-    @Override
-    public String getPacketTopic() {
-      return "Marker";
-    }
+  @Override
+  public String getPacketTopic() {
+    return "Marker";
   }
 }
