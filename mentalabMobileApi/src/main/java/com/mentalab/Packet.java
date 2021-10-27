@@ -15,7 +15,7 @@ interface PublishablePacket {
   String getPacketTopic();
 }
 
-interface QueueablePacket {}
+interface QueueablePacket{}
 
 /** Root packet interface */
 abstract class Packet {
@@ -242,7 +242,7 @@ abstract class DataPacket extends Packet implements PublishablePacket {
 }
 
 /** Interface for packets related to device information */
-abstract class InfoPacket extends Packet {
+abstract class InfoPacket extends Packet implements QueueablePacket{
   ArrayList<Float> convertedSamples = null;
   ArrayList<String> attributes;
 
