@@ -37,7 +37,7 @@ public class LslPacketSubscriber extends Thread {
       lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
       lslStreamInfoMarker =
-          new StreamInfo("Explore_Marker", "Marker", 1, 0, ChannelFormat.float32, "Marker");
+          new StreamInfo("Explore_Marker", "Marker", 1, 0, ChannelFormat.int32, "Marker");
 
       if (lslStreamInfoMarker == null) {
         throw new IOException("Stream Info is Null!!");
