@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class PubSubManager {
+class PubSubManager{
   private static final PubSubManager pubSubSingleton = new PubSubManager();
 
   private Map<String, ArrayList<Consumer<?>>> topicsSubscribers =

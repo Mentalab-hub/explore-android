@@ -2,6 +2,18 @@ package com.mentalab;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
+import com.mentalab.MentalabConstants.SamplingRate;
+import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.exception.InvalidDataException;
+import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.NoConnectionException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -9,5 +21,24 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
+    try {
+      Set<String> deviceList = MentalabCommands.scan();
+      MentalabCommands.connect(deviceList.iterator().next());
+      InputStream inputStream = MentalabCommands.getRawData();
+      Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
+
+      //MentalabCommands.setSamplingRate(SamplingRate.SR_250);
+    } catch (NoBluetoothException exception) {
+      exception.printStackTrace();
+    }catch (InvalidDataException exception) {
+      exception.printStackTrace();
+    } catch (NoConnectionException exception) {
+      exception.printStackTrace();
+    } catch (CommandFailedException e) {
+      e.printStackTrace();
+    } catch (InvalidCommandException | IOException e) {
+      e.printStackTrace();
+    }
   }
 }

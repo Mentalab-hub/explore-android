@@ -1,6 +1,7 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
@@ -12,19 +13,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
   private static final int NTHREADPOOL = 100;
-  private static final Executor executor = Executors.newFixedThreadPool(NTHREADPOOL);
+  private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
 
   public static Map<String, Queue<Float>> decodedDataMap = null;
-  // Device info properties to be used further
-  int channelCount = -1;
-  int samplingRate = 0;
 
   /**
    * Decodes a device raw data stream
@@ -49,6 +47,7 @@ public class MentalabCodec {
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
     executor.execute(new ConnectedThread(stream));
+    Log.d(TAG, "Started execution of decoder!!");
     //    ConnectedThread thread = new ConnectedThread(stream);
     //    thread.start();
     return decodedDataMap;
@@ -60,8 +59,11 @@ public class MentalabCodec {
    * @throws InvalidCommandException when the command is not recognized
    * @return byte[] encoded commands that can be sent to the device
    */
-  static byte[] encodeCommand(final String command) throws InvalidCommandException {
-    return new byte[10]; // Some example while stub
+  static byte[] encodeCommand(Command command, int extraArguments) throws InvalidCommandException {
+
+    CommandTranslator translator = command.createInstance(command, extraArguments);
+    byte[] translatedBytes = translator.translateCommand(extraArguments);
+    return translatedBytes; // Some example while stub
   }
 
   private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
@@ -122,6 +124,10 @@ public class MentalabCodec {
       }
 
       if (packet instanceof MarkerPacket) {
+        PubSubManager.getInstance().publish("Marker", packet);
+      }
+
+      if (packet instanceof CommandStatusPacket || packet instanceof AckPacket || packet instanceof CommandReceivedPacket) {
         PubSubManager.getInstance().publish("Marker", packet);
       }
     }
@@ -190,5 +196,9 @@ public class MentalabCodec {
         decodedDataMap = new HashMap<>();
       }
     }
+  }
+
+  synchronized static ExecutorService getExecutorService(){
+    return executor;
   }
 }

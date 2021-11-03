@@ -4,9 +4,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
-import com.mentalab.exception.CommandFailedException;
-import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.NoConnectionException;
+import com.mentalab.MentalabConstants.Command;
+import com.mentalab.MentalabConstants.SamplingRate;
+import com.mentalab.exception.*;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -161,12 +166,12 @@ public class MentalabCommands {
    * @throws NoBluetoothException
    * @return InputStream of raw bytes
    */
-  public static InputStream getRawData() throws NoBluetoothException {
+  public static InputStream getRawData() throws NoBluetoothException{
     try {
       assert mmSocket != null;
       mmInStream = mmSocket.getInputStream();
 
-    } catch (Exception exception) {
+    } catch (IOException exception) {
       Log.d(TAG, "NoBluetoothException occurred");
       throw new NoBluetoothException("NoBluetoothException occurred", null);
     }
@@ -181,20 +186,25 @@ public class MentalabCommands {
    * <p>Sampling rate only applies to ExG data. Orientation and Environment data are always sampled
    * at 20Hz. Currently available sampling rates are 250,500 and 1000 Hz. Default is 250Hz.
    *
-   * @param SamplingRate enumerator to choose sampling rate
+   * @param samplingRate enumerator to choose sampling rate
    * @throws CommandFailedException when sampling rate change fails
    * @throws NoBluetoothException
    */
-  /*
+
   public static void
-  setSamplingRate(SamplingRate s)
-          throws CommandFailedException, NoBluetoothException {...}
+  setSamplingRate(SamplingRate samplingRate)
+      throws CommandFailedException, NoBluetoothException, InvalidCommandException, IOException {
+
+    byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
+    mmOutputStream = mmSocket.getOutputStream();
+    MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes, mmOutputStream));
+  }
 
 
 
 
 
-  */
+
   /**
    * Enables or disables data collection per module or channel.
    *
@@ -219,10 +229,5 @@ public class MentalabCommands {
 
 
   */
-  /** Available sampling rates */
-  enum SamplingRate {
-    SR_250,
-    SR_500,
-    SR_100,
-  }
+
 }
