@@ -28,7 +28,9 @@ public class MainActivity extends AppCompatActivity {
       InputStream inputStream = MentalabCommands.getRawData();
       Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 
-      //MentalabCommands.setSamplingRate(SamplingRate.SR_250);
+      Thread.sleep(2000);
+
+      MentalabCommands.setSamplingRate(SamplingRate.SR_250);
     } catch (NoBluetoothException exception) {
       exception.printStackTrace();
     }catch (InvalidDataException exception) {
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     } catch (CommandFailedException e) {
       e.printStackTrace();
     } catch (InvalidCommandException | IOException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
       e.printStackTrace();
     }
   }

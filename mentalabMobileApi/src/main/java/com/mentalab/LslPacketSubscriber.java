@@ -18,6 +18,12 @@ public class LslPacketSubscriber extends Thread {
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
   private LslLoader.StreamInfo lslStreamInfoMarker;
+  private static String connectedDeviceName = null;
+
+  public LslPacketSubscriber(String deviceName) {
+    connectedDeviceName = deviceName;
+
+  }
 
   @Override
   public void run() {
@@ -25,19 +31,19 @@ public class LslPacketSubscriber extends Thread {
 
       lslStreamInfoOrn =
           new StreamInfo(
-              "Explore_Orn",
-              "Orn",
+              connectedDeviceName + "_ORN",
+              "ORN",
               dataCountOrientation,
               nominalSamplingRateOrientation,
               ChannelFormat.float32,
-              "Orn");
+              connectedDeviceName + "_ORN");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
       lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
       lslStreamInfoMarker =
-          new StreamInfo("Explore_Marker", "Marker", 1, 0, ChannelFormat.int32, "Marker");
+          new StreamInfo(connectedDeviceName + "_Marker", "Markers", 1, 0, ChannelFormat.int32, connectedDeviceName+ "_Markers");
 
       if (lslStreamInfoMarker == null) {
         throw new IOException("Stream Info is Null!!");
@@ -58,12 +64,12 @@ public class LslPacketSubscriber extends Thread {
     if (lslStreamInfoExg == null) {
       lslStreamInfoExg =
           new StreamInfo(
-              "Explore_ExG",
+              connectedDeviceName + "_ExG",
               "ExG",
               packet.getDataCount(),
               250,
               LslLoader.ChannelFormat.float32,
-              "ExG");
+              connectedDeviceName + "_ExG");
       if (lslStreamInfoExg != null) {
         try {
           lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);

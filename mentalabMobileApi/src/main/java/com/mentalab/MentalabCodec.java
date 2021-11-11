@@ -134,8 +134,8 @@ public class MentalabCodec {
   }
 
   // TODO Decouple executor class from Codec class
-  public static void pushToLsl() {
-    executor.execute(new LslPacketSubscriber());
+  public static void pushToLsl(String deviceName) {
+    executor.execute(new LslPacketSubscriber(deviceName));
   }
 
   private static class ConnectedThread extends Thread {

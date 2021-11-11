@@ -27,6 +27,7 @@ public class MentalabCommands {
   private static BluetoothSocket mmSocket = null;
   private static InputStream mmInStream = null;
   private static OutputStream mmOutputStream = null;
+  private static String connectedDeviceName = null;
 
   /**
    * Scan for Mentalab devices
@@ -139,7 +140,7 @@ public class MentalabCommands {
         throw new CommandFailedException("Connection to device failed", null);
       }
     }
-
+    connectedDeviceName = deviceName;
     Log.d(TAG, "Connected to Mentalab Explore!");
   }
 
@@ -229,5 +230,23 @@ public class MentalabCommands {
 
 
   */
+
+  /* */
+  /**
+   * Sets sampling rate of the device
+   *
+   * <p>Sampling rate only applies to ExG data. Orientation and Environment data are always sampled
+   * at 20Hz. Currently available sampling rates are 250,500 and 1000 Hz. Default is 250Hz.
+   *
+   * @throws CommandFailedException when sampling rate change fails
+   * @throws NoBluetoothException
+   */
+
+  public static void
+  pushToLsl()
+      throws CommandFailedException, IOException {
+
+    MentalabCodec.pushToLsl(connectedDeviceName);
+  }
 
 }
