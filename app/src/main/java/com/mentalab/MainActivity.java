@@ -4,14 +4,10 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import com.mentalab.MentalabConstants.DeviceConfigSwitches;
-import com.mentalab.MentalabConstants.SamplingRate;
 import com.mentalab.exception.CommandFailedException;
-import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Queue;
@@ -31,12 +27,13 @@ public class MainActivity extends AppCompatActivity {
       InputStream inputStream = MentalabCommands.getRawData();
       Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 
-      Map<String, Boolean> configMap = Map.of(DeviceConfigSwitches.Channels[7], false, MentalabConstants.DeviceConfigSwitches.Channels[6], false);
-      MentalabCommands.setEnabled(configMap);
+      // Map<String, Boolean> configMap = Map.of(DeviceConfigSwitches.Channels[7], false,
+      // MentalabConstants.DeviceConfigSwitches.Channels[6], false);
+      // MentalabCommands.setEnabled(configMap);
       // MentalabCommands.pushToLsl();
-      //MentalabCommands.formatDeviceMemory();
-      //Thread.sleep(2000);
-      //MentalabCodec.stopDecoder();
+      // MentalabCommands.formatDeviceMemory();
+      // Thread.sleep(2000);
+      // MentalabCodec.stopDecoder();
     } catch (NoBluetoothException exception) {
       exception.printStackTrace();
     } catch (InvalidDataException exception) {
@@ -45,10 +42,6 @@ public class MainActivity extends AppCompatActivity {
       exception.printStackTrace();
     } catch (CommandFailedException e) {
       e.printStackTrace();
-    } catch (InvalidCommandException e) {
-      e.printStackTrace();
-    } catch (IOException exception) {
-      exception.printStackTrace();
     }
   }
 }

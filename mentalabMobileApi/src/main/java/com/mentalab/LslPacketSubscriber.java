@@ -15,15 +15,14 @@ public class LslPacketSubscriber extends Thread {
   static LslLoader.StreamOutlet lslStreamOutletOrn;
   static LslLoader.StreamOutlet lslStreamOutletMarker;
   static LslLoader lslLoader = new LslLoader();
+  private static String connectedDeviceName = null;
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
   private LslLoader.StreamInfo lslStreamInfoMarker;
-  private static String connectedDeviceName = null;
 
   public LslPacketSubscriber(String deviceName) {
     Log.d(TAG, "In Constructor!!!!");
     connectedDeviceName = deviceName;
-
   }
 
   @Override
@@ -44,7 +43,13 @@ public class LslPacketSubscriber extends Thread {
       lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
 
       lslStreamInfoMarker =
-          new StreamInfo(connectedDeviceName + "_Marker", "Markers", 1, 0, ChannelFormat.int32, connectedDeviceName+ "_Markers");
+          new StreamInfo(
+              connectedDeviceName + "_Marker",
+              "Markers",
+              1,
+              0,
+              ChannelFormat.int32,
+              connectedDeviceName + "_Markers");
 
       if (lslStreamInfoMarker == null) {
         throw new IOException("Stream Info is Null!!");

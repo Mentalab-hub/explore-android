@@ -1,51 +1,14 @@
 package com.mentalab;
 
+import com.mentalab.CommandTranslators.ChannelMaskTranslator;
+import com.mentalab.CommandTranslators.CommandTranslator;
+import com.mentalab.CommandTranslators.FormatMemoryCommandTranslator;
+import com.mentalab.CommandTranslators.ModuleDisableTranslator;
+import com.mentalab.CommandTranslators.ModuleEnableTranslator;
+import com.mentalab.CommandTranslators.SamplingRateCommandTranslator;
+import com.mentalab.CommandTranslators.SoftResetCommandTranslator;
+
 public class MentalabConstants {
-
-  interface QueueAttribute {
-    enum OrientationAttribute {
-      ACC_X,
-      ACC_Y,
-      Acc_Z,
-      Mag_X,
-      Mag_Y,
-      Mag_Z,
-      Gyro_X,
-      Gyro_Y,
-      Gyro_Z;
-    }
-
-    enum ExgChannel {
-      CHANNEL_0,
-      CHANNEL_1,
-      CHANNEL_2,
-      CHANNEL_3,
-      CHANNEL_4,
-      CHANNEL_5,
-      CHANNEL_6,
-      CHANNEL_7;
-    }
-
-    enum DeviceInfoAttribute {
-      FIRMWARE_VERSION,
-      SAMPLING_RATE,
-      ADS_MASK;
-    }
-  }
-
-  public interface DeviceConfigSwitches {
-    String[] Modules = {"ModuleEnv", "ModuleOrn", "ModuleExg"};
-    String[] Channels = {
-      "CHANNEL_0",
-      "CHANNEL_1",
-      "CHANNEL_2",
-      "CHANNEL_3",
-      "CHANNEL_4",
-      "CHANNEL_5",
-      "CHANNEL_6",
-      "CHANNEL_7"
-    };
-  }
 
   public enum SamplingRate {
     // enum fields
@@ -53,13 +16,13 @@ public class MentalabConstants {
     SR_500(0x02),
     SR_1000(0x03);
 
+    // internal state
+    private int samplingRate;
+
     // constructor
     private SamplingRate(final int samplingRate) {
       this.samplingRate = samplingRate;
     }
-
-    // internal state
-    private int samplingRate;
 
     public int getValue() {
       return samplingRate;
@@ -123,13 +86,13 @@ public class MentalabConstants {
       }
     };
 
+    // internal state
+    private int opCode;
+
     // constructor
     private Command(final int opCode) {
       this.opCode = opCode;
     }
-
-    // internal state
-    private int opCode;
 
     public int getValue() {
       return opCode;
@@ -144,5 +107,50 @@ public class MentalabConstants {
     Orn,
     Marker,
     Command;
+  }
+
+  interface QueueAttribute {
+    enum OrientationAttribute {
+      ACC_X,
+      ACC_Y,
+      Acc_Z,
+      Mag_X,
+      Mag_Y,
+      Mag_Z,
+      Gyro_X,
+      Gyro_Y,
+      Gyro_Z;
+    }
+
+    enum ExgChannel {
+      CHANNEL_0,
+      CHANNEL_1,
+      CHANNEL_2,
+      CHANNEL_3,
+      CHANNEL_4,
+      CHANNEL_5,
+      CHANNEL_6,
+      CHANNEL_7;
+    }
+
+    enum DeviceInfoAttribute {
+      FIRMWARE_VERSION,
+      SAMPLING_RATE,
+      ADS_MASK;
+    }
+  }
+
+  public interface DeviceConfigSwitches {
+    String[] Modules = {"ModuleEnv", "ModuleOrn", "ModuleExg"};
+    String[] Channels = {
+      "CHANNEL_0",
+      "CHANNEL_1",
+      "CHANNEL_2",
+      "CHANNEL_3",
+      "CHANNEL_4",
+      "CHANNEL_5",
+      "CHANNEL_6",
+      "CHANNEL_7"
+    };
   }
 }

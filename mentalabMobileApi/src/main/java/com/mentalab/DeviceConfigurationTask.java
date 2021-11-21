@@ -12,8 +12,8 @@ public class DeviceConfigurationTask extends Thread {
   public DeviceConfigurationTask(byte[] encodedBytes) {
     // btOutputStream = outputStream;
     byteArray = encodedBytes.clone();
-    for(int i = 0; i < byteArray.length; i++){
-      Log.d("DEBUG_SR","Converted data for index: " + "is " + String.format("%02X", byteArray[i]));
+    for (int i = 0; i < byteArray.length; i++) {
+      Log.d("DEBUG_SR", "Converted data for index: " + "is " + String.format("%02X", byteArray[i]));
     }
     PubSubManager.getInstance().subscribe("Command", this::commandCallback);
   }
@@ -25,7 +25,7 @@ public class DeviceConfigurationTask extends Thread {
 
       MentalabCommands.getOutputStream().write(byteArray);
       MentalabCommands.getOutputStream().flush();
-      //MentalabCommands.getOutputStream().close();
+      // MentalabCommands.getOutputStream().close();
 
       Thread.sleep(1000);
       Log.d("DEBUG_SR", "Finished sending data..now waiting for acknowledgement!");

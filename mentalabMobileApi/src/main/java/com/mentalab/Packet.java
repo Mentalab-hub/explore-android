@@ -488,11 +488,12 @@ class Orientation extends InfoPacket implements PublishablePacket {
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class DeviceInfoPacket extends InfoPacket {
-  byte adsMask;
+  int adsMask;
   int samplingRate;
 
   public DeviceInfoPacket(double timeStamp) {
     super(timeStamp);
+    attributes = new ArrayList<String>(Arrays.asList("Ads_Mask", "Sampling_Rate"));
   }
 
   @Override
@@ -502,8 +503,17 @@ class DeviceInfoPacket extends InfoPacket {
             .order(ByteOrder.LITTLE_ENDIAN)
             .getInt();
     samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
-    adsMask = byteBuffer[3];
-    Log.d(TAG, "sampling rate: " + samplingRate + "ads is ..." + adsMask);
+    adsMask = byteBuffer[3] & 0xFF;
+
+    this.convertedSamples =
+        new ArrayList<Float>(
+            Arrays.asList(new Float[] {Float.valueOf(adsMask), Float.valueOf(samplingRate)}));
+  }
+
+  /** Return list of elements in each packet */
+  @Override
+  public ArrayList<Float> getData() {
+    return this.convertedSamples;
   }
 
   @Override
@@ -514,7 +524,7 @@ class DeviceInfoPacket extends InfoPacket {
   /** Number of element in each packet */
   @Override
   public int getDataCount() {
-    return 0;
+    return 2;
   }
 }
 
@@ -747,8 +757,7 @@ class CommandReceivedPacket extends UtilPacket {
    * @param byteBuffer
    */
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-  }
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {}
 
   /** String representation of attributes */
   @Override

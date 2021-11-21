@@ -16,10 +16,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -254,8 +252,8 @@ public class MentalabCommands {
     MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
   }
   /**
-   * Enables or disables data collection per module or channel. Only support enabling/disabling one module in one
-   * call. Mixing enable and disable switch will lead to erroneous result
+   * Enables or disables data collection per module or channel. Only support enabling/disabling one
+   * module in one call. Mixing enable and disable switch will lead to erroneous result
    *
    * <p>By default data from all modules is collected. Disable modules you do not need to save
    * bandwidth and power. Calling setEnabled with a partial map is supported. Trying to enable a
@@ -270,7 +268,8 @@ public class MentalabCommands {
    * @throws NoBluetoothException
    */
   public static void setEnabled(Map<String, Boolean> switches)
-      throws CommandFailedException, NoConnectionException, NoBluetoothException, InvalidCommandException, IOException {
+      throws CommandFailedException, NoConnectionException, NoBluetoothException,
+          InvalidCommandException, IOException {
 
     byte[] encodedBytes = null;
     ArrayList<String> keySet = new ArrayList<>(switches.keySet());
@@ -282,9 +281,17 @@ public class MentalabCommands {
       Log.d("DEBUG_SR", "Only Module!!");
 
       if (switches.values().iterator().next())
-      encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MODULE_ENABLE, generateExtraParameters(Command.CMD_MODULE_ENABLE, new String[]{keySet.iterator().next()}, null));
-    else{
-        encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MODULE_DISABLE, generateExtraParameters(Command.CMD_MODULE_DISABLE, new String[]{keySet.iterator().next()}, null));
+        encodedBytes =
+            MentalabCodec.encodeCommand(
+                Command.CMD_MODULE_ENABLE,
+                generateExtraParameters(
+                    Command.CMD_MODULE_ENABLE, new String[] {keySet.iterator().next()}, null));
+      else {
+        encodedBytes =
+            MentalabCodec.encodeCommand(
+                Command.CMD_MODULE_DISABLE,
+                generateExtraParameters(
+                    Command.CMD_MODULE_DISABLE, new String[] {keySet.iterator().next()}, null));
       }
     } else {
       boolean isChannelsOnly =
@@ -292,8 +299,13 @@ public class MentalabCommands {
               .allMatch(element -> Arrays.asList(DeviceConfigSwitches.Channels).contains(element));
       if (isChannelsOnly) {
         Log.d("DEBUG_SR", "Only Channels!!");
-        encodedBytes = MentalabCodec.encodeCommand(Command.CMD_CHANNEL_SET, generateExtraParameters(Command.CMD_CHANNEL_SET,
-            switches.keySet().toArray(new String[0]), switches.values().toArray(new Boolean[0])));
+        encodedBytes =
+            MentalabCodec.encodeCommand(
+                Command.CMD_CHANNEL_SET,
+                generateExtraParameters(
+                    Command.CMD_CHANNEL_SET,
+                    switches.keySet().toArray(new String[0]),
+                    switches.values().toArray(new Boolean[0])));
 
       } else {
         Log.d("DEBUG_SR", "Mixed Modules, has to throw Exception");
@@ -301,8 +313,10 @@ public class MentalabCommands {
       }
     }
 
-    for(int i = 0; i < encodedBytes.length; i++){
-      Log.d("DEBUG_SR","Converted data for index: " + "is " + String.format("%02X", encodedBytes[i]));
+    for (int i = 0; i < encodedBytes.length; i++) {
+      Log.d(
+          "DEBUG_SR",
+          "Converted data for index: " + "is " + String.format("%02X", encodedBytes[i]));
     }
 
     mmOutputStream = mmSocket.getOutputStream();
@@ -320,30 +334,30 @@ public class MentalabCommands {
     MentalabCodec.pushToLsl(connectedDeviceName);
   }
 
-  private static int generateExtraParameters(Command command, String[] arguments, Boolean[] switches){
+  private static int generateExtraParameters(
+      Command command, String[] arguments, Boolean[] switches) {
     int argument = 255;
-if (command == Command.CMD_MODULE_ENABLE || command == Command.CMD_MODULE_DISABLE){
-  for(int index = 0; index < DeviceConfigSwitches.Modules.length; index ++){
-    if (DeviceConfigSwitches.Modules[index].equals(arguments[0])){
-      return index;
-    }
-  }
-}
-else{
-  for(int index = 0; index < DeviceConfigSwitches.Channels.length; index ++){
-    for (int indexArguments = 0; indexArguments <arguments.length;indexArguments++){
-      if (arguments[indexArguments].equals(DeviceConfigSwitches.Channels[index])){
-        if(switches[indexArguments]){
-          argument = argument | (1 << index);
-        }else{
-          argument = argument & ~(1 << index);
+    if (command == Command.CMD_MODULE_ENABLE || command == Command.CMD_MODULE_DISABLE) {
+      for (int index = 0; index < DeviceConfigSwitches.Modules.length; index++) {
+        if (DeviceConfigSwitches.Modules[index].equals(arguments[0])) {
+          return index;
         }
-        break;
       }
+    } else {
+      for (int index = 0; index < DeviceConfigSwitches.Channels.length; index++) {
+        for (int indexArguments = 0; indexArguments < arguments.length; indexArguments++) {
+          if (arguments[indexArguments].equals(DeviceConfigSwitches.Channels[index])) {
+            if (switches[indexArguments]) {
+              argument = argument | (1 << index);
+            } else {
+              argument = argument & ~(1 << index);
+            }
+            break;
+          }
+        }
+      }
+      return argument;
     }
-  }
-  return argument;
-}
-return argument;
+    return argument;
   }
 }

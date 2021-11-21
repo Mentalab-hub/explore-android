@@ -1,6 +1,7 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.CommandTranslators.CommandTranslator;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
@@ -22,10 +23,9 @@ public class MentalabCodec {
 
   private static final String TAG = "Explore";
   private static final int NTHREADPOOL = 100;
-  private static Future<?> decoderTask = null;
   private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
-
   public static Map<String, Queue<Float>> decodedDataMap = null;
+  private static Future<?> decoderTask = null;
 
   /**
    * Decodes a device raw data stream
@@ -141,6 +141,14 @@ public class MentalabCodec {
     executor.execute(new LslPacketSubscriber(deviceName));
   }
 
+  static synchronized ExecutorService getExecutorService() {
+    return executor;
+  }
+
+  static void stopDecoder() {
+    decoderTask.cancel(true);
+  }
+
   private static class ConnectedThread implements Callable<Void> {
     private final InputStream mmInStream;
 
@@ -149,7 +157,7 @@ public class MentalabCodec {
       initializeMapInstance();
     }
 
-    public Void call() throws InterruptedException{
+    public Void call() throws InterruptedException {
 
       int pId = 0;
       while (true) {
@@ -198,13 +206,5 @@ public class MentalabCodec {
         decodedDataMap = new HashMap<>();
       }
     }
-  }
-
-  static synchronized ExecutorService getExecutorService() {
-    return executor;
-  }
-
-  static void stopDecoder() {
-    decoderTask.cancel(true);
   }
 }
