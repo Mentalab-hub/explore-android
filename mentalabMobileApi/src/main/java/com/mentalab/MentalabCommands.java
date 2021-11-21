@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.mentalab.MentalabConstants.Command;
+import com.mentalab.MentalabConstants.DeviceConfigSwitches;
 import com.mentalab.MentalabConstants.SamplingRate;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
@@ -13,7 +14,12 @@ import com.mentalab.exception.NoConnectionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -198,7 +204,6 @@ public class MentalabCommands {
     return mmOutputStream;
   }
 
-  /* */
   /**
    * Sets sampling rate of the device
    *
@@ -216,12 +221,41 @@ public class MentalabCommands {
         MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
 
     mmOutputStream = mmSocket.getOutputStream();
-    MentalabCodec.getExecutorService()
-        .submit(new DeviceConfigurationTask(encodedBytes));
+    MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
   }
 
   /**
-   * Enables or disables data collection per module or channel.
+   * Formats internal memory of device
+   *
+   * @throws CommandFailedException when sampling rate change fails
+   * @throws NoBluetoothException
+   */
+  public static void formatDeviceMemory()
+      throws CommandFailedException, NoBluetoothException, InvalidCommandException, IOException {
+
+    byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MEMORY_FORMAT, 0);
+
+    mmOutputStream = mmSocket.getOutputStream();
+    MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+  }
+
+  /**
+   * Formats internal memory of device
+   *
+   * @throws CommandFailedException when sampling rate change fails
+   * @throws NoBluetoothException
+   */
+  public static void softReset()
+      throws CommandFailedException, NoBluetoothException, InvalidCommandException, IOException {
+
+    byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SOFT_RESET, 0);
+
+    mmOutputStream = mmSocket.getOutputStream();
+    MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+  }
+  /**
+   * Enables or disables data collection per module or channel. Only support enabling/disabling one module in one
+   * call. Mixing enable and disable switch will lead to erroneous result
    *
    * <p>By default data from all modules is collected. Disable modules you do not need to save
    * bandwidth and power. Calling setEnabled with a partial map is supported. Trying to enable a
@@ -230,30 +264,86 @@ public class MentalabCommands {
    * been set.
    *
    * @param switches Map of modules to on (true) or off (false) state accelerometer, magnetometer,
-   *     gyroscope, environment, channel0 .. 31
+   *     gyroscope, environment, channel0 ..channel7
    * @throws CommandFailedException
    * @throws NoConnectionException
    * @throws NoBluetoothException
    */
-  /*
-  public static void
-  setEnabled(Map<String, Boolean> switches)
-          throws CommandFailedException, NoConnectionException, NoBluetoothException {...}
+  public static void setEnabled(Map<String, Boolean> switches)
+      throws CommandFailedException, NoConnectionException, NoBluetoothException, InvalidCommandException, IOException {
 
+    byte[] encodedBytes = null;
+    ArrayList<String> keySet = new ArrayList<>(switches.keySet());
+    boolean isModulesOnly =
+        keySet.stream()
+            .allMatch(element -> Arrays.asList(DeviceConfigSwitches.Modules).contains(element));
 
+    if (isModulesOnly) {
+      Log.d("DEBUG_SR", "Only Module!!");
 
+      if (switches.values().iterator().next())
+      encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MODULE_ENABLE, generateExtraParameters(Command.CMD_MODULE_ENABLE, new String[]{keySet.iterator().next()}, null));
+    else{
+        encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MODULE_DISABLE, generateExtraParameters(Command.CMD_MODULE_DISABLE, new String[]{keySet.iterator().next()}, null));
+      }
+    } else {
+      boolean isChannelsOnly =
+          keySet.stream()
+              .allMatch(element -> Arrays.asList(DeviceConfigSwitches.Channels).contains(element));
+      if (isChannelsOnly) {
+        Log.d("DEBUG_SR", "Only Channels!!");
+        encodedBytes = MentalabCodec.encodeCommand(Command.CMD_CHANNEL_SET, generateExtraParameters(Command.CMD_CHANNEL_SET,
+            switches.keySet().toArray(new String[0]), switches.values().toArray(new Boolean[0])));
 
-  */
+      } else {
+        Log.d("DEBUG_SR", "Mixed Modules, has to throw Exception");
+        throw new InvalidCommandException("Invalid Command", null);
+      }
+    }
 
-  /* */
+    for(int i = 0; i < encodedBytes.length; i++){
+      Log.d("DEBUG_SR","Converted data for index: " + "is " + String.format("%02X", encodedBytes[i]));
+    }
+
+    mmOutputStream = mmSocket.getOutputStream();
+    MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+  }
+
   /**
    * Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
    *
-   * @throws CommandFailedException when sampling rate change fails
+   * @throws CommandFailedException when LSL service initialization fails
    * @throws IOException
    */
   public static void pushToLsl() throws CommandFailedException, IOException {
 
     MentalabCodec.pushToLsl(connectedDeviceName);
+  }
+
+  private static int generateExtraParameters(Command command, String[] arguments, Boolean[] switches){
+    int argument = 255;
+if (command == Command.CMD_MODULE_ENABLE || command == Command.CMD_MODULE_DISABLE){
+  for(int index = 0; index < DeviceConfigSwitches.Modules.length; index ++){
+    if (DeviceConfigSwitches.Modules[index].equals(arguments[0])){
+      return index;
+    }
+  }
+}
+else{
+  for(int index = 0; index < DeviceConfigSwitches.Channels.length; index ++){
+    for (int indexArguments = 0; indexArguments <arguments.length;indexArguments++){
+      if (arguments[indexArguments].equals(DeviceConfigSwitches.Channels[index])){
+        if(switches[indexArguments]){
+          argument = argument | (1 << index);
+        }else{
+          argument = argument & ~(1 << index);
+        }
+        break;
+      }
+    }
+  }
+  return argument;
+}
+return argument;
   }
 }

@@ -139,7 +139,7 @@ abstract class Packet {
     EEG98R(210) {
       @Override
       public Packet createInstance(double timeStamp) {
-        return null;
+        return new Eeg98(timeStamp);
       }
     },
     CMDRCV(192) {

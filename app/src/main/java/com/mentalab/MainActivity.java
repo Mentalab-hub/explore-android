@@ -1,7 +1,10 @@
 package com.mentalab;
 
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import com.mentalab.MentalabConstants.DeviceConfigSwitches;
 import com.mentalab.MentalabConstants.SamplingRate;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
@@ -16,6 +19,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
+  @RequiresApi(api = VERSION_CODES.R)
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -27,10 +31,12 @@ public class MainActivity extends AppCompatActivity {
       InputStream inputStream = MentalabCommands.getRawData();
       Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 
-      //Thread.sleep(2000);
-
+      Map<String, Boolean> configMap = Map.of(DeviceConfigSwitches.Channels[7], false, MentalabConstants.DeviceConfigSwitches.Channels[6], false);
+      MentalabCommands.setEnabled(configMap);
       // MentalabCommands.pushToLsl();
-      MentalabCommands.setSamplingRate(SamplingRate.SR_500);
+      //MentalabCommands.formatDeviceMemory();
+      //Thread.sleep(2000);
+      //MentalabCodec.stopDecoder();
     } catch (NoBluetoothException exception) {
       exception.printStackTrace();
     } catch (InvalidDataException exception) {
@@ -39,10 +45,10 @@ public class MainActivity extends AppCompatActivity {
       exception.printStackTrace();
     } catch (CommandFailedException e) {
       e.printStackTrace();
-    } catch (IOException exception) {
-      exception.printStackTrace();
     } catch (InvalidCommandException e) {
       e.printStackTrace();
+    } catch (IOException exception) {
+      exception.printStackTrace();
     }
   }
 }

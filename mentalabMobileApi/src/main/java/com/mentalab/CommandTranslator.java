@@ -74,9 +74,9 @@ abstract class fourByteCommandTranslator extends CommandTranslator {
   }
 }
 
-class SamplingRateTranslator extends twoByteCommandTranslator {
+class SamplingRateCommandTranslator extends twoByteCommandTranslator {
 
-  public SamplingRateTranslator(int opcode, int argument) {
+  public SamplingRateCommandTranslator(int opcode, int argument) {
     super(opcode, argument);
   }
 
@@ -85,5 +85,72 @@ class SamplingRateTranslator extends twoByteCommandTranslator {
     return convertIntegerToByteArray();
 
     // return new int[]{this.pId, this.count,
+  }
+}
+  class FormatMemoryCommandTranslator extends twoByteCommandTranslator {
+
+    public FormatMemoryCommandTranslator(int opcode, int argument) {
+      super(opcode, argument);
+    }
+
+    @Override
+    byte[] translateCommand(int argument) {
+      return convertIntegerToByteArray();
+
+      // return new int[]{this.pId, this.count,
+    }
+}
+
+class SoftResetCommandTranslator extends twoByteCommandTranslator {
+
+  public SoftResetCommandTranslator(int opcode, int argument) {
+    super(opcode, argument);
+  }
+
+  @Override
+  byte[] translateCommand(int argument) {
+    return convertIntegerToByteArray();
+
+    // return new int[]{this.pId, this.count,
+  }
+}
+
+class ModuleEnableTranslator extends twoByteCommandTranslator {
+
+  public ModuleEnableTranslator(int opcode, int argument) {
+    super(opcode, argument);
+  }
+
+  @Override
+  byte[] translateCommand(int argument) {
+    return convertIntegerToByteArray();
+
+    // return new int[]{this.pId, this.count,
+  }
+}
+
+class ModuleDisableTranslator extends twoByteCommandTranslator {
+
+  public ModuleDisableTranslator(int opcode, int argument) {
+    super(opcode, argument);
+  }
+
+  @Override
+  byte[] translateCommand(int argument) {
+    return convertIntegerToByteArray();
+
+  }
+}
+
+class ChannelMaskTranslator extends twoByteCommandTranslator {
+
+  public ChannelMaskTranslator(int opcode, int argument) {
+    super(opcode, argument);
+  }
+
+  @Override
+  byte[] translateCommand(int argument) {
+    return convertIntegerToByteArray();
+
   }
 }

@@ -12,14 +12,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
   private static final int NTHREADPOOL = 100;
+  private static Future<?> decoderTask = null;
   private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
 
   public static Map<String, Queue<Float>> decodedDataMap = null;
@@ -46,7 +49,7 @@ public class MentalabCodec {
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    executor.submit(new ConnectedThread(stream));
+    decoderTask = executor.submit(new ConnectedThread(stream));
     Log.d(TAG, "Started execution of decoder!!");
     return decodedDataMap;
   }
@@ -138,7 +141,7 @@ public class MentalabCodec {
     executor.execute(new LslPacketSubscriber(deviceName));
   }
 
-  private static class ConnectedThread extends Thread {
+  private static class ConnectedThread implements Callable<Void> {
     private final InputStream mmInStream;
 
     public ConnectedThread(InputStream inputStream) {
@@ -146,16 +149,11 @@ public class MentalabCodec {
       initializeMapInstance();
     }
 
-    public void run() {
+    public Void call() throws InterruptedException{
 
       int pId = 0;
       while (true) {
         try {
-//          if (mmInStream.available() == 0) {
-//            Log.d("DEBUG_SR", "No data available, going to sleep");
-//            Thread.sleep(100);
-//            continue;
-//          }
           byte[] buffer = new byte[1024];
           // reading PID
           mmInStream.read(buffer, 0, 1);
@@ -190,7 +188,6 @@ public class MentalabCodec {
 
         } catch (IOException | InvalidDataException exception) {
           exception.printStackTrace();
-          break;
         }
       }
     }
@@ -205,5 +202,9 @@ public class MentalabCodec {
 
   static synchronized ExecutorService getExecutorService() {
     return executor;
+  }
+
+  static void stopDecoder() {
+    decoderTask.cancel(true);
   }
 }
