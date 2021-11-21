@@ -35,9 +35,9 @@ public class MentalabConstants {
 
   public enum SamplingRate {
     // enum fields
-    SR_250(0xA1),
-    SR_500(0xA2),
-    SR_1000(0xA3);
+    SR_250(0x01),
+    SR_500(0x02),
+    SR_1000(0x03);
 
     // constructor
     private SamplingRate(final int samplingRate) {

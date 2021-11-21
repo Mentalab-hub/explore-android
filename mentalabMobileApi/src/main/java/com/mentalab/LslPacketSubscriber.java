@@ -21,6 +21,7 @@ public class LslPacketSubscriber extends Thread {
   private static String connectedDeviceName = null;
 
   public LslPacketSubscriber(String deviceName) {
+    Log.d(TAG, "In Constructor!!!!");
     connectedDeviceName = deviceName;
 
   }

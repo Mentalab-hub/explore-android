@@ -6,12 +6,10 @@ import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.MentalabConstants.SamplingRate;
-import com.mentalab.exception.*;
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.NoConnectionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -167,7 +165,7 @@ public class MentalabCommands {
    * @throws NoBluetoothException
    * @return InputStream of raw bytes
    */
-  public static InputStream getRawData() throws NoBluetoothException{
+  public static InputStream getRawData() throws NoBluetoothException {
     try {
       assert mmSocket != null;
       mmInStream = mmSocket.getInputStream();
@@ -178,6 +176,26 @@ public class MentalabCommands {
     }
 
     return mmInStream;
+  }
+
+  /**
+   * Returns the device data stream
+   *
+   * @throws NoConnectionException when Bluetooth connection is lost during communication
+   * @throws NoBluetoothException
+   * @return InputStream of raw bytes
+   */
+  public static OutputStream getOutputStream() throws NoBluetoothException {
+    try {
+      assert mmSocket != null;
+      mmOutputStream = mmSocket.getOutputStream();
+
+    } catch (IOException exception) {
+      Log.d(TAG, "NoBluetoothException occurred");
+      throw new NoBluetoothException("NoBluetoothException occurred", null);
+    }
+
+    return mmOutputStream;
   }
 
   /* */
@@ -191,20 +209,16 @@ public class MentalabCommands {
    * @throws CommandFailedException when sampling rate change fails
    * @throws NoBluetoothException
    */
-
-  public static void
-  setSamplingRate(SamplingRate samplingRate)
+  public static void setSamplingRate(SamplingRate samplingRate)
       throws CommandFailedException, NoBluetoothException, InvalidCommandException, IOException {
 
-    byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
+    byte[] encodedBytes =
+        MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
+
     mmOutputStream = mmSocket.getOutputStream();
-    MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes, mmOutputStream));
+    MentalabCodec.getExecutorService()
+        .submit(new DeviceConfigurationTask(encodedBytes));
   }
-
-
-
-
-
 
   /**
    * Enables or disables data collection per module or channel.
@@ -233,20 +247,13 @@ public class MentalabCommands {
 
   /* */
   /**
-   * Sets sampling rate of the device
-   *
-   * <p>Sampling rate only applies to ExG data. Orientation and Environment data are always sampled
-   * at 20Hz. Currently available sampling rates are 250,500 and 1000 Hz. Default is 250Hz.
+   * Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
    *
    * @throws CommandFailedException when sampling rate change fails
-   * @throws NoBluetoothException
+   * @throws IOException
    */
-
-  public static void
-  pushToLsl()
-      throws CommandFailedException, IOException {
+  public static void pushToLsl() throws CommandFailedException, IOException {
 
     MentalabCodec.pushToLsl(connectedDeviceName);
   }
-
 }

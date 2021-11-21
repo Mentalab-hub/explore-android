@@ -748,14 +748,12 @@ class CommandReceivedPacket extends UtilPacket {
    */
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
-    markerCode = (float) convertedRawValues[0];
   }
 
   /** String representation of attributes */
   @Override
   public String toString() {
-    return "Command Received with marker code: " + markerCode;
+    return "Command received packet";
   }
 
   /** Number of element in each packet */
@@ -793,7 +791,7 @@ class CommandStatusPacket extends UtilPacket {
   /** String representation of attributes */
   @Override
   public String toString() {
-    return "Command status" + commandStatus;
+    return "Command status is " + commandStatus;
   }
 
   /** Number of element in each packet */

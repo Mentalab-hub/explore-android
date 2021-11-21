@@ -8,7 +8,6 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -28,20 +27,21 @@ public class MainActivity extends AppCompatActivity {
       InputStream inputStream = MentalabCommands.getRawData();
       Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 
-      Thread.sleep(2000);
+      //Thread.sleep(2000);
 
-      MentalabCommands.setSamplingRate(SamplingRate.SR_250);
+      // MentalabCommands.pushToLsl();
+      MentalabCommands.setSamplingRate(SamplingRate.SR_500);
     } catch (NoBluetoothException exception) {
       exception.printStackTrace();
-    }catch (InvalidDataException exception) {
+    } catch (InvalidDataException exception) {
       exception.printStackTrace();
     } catch (NoConnectionException exception) {
       exception.printStackTrace();
     } catch (CommandFailedException e) {
       e.printStackTrace();
-    } catch (InvalidCommandException | IOException e) {
-      e.printStackTrace();
-    } catch (InterruptedException e) {
+    } catch (IOException exception) {
+      exception.printStackTrace();
+    } catch (InvalidCommandException e) {
       e.printStackTrace();
     }
   }

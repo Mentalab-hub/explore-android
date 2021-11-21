@@ -46,10 +46,8 @@ public class MentalabCodec {
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    executor.execute(new ConnectedThread(stream));
+    executor.submit(new ConnectedThread(stream));
     Log.d(TAG, "Started execution of decoder!!");
-    //    ConnectedThread thread = new ConnectedThread(stream);
-    //    thread.start();
     return decodedDataMap;
   }
 
@@ -63,7 +61,7 @@ public class MentalabCodec {
 
     CommandTranslator translator = command.createInstance(command, extraArguments);
     byte[] translatedBytes = translator.translateCommand(extraArguments);
-    return translatedBytes; // Some example while stub
+    return translatedBytes;
   }
 
   private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
@@ -81,7 +79,7 @@ public class MentalabCodec {
       }
     }
   }
-  // TODO refactor packet class to expose uniform methods
+  // TODO refactor this method with new interfaces
   private static void pushDataInQueue(Packet packet) {
 
     if (packet instanceof DataPacket) {
@@ -127,9 +125,11 @@ public class MentalabCodec {
         PubSubManager.getInstance().publish("Marker", packet);
       }
 
-      if (packet instanceof CommandStatusPacket || packet instanceof AckPacket || packet instanceof CommandReceivedPacket) {
-        PubSubManager.getInstance().publish("Marker", packet);
-      }
+    } else if (packet instanceof CommandStatusPacket
+        || packet instanceof AckPacket
+        || packet instanceof CommandReceivedPacket) {
+      Log.d("DEBUG_SR", "Publishing packets of type command ");
+      PubSubManager.getInstance().publish("Command", packet);
     }
   }
 
@@ -151,6 +151,11 @@ public class MentalabCodec {
       int pId = 0;
       while (true) {
         try {
+//          if (mmInStream.available() == 0) {
+//            Log.d("DEBUG_SR", "No data available, going to sleep");
+//            Thread.sleep(100);
+//            continue;
+//          }
           byte[] buffer = new byte[1024];
           // reading PID
           mmInStream.read(buffer, 0, 1);
@@ -198,7 +203,7 @@ public class MentalabCodec {
     }
   }
 
-  synchronized static ExecutorService getExecutorService(){
+  static synchronized ExecutorService getExecutorService() {
     return executor;
   }
 }
