@@ -1,6 +1,8 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.CommandTranslators.CommandTranslator;
+import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
@@ -11,20 +13,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
   private static final int NTHREADPOOL = 100;
-  private static final Executor executor = Executors.newFixedThreadPool(NTHREADPOOL);
-
+  private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
   public static Map<String, Queue<Float>> decodedDataMap = null;
-  // Device info properties to be used further
-  int channelCount = -1;
-  int samplingRate = 0;
+  private static Future<?> decoderTask = null;
 
   /**
    * Decodes a device raw data stream
@@ -48,9 +49,8 @@ public class MentalabCodec {
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    executor.execute(new ConnectedThread(stream));
-    //    ConnectedThread thread = new ConnectedThread(stream);
-    //    thread.start();
+    decoderTask = executor.submit(new ConnectedThread(stream));
+    Log.d(TAG, "Started execution of decoder!!");
     return decodedDataMap;
   }
 
@@ -60,8 +60,11 @@ public class MentalabCodec {
    * @throws InvalidCommandException when the command is not recognized
    * @return byte[] encoded commands that can be sent to the device
    */
-  static byte[] encodeCommand(final String command) throws InvalidCommandException {
-    return new byte[10]; // Some example while stub
+  static byte[] encodeCommand(Command command, int extraArguments) throws InvalidCommandException {
+
+    CommandTranslator translator = command.createInstance(command, extraArguments);
+    byte[] translatedBytes = translator.translateCommand(extraArguments);
+    return translatedBytes;
   }
 
   private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
@@ -79,7 +82,7 @@ public class MentalabCodec {
       }
     }
   }
-  // TODO refactor packet class to expose uniform methods
+  // TODO refactor this method with new interfaces
   private static void pushDataInQueue(Packet packet) {
 
     if (packet instanceof DataPacket) {
@@ -124,15 +127,29 @@ public class MentalabCodec {
       if (packet instanceof MarkerPacket) {
         PubSubManager.getInstance().publish("Marker", packet);
       }
+
+    } else if (packet instanceof CommandStatusPacket
+        || packet instanceof AckPacket
+        || packet instanceof CommandReceivedPacket) {
+      Log.d("DEBUG_SR", "Publishing packets of type command ");
+      PubSubManager.getInstance().publish("Command", packet);
     }
   }
 
   // TODO Decouple executor class from Codec class
-  public static void pushToLsl() {
-    executor.execute(new LslPacketSubscriber());
+  public static void pushToLsl(String deviceName) {
+    executor.execute(new LslPacketSubscriber(deviceName));
   }
 
-  private static class ConnectedThread extends Thread {
+  static synchronized ExecutorService getExecutorService() {
+    return executor;
+  }
+
+  static void stopDecoder() {
+    decoderTask.cancel(true);
+  }
+
+  private static class ConnectedThread implements Callable<Void> {
     private final InputStream mmInStream;
 
     public ConnectedThread(InputStream inputStream) {
@@ -140,7 +157,7 @@ public class MentalabCodec {
       initializeMapInstance();
     }
 
-    public void run() {
+    public Void call() throws InterruptedException {
 
       int pId = 0;
       while (true) {
@@ -179,7 +196,6 @@ public class MentalabCodec {
 
         } catch (IOException | InvalidDataException exception) {
           exception.printStackTrace();
-          break;
         }
       }
     }
