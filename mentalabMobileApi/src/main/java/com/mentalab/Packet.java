@@ -16,7 +16,7 @@ interface PublishablePacket {
   String getPacketTopic();
 }
 
-interface QueueablePacket{}
+interface QueueablePacket {}
 
 /** Root packet interface */
 abstract class Packet {
@@ -148,7 +148,7 @@ abstract class Packet {
     EEG98R(210) {
       @Override
       public Packet createInstance(double timeStamp) {
-        return null;
+        return new Eeg98(timeStamp);
       }
     },
     CMDRCV(192) {
@@ -251,7 +251,7 @@ abstract class DataPacket extends Packet implements PublishablePacket {
 }
 
 /** Interface for packets related to device information */
-abstract class InfoPacket extends Packet implements QueueablePacket{
+abstract class InfoPacket extends Packet implements QueueablePacket {
   ArrayList<Float> convertedSamples = null;
   ArrayList<String> attributes;
 
@@ -497,11 +497,12 @@ class Orientation extends InfoPacket implements PublishablePacket {
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class DeviceInfoPacket extends InfoPacket {
-  byte adsMask;
+  int adsMask;
   int samplingRate;
 
   public DeviceInfoPacket(double timeStamp) {
     super(timeStamp);
+    attributes = new ArrayList<String>(Arrays.asList("Ads_Mask", "Sampling_Rate"));
   }
 
   @Override
@@ -511,8 +512,17 @@ class DeviceInfoPacket extends InfoPacket {
             .order(ByteOrder.LITTLE_ENDIAN)
             .getInt();
     samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
-    adsMask = byteBuffer[3];
-    Log.d(TAG, "sampling rate: " + samplingRate + "ads is ..." + adsMask);
+    adsMask = byteBuffer[3] & 0xFF;
+
+    this.convertedSamples =
+        new ArrayList<Float>(
+            Arrays.asList(new Float[] {Float.valueOf(adsMask), Float.valueOf(samplingRate)}));
+  }
+
+  /** Return list of elements in each packet */
+  @Override
+  public ArrayList<Float> getData() {
+    return this.convertedSamples;
   }
 
   @Override
@@ -523,7 +533,7 @@ class DeviceInfoPacket extends InfoPacket {
   /** Number of element in each packet */
   @Override
   public int getDataCount() {
-    return 0;
+    return 2;
   }
 }
 
@@ -756,15 +766,12 @@ class CommandReceivedPacket extends UtilPacket {
    * @param byteBuffer
    */
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
-    markerCode = (float) convertedRawValues[0];
-  }
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {}
 
   /** String representation of attributes */
   @Override
   public String toString() {
-    return "Command Received with marker code: " + markerCode;
+    return "Command received packet";
   }
 
   /** Number of element in each packet */
@@ -802,7 +809,7 @@ class CommandStatusPacket extends UtilPacket {
   /** String representation of attributes */
   @Override
   public String toString() {
-    return "Command status" + commandStatus;
+    return "Command status is " + commandStatus;
   }
 
   /** Number of element in each packet */
