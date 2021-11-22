@@ -12,9 +12,6 @@ public class DeviceConfigurationTask extends Thread {
   public DeviceConfigurationTask(byte[] encodedBytes) {
     // btOutputStream = outputStream;
     byteArray = encodedBytes.clone();
-    for (int i = 0; i < byteArray.length; i++) {
-      Log.d("DEBUG_SR", "Converted data for index: " + "is " + String.format("%02X", byteArray[i]));
-    }
     PubSubManager.getInstance().subscribe("Command", this::commandCallback);
   }
 

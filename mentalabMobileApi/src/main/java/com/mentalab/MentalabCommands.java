@@ -147,22 +147,6 @@ public class MentalabCommands {
   }
 
   /**
-   * Reset device to default settings
-   *
-   * <p>Defaults: 250Hz sampling rate, data collection from all modules is enabled.
-   *
-   * @throws CommandFailedException
-   * @throws NoConnectionException
-   * @throws NoBluetoothException
-   */
-  /*
-    public static void
-    softReset()
-            throws CommandFailedException, NoConnectionException, NoBluetoothException {...}
-
-  */
-
-  /**
    * Returns the device data stream
    *
    * @throws NoConnectionException when Bluetooth connection is lost during communication
