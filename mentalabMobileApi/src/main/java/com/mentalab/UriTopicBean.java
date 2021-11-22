@@ -5,10 +5,10 @@ import android.net.Uri;
 public class UriTopicBean {
 
     private Uri uri;
-    private MentalabEnums.Topics topic;
+    private MentalabConstants.Topic topic;
 
 
-    public UriTopicBean(Uri uri, MentalabEnums.Topics topic) {
+    public UriTopicBean(Uri uri, MentalabConstants.Topic topic) {
         this.uri = uri;
         this.topic = topic;
     }
@@ -22,11 +22,11 @@ public class UriTopicBean {
         this.uri = uri;
     }
 
-    public MentalabEnums.Topics getTopic() {
+    public MentalabConstants.Topic getTopic() {
         return topic;
     }
 
-    public void setTopic(MentalabEnums.Topics topic) {
+    public void setTopic(MentalabConstants.Topic topic) {
         this.topic = topic;
     }
 }

@@ -54,22 +54,22 @@ public class FileGenerator {
         if (overwrite) { //todo: delete doesn't work
             deleteIfExists(directory, filename + "_Exg.csv");
             exgFile = resolver.insert(directory, metaDataExg);
-            createdUris.add(new UriTopicBean(exgFile, MentalabEnums.Topics.ExG));
+            createdUris.add(new UriTopicBean(exgFile, MentalabConstants.Topic.ExG));
 
             deleteIfExists(directory, filename + "_Orn.csv");
             ornFile = resolver.insert(directory, metaDataOrn);
-            createdUris.add(new UriTopicBean(ornFile, MentalabEnums.Topics.Orn));
+            createdUris.add(new UriTopicBean(ornFile, MentalabConstants.Topic.Orn));
 
             deleteIfExists(directory, filename + "_Markers.csv");
             markerFile = resolver.insert(directory, metaDataMarkers);
-            createdUris.add(new UriTopicBean(markerFile, MentalabEnums.Topics.Marker));
+            createdUris.add(new UriTopicBean(markerFile, MentalabConstants.Topic.Marker));
         } else {
-            exgFile = createNewFile(directory, filename, metaDataExg, MentalabEnums.Topics.ExG);
-            createdUris.add(new UriTopicBean(exgFile, MentalabEnums.Topics.ExG));
-            ornFile = createNewFile(directory, filename, metaDataOrn, MentalabEnums.Topics.Orn);
-            createdUris.add(new UriTopicBean(ornFile, MentalabEnums.Topics.Orn));
-            markerFile = createNewFile(directory, filename, metaDataMarkers, MentalabEnums.Topics.Marker);
-            createdUris.add(new UriTopicBean(markerFile, MentalabEnums.Topics.Marker));
+            exgFile = createNewFile(directory, filename, metaDataExg, MentalabConstants.Topic.ExG);
+            createdUris.add(new UriTopicBean(exgFile, MentalabConstants.Topic.ExG));
+            ornFile = createNewFile(directory, filename, metaDataOrn, MentalabConstants.Topic.Orn);
+            createdUris.add(new UriTopicBean(ornFile, MentalabConstants.Topic.Orn));
+            markerFile = createNewFile(directory, filename, metaDataMarkers, MentalabConstants.Topic.Marker);
+            createdUris.add(new UriTopicBean(markerFile, MentalabConstants.Topic.Marker));
         }
 
         addExgHeader(exgFile);
@@ -108,7 +108,7 @@ public class FileGenerator {
         }
     }
 
-    private Uri createNewFile(Uri directory, String filename, ContentValues metaData, MentalabEnums.Topics topic) {
+    private Uri createNewFile(Uri directory, String filename, ContentValues metaData, MentalabConstants.Topic topic) {
         Uri location;
         int i = 1;
         while ((location = context.getContentResolver().insert(directory, metaData)) == null) {

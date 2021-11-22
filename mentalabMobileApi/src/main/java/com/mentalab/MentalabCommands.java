@@ -5,10 +5,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Build;
 import android.util.Log;
+import androidx.annotation.RequiresApi;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.MentalabConstants.DeviceConfigSwitches;
 import com.mentalab.MentalabConstants.SamplingRate;
-import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
@@ -17,12 +17,8 @@ import com.mentalab.exception.NoConnectionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.Executors;
 
 public class MentalabCommands {
 
