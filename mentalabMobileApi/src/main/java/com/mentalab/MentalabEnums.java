@@ -39,4 +39,8 @@ class MentalabEnums {
     SAMPLING_RATE,
     ADS_MASK;
   }
+
+  enum FileType {
+    CSV
+  }
 }

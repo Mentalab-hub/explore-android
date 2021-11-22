@@ -2,6 +2,7 @@ package com.mentalab;
 
 import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -45,7 +46,7 @@ abstract class Packet {
       value =
           ByteBuffer.wrap(new byte[] {bytes[index], bytes[index + 1]})
               .order(ByteOrder.LITTLE_ENDIAN)
-              .getShort();
+                  .getShort();
       if (signBit == 1) {
         value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
       }
@@ -55,6 +56,12 @@ abstract class Packet {
     return values;
   }
 
+
+  public double getTimeStamp() {
+    return timeStamp;
+  }
+
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -62,7 +69,9 @@ abstract class Packet {
    */
   public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
 
-  /** String representation of attributes */
+  /**
+   * String representation of attributes
+   */
   public abstract String toString();
 
   /** Number of element in each packet */

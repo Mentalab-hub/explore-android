@@ -3,16 +3,20 @@ package com.mentalab;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Build;
 import android.util.Log;
+import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 public class MentalabCommands {
 
@@ -138,6 +142,16 @@ public class MentalabCommands {
     Log.d(TAG, "Connected to Mentalab Explore!");
   }
 
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  public static void recordToFile(RecordSubscriber recordSubscriber) {
+    FileGenerator androidFileGenerator = new FileGenerator(recordSubscriber);
+    Set<UriTopicBean> generatedFiles = androidFileGenerator.generateFiles(recordSubscriber.getDirectory(), recordSubscriber.getFilename());
+    recordSubscriber.setGeneratedFiles(generatedFiles);
+    Executors.newSingleThreadExecutor().execute(recordSubscriber);
+  }
+
+
   /**
    * Reset device to default settings
    *
@@ -172,6 +186,15 @@ public class MentalabCommands {
     }
 
     return mmInStream;
+  }
+
+  public static void closeSockets() {
+    try {
+      mmSocket.close();
+    } catch (IOException e) {
+      Log.e(TAG, "Unable to close socket.");
+    }
+    mmSocket = null;
   }
 
   /* */
