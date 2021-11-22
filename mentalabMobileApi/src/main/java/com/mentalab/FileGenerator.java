@@ -8,7 +8,10 @@ import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +31,7 @@ public class FileGenerator {
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public Set<UriTopicBean> generateFiles(Uri directory, String filename) {
+    public Set<UriTopicBean> generateFiles(Uri directory, String filename) throws IOException {
         //todo: handle filename, what if overwrite is true etc
         ContentValues metaDataExg = new ContentValues();
         metaDataExg.put(DISPLAY_NAME, filename + "_Exg");
@@ -45,24 +48,65 @@ public class FileGenerator {
         ContentResolver resolver = context.getContentResolver();
 
         Set<UriTopicBean> createdUris = new HashSet<>();
+        Uri exgFile;
+        Uri ornFile;
+        Uri markerFile;
         if (overwrite) { //todo: delete doesn't work
             deleteIfExists(directory, filename + "_Exg.csv");
-            createdUris.add(new UriTopicBean(resolver.insert(directory, metaDataExg), MentalabEnums.Topics.ExG));
+            exgFile = resolver.insert(directory, metaDataExg);
+            createdUris.add(new UriTopicBean(exgFile, MentalabEnums.Topics.ExG));
+
             deleteIfExists(directory, filename + "_Orn.csv");
-            createdUris.add(new UriTopicBean(resolver.insert(directory, metaDataOrn), MentalabEnums.Topics.Orn));
+            ornFile = resolver.insert(directory, metaDataOrn);
+            createdUris.add(new UriTopicBean(ornFile, MentalabEnums.Topics.Orn));
+
             deleteIfExists(directory, filename + "_Markers.csv");
-            createdUris.add(new UriTopicBean(resolver.insert(directory, metaDataMarkers), MentalabEnums.Topics.Marker));
+            markerFile = resolver.insert(directory, metaDataMarkers);
+            createdUris.add(new UriTopicBean(markerFile, MentalabEnums.Topics.Marker));
         } else {
-            createdUris.add(
-                    new UriTopicBean(createNewFile(directory, filename, metaDataExg, MentalabEnums.Topics.ExG), MentalabEnums.Topics.ExG));
-            createdUris.add(
-                    new UriTopicBean(createNewFile(directory, filename, metaDataOrn, MentalabEnums.Topics.Orn), MentalabEnums.Topics.Orn));
-            createdUris.add(
-                    new UriTopicBean(createNewFile(directory, filename, metaDataMarkers, MentalabEnums.Topics.Marker), MentalabEnums.Topics.Marker));
+            exgFile = createNewFile(directory, filename, metaDataExg, MentalabEnums.Topics.ExG);
+            createdUris.add(new UriTopicBean(exgFile, MentalabEnums.Topics.ExG));
+            ornFile = createNewFile(directory, filename, metaDataOrn, MentalabEnums.Topics.Orn);
+            createdUris.add(new UriTopicBean(ornFile, MentalabEnums.Topics.Orn));
+            markerFile = createNewFile(directory, filename, metaDataMarkers, MentalabEnums.Topics.Marker);
+            createdUris.add(new UriTopicBean(markerFile, MentalabEnums.Topics.Marker));
         }
+
+        addExgHeader(exgFile);
+        addOrnHeader(ornFile);
+        addMarkerHeader(markerFile);
         return createdUris;
     }
 
+
+    private void addMarkerHeader(Uri location) throws IOException {
+        try (final BufferedWriter writer =
+                     new BufferedWriter(
+                             new OutputStreamWriter(context.getContentResolver()
+                                     .openOutputStream(location, "wa")))) {
+            writer.write("TimeStamp,Code");
+        }
+    }
+
+
+    private void addOrnHeader(Uri location) throws IOException {
+        try (final BufferedWriter writer =
+                     new BufferedWriter(
+                             new OutputStreamWriter(context.getContentResolver()
+                                     .openOutputStream(location, "wa")))) {
+            writer.write("TimeStamp,ax,ay,az,gx,gy,gz,mx,my,mz");
+        }
+    }
+
+
+    private void addExgHeader(Uri location) throws IOException {
+        try (final BufferedWriter writer =
+                     new BufferedWriter(
+                             new OutputStreamWriter(context.getContentResolver()
+                                     .openOutputStream(location, "wa")))) {
+            writer.write("TimeStamp,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8");
+        }
+    }
 
     private Uri createNewFile(Uri directory, String filename, ContentValues metaData, MentalabEnums.Topics topic) {
         Uri location;

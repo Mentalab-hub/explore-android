@@ -144,8 +144,9 @@ public class MentalabCommands {
 
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public static void recordToFile(RecordSubscriber recordSubscriber) {
+  public static void record(RecordSubscriber recordSubscriber) throws IOException {
     FileGenerator androidFileGenerator = new FileGenerator(recordSubscriber);
+    MentalabCodec.decodedDataMap.get("");
     Set<UriTopicBean> generatedFiles = androidFileGenerator.generateFiles(recordSubscriber.getDirectory(), recordSubscriber.getFilename());
     recordSubscriber.setGeneratedFiles(generatedFiles);
     Executors.newSingleThreadExecutor().execute(recordSubscriber);

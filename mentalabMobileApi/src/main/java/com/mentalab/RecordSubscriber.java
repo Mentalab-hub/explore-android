@@ -6,7 +6,6 @@ import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Set;
@@ -24,11 +23,7 @@ public class RecordSubscriber extends Thread {
 
 
     private RecordSubscriber(Uri directory, String filename, Context context) {
-        this.directory = directory;
-
-        File file = new File(directory.getPath());//create path from uri
-        final String[] split = file.getPath().split(":");//split the path.
-        String filePath = split[1];//assign it to a string(your choice).
+        this.directory = directory; //todo: validate
         if (filename.contains(".")) {
             this.filename = filename.split("\\.")[0]; //todo: validate
         } else {
@@ -77,7 +72,6 @@ public class RecordSubscriber extends Thread {
                 .findFirst()
                 .orElse(null);
         if (exgUriTopic == null) {
-            System.out.println("----------------------------------------------------");
             return;
         }
         Uri location = exgUriTopic.getUri();
@@ -85,13 +79,7 @@ public class RecordSubscriber extends Thread {
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver()
                                      .openOutputStream(location, "wa")))) {
-            if (noChannels > 4) {
-                writer.write("TimeStamp,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8");
-            } else {
-                writer.write("TimeStamp,ch1,ch2,ch3,ch4");
-            }
             writer.newLine();
-
             writePacketToCSV(writer, packet, timestamp, noChannels);
         } catch (IOException e) {
             e.printStackTrace();
@@ -110,14 +98,37 @@ public class RecordSubscriber extends Thread {
                 .findFirst()
                 .orElse(null);
         if (ornUriTopic == null) {
-            System.out.println("----------------------------------------------------");
             return;
         }
         Uri location = ornUriTopic.getUri();
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writer.write("TimeStamp,ax,ay,az,gx,gy,gz,mx,my,mz");
+            writer.newLine();
+            writePacketToCSV(writer, packet, timestamp, noChannels);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void writeMarker(Packet packet) {
+        //todo: validate what's being written
+        final int noChannels = 9;
+        double timestamp = packet.getTimeStamp();
+
+        UriTopicBean markerUriTopic = generatedFies.stream()
+                .filter(b -> b.getTopic() == MentalabEnums.Topics.Marker)
+                .findFirst()
+                .orElse(null);
+        if (markerUriTopic == null) {
+            return;
+        }
+        Uri location = markerUriTopic.getUri();
+        try (final BufferedWriter writer =
+                     new BufferedWriter(
+                             new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
             writer.newLine();
             writePacketToCSV(writer, packet, timestamp, noChannels);
         } catch (IOException e) {
