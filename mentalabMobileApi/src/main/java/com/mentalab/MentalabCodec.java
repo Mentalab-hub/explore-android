@@ -94,6 +94,11 @@ public class MentalabCodec {
           ArrayList<Float> convertedSamples = ((DataPacket) packet).getData();
           String channelKey = "Channel_" + String.valueOf(index + 1);
           if (decodedDataMap.get(channelKey) == null) {
+            decodedDataMap.put("Channel_Number", new ConcurrentLinkedDeque<>());
+            ConcurrentLinkedDeque<Float> channelNumberMap =
+                (ConcurrentLinkedDeque) decodedDataMap.get("Channel_Number");
+
+            channelNumberMap.offerFirst((float) packet.getDataCount());
             decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
           }
 
