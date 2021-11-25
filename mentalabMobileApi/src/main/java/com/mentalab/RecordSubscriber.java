@@ -8,18 +8,21 @@ import androidx.annotation.RequiresApi;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.Set;
+import java.util.Map;
 
 public class RecordSubscriber extends Thread {
 
     private final Uri directory;
     private final String filename;
     private final Context context;
+
     private boolean overwrite;
     private boolean blocking;
-    private MentalabEnums.FileType fileType;
+    private MentalabConstants.FileType fileType;
+    private int adsMask;
+    private float samplingRate = Integer.MAX_VALUE;
     private Double duration;
-    private Set<UriTopicBean> generatedFies;
+    private Map<MentalabConstants.Topic, Uri> generatedFies;
 
 
     private RecordSubscriber(Uri directory, String filename, Context context) {
@@ -56,8 +59,9 @@ public class RecordSubscriber extends Thread {
 
     @Override
     public void run() {
-        PubSubManager.getInstance().subscribe(MentalabEnums.Topics.ExG.name(), this::writeExg);
-        PubSubManager.getInstance().subscribe(MentalabEnums.Topics.Orn.name(), this::writeOrn);
+        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.ExG.name(), this::writeExg);
+        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Orn.name(), this::writeOrn);
+        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Orn.name(), this::writeMarker);
     }
 
 
@@ -67,19 +71,11 @@ public class RecordSubscriber extends Thread {
         final int noChannels = packet.getDataCount();
         double timestamp = packet.getTimeStamp();
 
-        UriTopicBean exgUriTopic = generatedFies.stream()
-                .filter(b -> b.getTopic() == MentalabEnums.Topics.ExG)
-                .findFirst()
-                .orElse(null);
-        if (exgUriTopic == null) {
-            return;
-        }
-        Uri location = exgUriTopic.getUri();
+        final Uri location = generatedFies.get(MentalabConstants.Topic.ExG);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver()
                                      .openOutputStream(location, "wa")))) {
-            writer.newLine();
             writePacketToCSV(writer, packet, timestamp, noChannels);
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,22 +86,14 @@ public class RecordSubscriber extends Thread {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void writeOrn(Packet packet) {
         //todo: validate what's being written
-        final int noChannels = 9;
+        final int lineBreak = 9;
         double timestamp = packet.getTimeStamp();
 
-        UriTopicBean ornUriTopic = generatedFies.stream()
-                .filter(b -> b.getTopic() == MentalabEnums.Topics.Orn)
-                .findFirst()
-                .orElse(null);
-        if (ornUriTopic == null) {
-            return;
-        }
-        Uri location = ornUriTopic.getUri();
+        final Uri location = generatedFies.get(MentalabConstants.Topic.Orn);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writer.newLine();
-            writePacketToCSV(writer, packet, timestamp, noChannels);
+            writePacketToCSV(writer, packet, timestamp, lineBreak);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,29 +103,21 @@ public class RecordSubscriber extends Thread {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void writeMarker(Packet packet) {
         //todo: validate what's being written
-        final int noChannels = 9;
+        final int lineBreak = 2;
         double timestamp = packet.getTimeStamp();
 
-        UriTopicBean markerUriTopic = generatedFies.stream()
-                .filter(b -> b.getTopic() == MentalabEnums.Topics.Marker)
-                .findFirst()
-                .orElse(null);
-        if (markerUriTopic == null) {
-            return;
-        }
-        Uri location = markerUriTopic.getUri();
+        final Uri location = generatedFies.get(MentalabConstants.Topic.Marker);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writer.newLine();
-            writePacketToCSV(writer, packet, timestamp, noChannels);
+            writePacketToCSV(writer, packet, timestamp, lineBreak);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-    private void writePacketToCSV(BufferedWriter writer, Packet packet, double timestamp, int noChannels) throws IOException {
+    private void writePacketToCSV(BufferedWriter writer, Packet packet, double timestamp, int lineBreak) throws IOException {
         writer.write(String.valueOf(timestamp));
         writer.write(",");
         writer.write(packet.getData().get(0).toString());
@@ -145,10 +125,10 @@ public class RecordSubscriber extends Thread {
             writer.write(",");
             writer.write(packet.getData().get(i).toString());
 
-            final int channelNo = i % noChannels + 1; // 1, 2, 3, 4,...
-            if (channelNo == noChannels) { // break line after 4 or 8 entries
+            final int channelNo = i % lineBreak + 1; // 1, 2, 3, 4,...
+            if (channelNo == lineBreak) { // break line after 4 or 8 entries
                 writer.newLine();
-                timestamp += 1 / getSamplingRate(packet);
+                timestamp += 1 / samplingRate;
                 if ((packet.getData().size() - i) > 2) {
                     writer.write(String.valueOf(timestamp));
                 }
@@ -157,12 +137,16 @@ public class RecordSubscriber extends Thread {
     }
 
 
-    private int getSamplingRate(Packet packet) {
-        return Integer.MAX_VALUE;
+    public void setGeneratedFiles(Map<MentalabConstants.Topic, Uri> generatedFies) {
+        this.generatedFies = generatedFies;
     }
 
-    public void setGeneratedFiles(Set<UriTopicBean> generatedFies) {
-        this.generatedFies = generatedFies;
+    public void setAdsMask(int adsMask) {
+        this.adsMask = adsMask;
+    }
+
+    public void setSamplingRate(float samplingRate) {
+        this.samplingRate = samplingRate;
     }
 
 
@@ -173,7 +157,7 @@ public class RecordSubscriber extends Thread {
 
         private boolean overwrite = false;
         private boolean blocking = false;
-        private MentalabEnums.FileType fileType = MentalabEnums.FileType.CSV;
+        private MentalabConstants.FileType fileType = MentalabConstants.FileType.CSV;
         private Double duration = null;
 
         public Builder(Uri destination, String filename, Context context) {
@@ -193,7 +177,7 @@ public class RecordSubscriber extends Thread {
             return this;
         }
 
-        public Builder setFileType(MentalabEnums.FileType fileType) {
+        public Builder setFileType(MentalabConstants.FileType fileType) {
             this.fileType = fileType;
             return this;
         }

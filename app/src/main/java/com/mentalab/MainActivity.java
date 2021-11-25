@@ -66,6 +66,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    private boolean createExploreFolder() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            final String folderName = "Explore";
+//
+//            final ContentValues contentValues = new ContentValues();
+//            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, folderName);
+//            contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, );
+//            return getApplicationContext()
+//                    .getContentResolver()
+//                    .insert(MediaStore., contentValues);
+//        }
+//    }
+
 
     private static void connectToADevice() throws NoBluetoothException, NoConnectionException, IOException, CommandFailedException {
         final Set<String> deviceList = MentalabCommands.scan();

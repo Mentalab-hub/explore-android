@@ -12,8 +12,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.provider.MediaStore.MediaColumns.DISPLAY_NAME;
 import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
@@ -31,7 +31,7 @@ public class FileGenerator {
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public Set<UriTopicBean> generateFiles(Uri directory, String filename) throws IOException {
+    public Map<MentalabConstants.Topic, Uri> generateFiles(Uri directory, String filename) throws IOException {
         //todo: handle filename, what if overwrite is true etc
         ContentValues metaDataExg = new ContentValues();
         metaDataExg.put(DISPLAY_NAME, filename + "_Exg");
@@ -47,29 +47,29 @@ public class FileGenerator {
 
         ContentResolver resolver = context.getContentResolver();
 
-        Set<UriTopicBean> createdUris = new HashSet<>();
+        Map<MentalabConstants.Topic, Uri> createdUris = new HashMap<>();
         Uri exgFile;
         Uri ornFile;
         Uri markerFile;
         if (overwrite) { //todo: delete doesn't work
             deleteIfExists(directory, filename + "_Exg.csv");
             exgFile = resolver.insert(directory, metaDataExg);
-            createdUris.add(new UriTopicBean(exgFile, MentalabConstants.Topic.ExG));
+            createdUris.put(MentalabConstants.Topic.ExG, exgFile);
 
             deleteIfExists(directory, filename + "_Orn.csv");
             ornFile = resolver.insert(directory, metaDataOrn);
-            createdUris.add(new UriTopicBean(ornFile, MentalabConstants.Topic.Orn));
+            createdUris.put(MentalabConstants.Topic.Orn, ornFile);
 
             deleteIfExists(directory, filename + "_Markers.csv");
             markerFile = resolver.insert(directory, metaDataMarkers);
-            createdUris.add(new UriTopicBean(markerFile, MentalabConstants.Topic.Marker));
+            createdUris.put(MentalabConstants.Topic.Marker, markerFile);
         } else {
             exgFile = createNewFile(directory, filename, metaDataExg, MentalabConstants.Topic.ExG);
-            createdUris.add(new UriTopicBean(exgFile, MentalabConstants.Topic.ExG));
+            createdUris.put(MentalabConstants.Topic.ExG, exgFile);
             ornFile = createNewFile(directory, filename, metaDataOrn, MentalabConstants.Topic.Orn);
-            createdUris.add(new UriTopicBean(ornFile, MentalabConstants.Topic.Orn));
+            createdUris.put(MentalabConstants.Topic.Orn, ornFile);
             markerFile = createNewFile(directory, filename, metaDataMarkers, MentalabConstants.Topic.Marker);
-            createdUris.add(new UriTopicBean(markerFile, MentalabConstants.Topic.Marker));
+            createdUris.put(MentalabConstants.Topic.Marker, markerFile);
         }
 
         addExgHeader(exgFile);
@@ -85,6 +85,7 @@ public class FileGenerator {
                              new OutputStreamWriter(context.getContentResolver()
                                      .openOutputStream(location, "wa")))) {
             writer.write("TimeStamp,Code");
+            writer.newLine();
         }
     }
 
@@ -95,6 +96,7 @@ public class FileGenerator {
                              new OutputStreamWriter(context.getContentResolver()
                                      .openOutputStream(location, "wa")))) {
             writer.write("TimeStamp,ax,ay,az,gx,gy,gz,mx,my,mz");
+            writer.newLine();
         }
     }
 
@@ -105,6 +107,7 @@ public class FileGenerator {
                              new OutputStreamWriter(context.getContentResolver()
                                      .openOutputStream(location, "wa")))) {
             writer.write("TimeStamp,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8");
+            writer.newLine();
         }
     }
 
