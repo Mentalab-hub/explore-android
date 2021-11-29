@@ -5,19 +5,12 @@ import com.mentalab.CommandTranslators.CommandTranslator;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class MentalabCodec {
 
@@ -183,6 +176,7 @@ public class MentalabCodec {
           mmInStream.read(buffer, 0, 4);
           double timeStamp =
               ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          timeStamp = timeStamp / 10_000; // convert to seconds
 
           Log.d(TAG, "pid .." + pId + " payload is : " + payload);
 
