@@ -9,6 +9,9 @@ Explore Android API is Mentalab's open-source biosignal acquisition API for use 
 
 * Real-time streaming of ExG, orientation and environmental data
 * Connect, pair and search Explore device via Bluetooth
+* Record data in csv format
+* Push data to Lab Streaming Layer(LSL)
+* Change device settings
 
 Requirements
 ==================
@@ -29,25 +32,24 @@ maven { url ‘https://jitpack.io’ }
 
 ![alt text](https://github.com/Mentalab-hub/explore-android/blob/master/screenshots/maven.png?raw=true)
 
-* In your app’s build.gradle add the dependency
+* Add the following dependency in your app level build.gradle file
 ```
-implementation 'com.github.Mentalab-hub:explore-android:V_0.1'
+implementation 'com.github.Mentalab-hub:explore-android:V_0.2'
 ```
 
-![alt text](https://github.com/Mentalab-hub/explore-android/blob/master/screenshots/app.png?raw=true)
-
-* Add the following line in your android manifest:
+* Add the following permisions in your android manifest:
 ```
 <uses-permission android:name="android.permission.BLUETOOTH" />
+<uses-permission android:name="android.permission.INTERNET" />
 ```
 * Sync gradle and Mentlab API is ready to use!
 
-A demo Android application is availble here:
+The following example shows how to set up the your project for explore-android. Please always follow the instructions in this page to integrate latest features in your app.
 
 
 [![SC2 Video](https://img.youtube.com/vi/nP57MqztEUI/0.jpg)](https://youtu.be/nP57MqztEUI)
 
-A demo Android application which used explore-java library is available [here](https://github.com/Mentalab-hub/explore-demo-app)
+A demo Android application which used explore-java library is available [here](https://github.com/Mentalab-hub/explore-demo-app).
 Please check troubleshooting section of this document in case of issues.
 
 Usage Example
@@ -63,13 +65,21 @@ MentalabCommands.connect("Explore_XXXX");
 InputStream inputStream = MentalabCommands.getRawData();
 /* Get data map with decoded data points */
 Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
+
+/* Push data to LSL */
+MentalabCommands.pushToLsl();
+
+/* Set specific channels */
+Map<String, Boolean> configMap = Map.of(DeviceConfigSwitches.Channels[7], false,
+MentalabConstants.DeviceConfigSwitches.Channels[6], false);
+ MentalabCommands.setEnabled(configMap);
 ```
 
 
 Documentation
 =============
 
-For the full documentation of the API, please visit our [Javadoc page](https://javadoc.jitpack.io/com/github/Mentalab-hub/explore-android/V_0.1/javadoc/)
+For the full documentation of the API, please visit our [Javadoc page](https://javadoc.jitpack.io/com/github/Mentalab-hub/explore-android/V_0.2/javadoc/)
 
 Troubleshooting
 ===============
@@ -82,6 +92,7 @@ Authors
 =======
 
 * [Salman Rahman](https://github.com/salman2135)
+* [Alex Platt](https://github.com/Nujanauss)
 * [Florian Sesser](https://github.com/hacklschorsch)
 
 
