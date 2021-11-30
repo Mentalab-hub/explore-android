@@ -126,7 +126,7 @@ public class RecordSubscriber extends Thread {
             writer.write(packet.getData().get(i).toString());
 
             final int channelNo = i % lineBreak + 1; // 1, 2, 3, 4,...
-            if (channelNo == lineBreak) { // break line after 4 or 8 entries
+            if (channelNo == lineBreak) { // break line after 2, 4 or 8 entries
                 writer.newLine();
                 timestamp += 1 / samplingRate;
                 if ((packet.getData().size() - i) > 2) {

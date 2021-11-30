@@ -1,15 +1,12 @@
 package com.mentalab;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
@@ -24,50 +21,45 @@ public class FileGenerator {
     private final boolean overwrite;
 
 
-    public FileGenerator(RecordSubscriber recordSubscriber) {
-        this.context = recordSubscriber.getContext();
-        this.overwrite = recordSubscriber.getOverwrite();
+    public FileGenerator(Context context, boolean overwrite) {
+        this.context = context;
+        this.overwrite = overwrite;
     }
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public Map<MentalabConstants.Topic, Uri> generateFiles(Uri directory, String filename) throws IOException {
-        //todo: handle filename, what if overwrite is true etc
-        ContentValues metaDataExg = new ContentValues();
-        metaDataExg.put(DISPLAY_NAME, filename + "_Exg");
-        metaDataExg.put(MIME_TYPE, "text/csv");
+        //todo: handle & validate filename
+        final ContentValues metaDataExg = createMetaDataForFile(filename + "_Exg");
+        final ContentValues metaDataOrn = createMetaDataForFile(filename + "_Orn");
+        final ContentValues metaDataMarkers = createMetaDataForFile(filename + "_Markers");
 
-        ContentValues metaDataOrn = new ContentValues();
-        metaDataOrn.put(DISPLAY_NAME, filename + "_Orn");
-        metaDataOrn.put(MIME_TYPE, "text/csv");
-
-        ContentValues metaDataMarkers = new ContentValues();
-        metaDataMarkers.put(DISPLAY_NAME, filename + "_Markers");
-        metaDataMarkers.put(MIME_TYPE, "text/csv");
-
-        ContentResolver resolver = context.getContentResolver();
-
-        Map<MentalabConstants.Topic, Uri> createdUris = new HashMap<>();
-        Uri exgFile;
-        Uri ornFile;
-        Uri markerFile;
+        final Map<MentalabConstants.Topic, Uri> createdUris = new HashMap<>();
         if (!overwrite) {
-            exgFile = createNewFile(directory, filename, metaDataExg, MentalabConstants.Topic.ExG);
-            createdUris.put(MentalabConstants.Topic.ExG, exgFile);
+            final Uri exgFile = createFile(directory, metaDataExg, MentalabConstants.Topic.ExG);
             addExgHeader(exgFile);
+            createdUris.put(MentalabConstants.Topic.ExG, exgFile);
 
-            ornFile = createNewFile(directory, filename, metaDataOrn, MentalabConstants.Topic.Orn);
-            createdUris.put(MentalabConstants.Topic.Orn, ornFile);
+            final Uri ornFile = createFile(directory, metaDataOrn, MentalabConstants.Topic.Orn);
             addOrnHeader(ornFile);
+            createdUris.put(MentalabConstants.Topic.Orn, ornFile);
 
-            markerFile = createNewFile(directory, filename, metaDataMarkers, MentalabConstants.Topic.Marker);
-            createdUris.put(MentalabConstants.Topic.Marker, markerFile);
+            final Uri markerFile = createFile(directory, metaDataMarkers, MentalabConstants.Topic.Marker);
             addMarkerHeader(markerFile);
+            createdUris.put(MentalabConstants.Topic.Marker, markerFile);
         } else {
             //Todo: include a delete function
         }
 
         return createdUris;
+    }
+
+
+    private ContentValues createMetaDataForFile(String filename) {
+        final ContentValues metaData = new ContentValues();
+        metaData.put(DISPLAY_NAME, filename);
+        metaData.put(MIME_TYPE, "text/csv");
+        return metaData;
     }
 
 
@@ -103,45 +95,14 @@ public class FileGenerator {
         }
     }
 
-    private Uri createNewFile(Uri directory, String filename, ContentValues metaData, MentalabConstants.Topic topic) {
+
+    private Uri createFile(Uri directory, ContentValues metaData, MentalabConstants.Topic topic) {
         Uri location;
         int i = 1;
         while ((location = context.getContentResolver().insert(directory, metaData)) == null) {
-            metaData.put(DISPLAY_NAME, filename + "(" + i + ")_" + topic.name());
+            metaData.put(DISPLAY_NAME, metaData.get(DISPLAY_NAME) + "(" + i + ")_" + topic.name());
             i++;
         }
         return location;
-    }
-
-
-    private void deleteIfExists(Uri directory, String filename) {
-        final Uri fullPath = Uri.parse(directory.toString() + File.separator + filename);
-        final boolean fileExists = checkIfUriExists(fullPath);
-        if (fileExists) {
-            context.getContentResolver().delete(fullPath, null, null);
-        }
-    }
-
-    private boolean checkIfUriExists(Uri contentUri) {
-        ContentResolver cr = context.getContentResolver();
-        Cursor cur = cr.query(contentUri, null, null, null, null);
-        if (cur != null) {
-            if (cur.moveToFirst()) {
-                String filePath = cur.getString(0);
-
-                if (new File(filePath).exists()) {
-                    cur.close();
-                    return true;// do something if it exists
-                } else {
-                    cur.close();
-                    return false;// File was not found
-                }
-            } else {
-                cur.close();
-                return false;// Uri was ok but no entry found.
-            }
-        } else {
-            return false;// content Uri was invalid or some other error occurred
-        }
     }
 }

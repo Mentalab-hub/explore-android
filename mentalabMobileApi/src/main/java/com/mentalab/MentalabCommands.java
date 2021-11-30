@@ -3,6 +3,7 @@ package com.mentalab;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
@@ -152,14 +153,23 @@ public class MentalabCommands {
 
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public static void record(RecordSubscriber recordSubscriber) throws IOException, InterruptedException {
-    final FileGenerator androidFileGenerator = new FileGenerator(recordSubscriber);
-    final Uri directory = recordSubscriber.getDirectory();
-    final String filename = recordSubscriber.getFilename();
-    final Map<MentalabConstants.Topic, Uri> generatedFiles = androidFileGenerator.generateFiles(directory, filename);
+  public static void record(RecordSubscriber recordSubscriber) throws IOException {
+    final Map<MentalabConstants.Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
     recordSubscriber.setGeneratedFiles(generatedFiles);
 
     Executors.newSingleThreadExecutor().execute(recordSubscriber);
+  }
+
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  private static Map<MentalabConstants.Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
+    final Context context = recordSubscriber.getContext();
+    final boolean overwrite = recordSubscriber.getOverwrite();
+    final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
+
+    final Uri directory = recordSubscriber.getDirectory();
+    final String filename = recordSubscriber.getFilename();
+    return androidFileGenerator.generateFiles(directory, filename);
   }
 
 
