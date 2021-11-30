@@ -1,22 +1,24 @@
 package com.mentalab;
 
 import android.util.Log;
+import com.mentalab.CommandTranslators.CommandTranslator;
+import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
+  private static final int NTHREADPOOL = 100;
+  private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
   public static Map<String, Queue<Float>> decodedDataMap = null;
+  private static Future<?> decoderTask = null;
 
   /**
    * Decodes a device raw data stream
@@ -35,13 +37,13 @@ public class MentalabCodec {
    * }<pre>
    *
    * @throws InvalidDataException throws when invalid data is received
-   * @parameter InputStream of device bytes
+   * @stream InputStream of device bytes
    * @return Immutable Map of Queues of Numbers
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    ConnectedThread thread = new ConnectedThread(stream);
-    thread.start();
+    decoderTask = executor.submit(new ConnectedThread(stream));
+    Log.d(TAG, "Started execution of decoder!!");
     return decodedDataMap;
   }
 
@@ -51,16 +53,20 @@ public class MentalabCodec {
    * @throws InvalidCommandException when the command is not recognized
    * @return byte[] encoded commands that can be sent to the device
    */
-  static byte[] encodeCommand(final String command) throws InvalidCommandException {
-    return new byte[10]; // Some example while stub
+  static byte[] encodeCommand(Command command, int extraArguments) throws InvalidCommandException {
+
+    CommandTranslator translator = command.createInstance(command, extraArguments);
+    byte[] translatedBytes = translator.translateCommand(extraArguments);
+    return translatedBytes;
   }
 
-  private static Packet parsePayloadData(int pId, byte[] byteBuffer) throws InvalidDataException {
+  private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
+      throws InvalidDataException {
 
     for (Packet.PacketId packetId : Packet.PacketId.values()) {
       if (packetId.getNumVal() == pId) {
         Log.d(TAG, "Converting data for Explore");
-        Packet packet = packetId.createInstance();
+        Packet packet = packetId.createInstance(timeStamp);
         if (packet != null) {
           packet.convertData(byteBuffer);
           Log.d(TAG, "Data decoded is " + packet.toString());
@@ -68,17 +74,17 @@ public class MentalabCodec {
         }
       }
     }
-    return null;
   }
-
+  // TODO refactor this method with new interfaces
   private static void pushDataInQueue(Packet packet) {
+
     if (packet instanceof DataPacket) {
       DataPacket dataPacket = (DataPacket) packet;
       int channelCount = dataPacket.getDataCount();
 
       for (int index = 0; index < channelCount; index++) {
         synchronized (decodedDataMap) {
-          ArrayList<Float> convertedSamples = ((DataPacket) packet).getVoltageValues();
+          ArrayList<Float> convertedSamples = ((DataPacket) packet).getData();
           String channelKey = "Channel_" + String.valueOf(index + 1);
           if (decodedDataMap.get(channelKey) == null) {
             decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
@@ -89,6 +95,9 @@ public class MentalabCodec {
           floats.offerFirst(((DataPacket) packet).convertedSamples.get(index));
         }
       }
+      // Lsl Packet Subscriber implementation
+      PubSubManager.getInstance().publish("ExG", packet);
+
     } else if (packet instanceof InfoPacket) {
 
       int channelCount = packet.getDataCount();
@@ -104,10 +113,47 @@ public class MentalabCodec {
           floats.offerFirst(((InfoPacket) packet).convertedSamples.get(index));
         }
       }
+      if (packet instanceof Orientation) {
+        PubSubManager.getInstance().publish("Orn", packet);
+      }
+
+      if (packet instanceof MarkerPacket) {
+        PubSubManager.getInstance().publish("Marker", packet);
+      }
+
+    } else if (packet instanceof CommandStatusPacket
+        || packet instanceof AckPacket
+        || packet instanceof CommandReceivedPacket) {
+      Log.d("DEBUG_SR", "Publishing packets of type command ");
+      PubSubManager.getInstance().publish("Command", packet);
     }
   }
 
-  private static class ConnectedThread extends Thread {
+
+  public static int getAdsMask() {
+    return Objects.requireNonNull(decodedDataMap.get("Ads_Mask").poll()).intValue();
+  }
+
+
+  public static float getSamplingRate() {
+    return Objects.requireNonNull(decodedDataMap.get("Sampling_Rate").poll());
+  }
+
+
+  // TODO Decouple executor class from Codec class
+  public static void pushToLsl(String deviceName) {
+    executor.execute(new LslPacketSubscriber(deviceName));
+  }
+
+  static synchronized ExecutorService getExecutorService() {
+    return executor;
+  }
+
+  static void stopDecoder() {
+    decoderTask.cancel(true);
+  }
+
+  private static class ConnectedThread implements Callable<Void> {
     private final InputStream mmInStream;
 
     public ConnectedThread(InputStream inputStream) {
@@ -115,7 +161,8 @@ public class MentalabCodec {
       initializeMapInstance();
     }
 
-    public void run() {
+    public Void call() throws InterruptedException {
+
       int pId = 0;
       while (true) {
         try {
@@ -138,7 +185,9 @@ public class MentalabCodec {
 
           // reading timestamp
           mmInStream.read(buffer, 0, 4);
-          int timeStamp = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          double timeStamp =
+              ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          timeStamp = timeStamp / 10_000; // convert to seconds
 
           Log.d(TAG, "pid .." + pId + " payload is : " + payload);
 
@@ -148,11 +197,10 @@ public class MentalabCodec {
           Log.d(TAG, "reading count is ...." + read);
           // parsing payload data
 
-          Packet packet = parsePayloadData(pId, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+          parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
 
         } catch (IOException | InvalidDataException exception) {
           exception.printStackTrace();
-          break;
         }
       }
     }

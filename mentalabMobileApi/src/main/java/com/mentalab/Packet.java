@@ -1,5 +1,6 @@
 package com.mentalab;
 
+import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -9,11 +10,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
+/** Placeholder class for publishable packets */
+interface PublishablePacket {
+  String getPacketTopic();
+}
+
+interface QueueablePacket {}
+
 /** Root packet interface */
 abstract class Packet {
-  private static final String TAG = "Explore";
+
+  // TODO refactor with Enum class
+  // TODO Have release build before final release
+  protected static final String TAG = "Explore";
   private byte[] byteBuffer = null;
   private int dataCount;
+  private double timeStamp;
+
+  public Packet(double timeStamp) {
+    this.timeStamp = timeStamp;
+  }
 
   /** String representation of attributes */
   static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {
@@ -39,6 +55,12 @@ abstract class Packet {
     return values;
   }
 
+
+  public double getTimeStamp() {
+    return timeStamp;
+  }
+
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -52,94 +74,101 @@ abstract class Packet {
   /** Number of element in each packet */
   public abstract int getDataCount();
 
+  /** Get data values from packet structure */
+  public ArrayList<Float> getData() {
+    return null;
+  }
+  ;
+
   enum PacketId {
     ORIENTATION(13) {
       @Override
-      public Packet createInstance() {
-        return new Orientation();
+      public Packet createInstance(double timeStamp) {
+
+        return new Orientation(timeStamp);
       }
     },
     ENVIRONMENT(19) {
       @Override
-      public Packet createInstance() {
-        return new Environment();
+      public Packet createInstance(double timeStamp) {
+        return new Environment(timeStamp);
       }
     },
     TIMESTAMP(27) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     DISCONNECT(25) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     INFO(99) {
       @Override
-      public Packet createInstance() {
-        return null;
+      public Packet createInstance(double timeStamp) {
+        return new DeviceInfoPacket(timeStamp);
       }
     },
     EEG94(144) {
       @Override
-      public Packet createInstance() {
-        return new Eeg94();
+      public Packet createInstance(double timeStamp) {
+        return new Eeg94(timeStamp);
       }
     },
     EEG98(146) {
       @Override
-      public Packet createInstance() {
-        return new Eeg98();
+      public Packet createInstance(double timeStamp) {
+        return new Eeg98(timeStamp);
       }
     },
     EEG99S(30) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG99(62) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG94R(208) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     },
     EEG98R(210) {
       @Override
-      public Packet createInstance() {
-        return null;
+      public Packet createInstance(double timeStamp) {
+        return new Eeg98(timeStamp);
       }
     },
     CMDRCV(192) {
       @Override
-      public Packet createInstance() {
-        return null;
+      public Packet createInstance(double timeStamp) {
+        return new CommandReceivedPacket(timeStamp);
       }
     },
     CMDSTAT(193) {
       @Override
-      public Packet createInstance() {
-        return null;
+      public Packet createInstance(double timeStamp) {
+        return new CommandStatusPacket(timeStamp);
       }
     },
     MARKER(194) {
       @Override
-      public Packet createInstance() {
-        return null;
+      public Packet createInstance(double timeStamp) {
+        return new MarkerPacket(timeStamp);
       }
     },
     CALIBINFO(195) {
       @Override
-      public Packet createInstance() {
+      public Packet createInstance(double timeStamp) {
         return null;
       }
     };
@@ -154,16 +183,19 @@ abstract class Packet {
       return value;
     }
 
-    public abstract Packet createInstance();
+    public abstract Packet createInstance(double timeStamp);
   }
 }
-;
 
 /** Interface for different EEG packets */
-abstract class DataPacket extends Packet {
+abstract class DataPacket extends Packet implements PublishablePacket {
   private static final String TAG = "Explore";
   private static byte channelMask;
-  protected ArrayList<Float> convertedSamples;
+  public ArrayList<Float> convertedSamples;
+
+  public DataPacket(double timeStamp) {
+    super(timeStamp);
+  }
 
   static double[] toInt32(byte[] byteArray) throws InvalidDataException, IOException {
     if (byteArray.length % 3 != 0)
@@ -205,26 +237,43 @@ abstract class DataPacket extends Packet {
     DataPacket.channelMask = channelMask;
   }
 
-  ArrayList<Float> getVoltageValues() {
+  public ArrayList<Float> getData() {
     return convertedSamples;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "ExG";
   }
 }
 
 /** Interface for packets related to device information */
-abstract class InfoPacket extends Packet {
-  List<Float> convertedSamples = null;
+abstract class InfoPacket extends Packet implements QueueablePacket {
+  ArrayList<Float> convertedSamples = null;
   ArrayList<String> attributes;
+
+  public InfoPacket(double timeStamp) {
+    super(timeStamp);
+  }
 }
 
 /** Interface for packets related to device synchronization */
-abstract class UtilPacket extends Packet {
+abstract class UtilPacket extends Packet implements PublishablePacket {
 
   protected ArrayList<Float> convertedSamples;
+
+  public UtilPacket(double timeStamp) {
+    super(timeStamp);
+  }
 }
 
 // class Eeg implements DataPacket {}
 class Eeg98 extends DataPacket {
   private static int channelNumber = 8;
+
+  public Eeg98(double timeStamp) {
+    super(timeStamp);
+  }
 
   @Override
   public void convertData(byte[] byteBuffer) {
@@ -268,6 +317,11 @@ class Eeg98 extends DataPacket {
 class Eeg94 extends DataPacket {
 
   private final int channelNumber = 4;
+
+  public Eeg94(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -314,6 +368,11 @@ class Eeg94 extends DataPacket {
 }
 
 class Eeg99 extends DataPacket {
+
+  public Eeg99(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -336,6 +395,11 @@ class Eeg99 extends DataPacket {
 }
 
 class Eeg99s extends DataPacket {
+
+  public Eeg99s(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -358,9 +422,11 @@ class Eeg99s extends DataPacket {
 }
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-class Orientation extends InfoPacket {
+class Orientation extends InfoPacket implements PublishablePacket {
+  ArrayList<Float> listValues = new ArrayList<Float>();
 
-  public Orientation() {
+  public Orientation(double timeStamp) {
+    super(timeStamp);
     attributes =
         new ArrayList<String>(
             Arrays.asList(
@@ -370,7 +436,6 @@ class Orientation extends InfoPacket {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    List<Float> listValues = new ArrayList<Float>();
     double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
 
     for (int index = 0; index < convertedRawValues.length; index++) {
@@ -387,6 +452,7 @@ class Orientation extends InfoPacket {
       }
     }
     this.convertedSamples = new ArrayList<>(listValues);
+    Log.d("Explore", "Converted samples in the packets are: " + this.convertedSamples.toString());
   }
 
   @Override
@@ -413,12 +479,48 @@ class Orientation extends InfoPacket {
   public int getDataCount() {
     return 9;
   }
+
+  /** Number of element in each packet */
+  @Override
+  public ArrayList<Float> getData() {
+    return this.convertedSamples;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "Orn";
+  }
 }
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 class DeviceInfoPacket extends InfoPacket {
+  int adsMask;
+  int samplingRate;
+
+  public DeviceInfoPacket(double timeStamp) {
+    super(timeStamp);
+    attributes = new ArrayList<String>(Arrays.asList("Ads_Mask", "Sampling_Rate"));
+  }
+
   @Override
-  public void convertData(byte[] byteBuffer) {}
+  public void convertData(byte[] byteBuffer) {
+    int samplingRateMultiplier =
+        ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .getInt();
+    samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
+    adsMask = byteBuffer[3] & 0xFF;
+
+    this.convertedSamples =
+        new ArrayList<Float>(
+            Arrays.asList(new Float[] {Float.valueOf(adsMask), Float.valueOf(samplingRate)}));
+  }
+
+  /** Return list of elements in each packet */
+  @Override
+  public ArrayList<Float> getData() {
+    return this.convertedSamples;
+  }
 
   @Override
   public String toString() {
@@ -428,7 +530,7 @@ class DeviceInfoPacket extends InfoPacket {
   /** Number of element in each packet */
   @Override
   public int getDataCount() {
-    return 0;
+    return 2;
   }
 }
 
@@ -436,7 +538,12 @@ class DeviceInfoPacket extends InfoPacket {
  * Acknowledgement packet is sent when a configuration command is successfully executed on the
  * device
  */
-class AckPacket extends InfoPacket {
+class AckPacket extends UtilPacket {
+
+  public AckPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   @Override
   public void convertData(byte[] byteBuffer) {}
 
@@ -449,10 +556,20 @@ class AckPacket extends InfoPacket {
   public int getDataCount() {
     return 0;
   }
+
+  @Override
+  public String getPacketTopic() {
+    return "Command";
+  }
 }
 
 /** Packet sent from the device to sync clocks */
-class TimeStampPacket extends UtilPacket {
+class TimeStampPacket extends Packet {
+
+  public TimeStampPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   @Override
   public void convertData(byte[] byteBuffer) {}
 
@@ -469,7 +586,12 @@ class TimeStampPacket extends UtilPacket {
 }
 
 /** Disconnection packet is sent when the host machine is disconnected from the device */
-class DisconnectionPacket extends UtilPacket {
+class DisconnectionPacket extends Packet {
+
+  public DisconnectionPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
   /**
    * Converts binary data stream to human readable voltage values
    *
@@ -494,7 +616,8 @@ class DisconnectionPacket extends UtilPacket {
 class Environment extends InfoPacket {
   float temperature, light, battery;
 
-  public Environment() {
+  public Environment(double timeStamp) {
+    super(timeStamp);
     super.attributes = new ArrayList(Arrays.asList("Temperature ", "Light ", "Battery "));
   }
   /**
@@ -577,5 +700,123 @@ class Environment extends InfoPacket {
     }
 
     return (float) parcentage;
+  }
+}
+
+class MarkerPacket extends InfoPacket implements PublishablePacket {
+
+  int markerCode;
+
+  // super.att = new ArrayList<String>(Arrays.asList("Marker"));
+
+  public MarkerPacket(double timeStamp) {
+    super(timeStamp);
+    attributes = new ArrayList<String>(Arrays.asList("Marker"));
+  }
+
+  /**
+   * Converts binary data stream to human readable voltage values
+   *
+   * @param byteBuffer
+   */
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    markerCode =
+        ByteBuffer.wrap(new byte[] {byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    convertedSamples = new ArrayList<Float>(Arrays.asList((float) markerCode));
+  }
+
+  /** String representation of attributes */
+  @Override
+  public String toString() {
+    return "Marker: " + markerCode;
+  }
+
+  /** Number of element in each packet */
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
+
+  /** Get data values from packet structure */
+  @Override
+  public ArrayList<Float> getData() {
+    return new ArrayList<Float>(markerCode);
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "Marker";
+  }
+}
+
+class CommandReceivedPacket extends UtilPacket {
+  float markerCode;
+
+  public CommandReceivedPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
+  /**
+   * Converts binary data stream to human readable voltage values
+   *
+   * @param byteBuffer
+   */
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {}
+
+  /** String representation of attributes */
+  @Override
+  public String toString() {
+    return "Command received packet";
+  }
+
+  /** Number of element in each packet */
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "Command";
+  }
+}
+
+class CommandStatusPacket extends UtilPacket {
+  boolean commandStatus;
+
+  public CommandStatusPacket(double timeStamp) {
+    super(timeStamp);
+  }
+
+  /**
+   * Converts binary data stream to human readable voltage values
+   *
+   * @param byteBuffer
+   */
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
+    short status =
+        ByteBuffer.wrap(new byte[] {byteBuffer[5], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    commandStatus = status != 0;
+  }
+
+  /** String representation of attributes */
+  @Override
+  public String toString() {
+    return "Command status is " + commandStatus;
+  }
+
+  /** Number of element in each packet */
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
+
+  @Override
+  public String getPacketTopic() {
+    return "Command";
   }
 }
