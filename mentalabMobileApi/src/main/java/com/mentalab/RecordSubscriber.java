@@ -19,7 +19,7 @@ public class RecordSubscriber extends Thread {
     private boolean overwrite;
     private boolean blocking;
     private MentalabConstants.FileType fileType;
-    private int adsMask;
+    private int adcMask = 0;
     private float samplingRate = Integer.MAX_VALUE;
     private Double duration;
     private Map<MentalabConstants.Topic, Uri> generatedFies;
@@ -61,7 +61,7 @@ public class RecordSubscriber extends Thread {
     public void run() {
         PubSubManager.getInstance().subscribe(MentalabConstants.Topic.ExG.name(), this::writeExg);
         PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Orn.name(), this::writeOrn);
-        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Orn.name(), this::writeMarker);
+        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Marker.name(), this::writeMarker);
     }
 
 
@@ -141,8 +141,8 @@ public class RecordSubscriber extends Thread {
         this.generatedFies = generatedFies;
     }
 
-    public void setAdsMask(int adsMask) {
-        this.adsMask = adsMask;
+    public void setAdcMask(int adcMask) {
+        this.adcMask = adcMask;
     }
 
     public void setSamplingRate(float samplingRate) {
@@ -197,6 +197,5 @@ public class RecordSubscriber extends Thread {
 
             return subscriber;
         }
-
     }
 }

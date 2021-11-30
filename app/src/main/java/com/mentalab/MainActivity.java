@@ -53,12 +53,18 @@ public class MainActivity extends AppCompatActivity {
         final Uri location = getLocation();
         try (final InputStream rawData = MentalabCommands.getRawData()) {
             MentalabCodec.decode(rawData);
+            TimeUnit.SECONDS.sleep(1);
+
             final RecordSubscriber subscriber = new RecordSubscriber
                     .Builder(location, "test.csv", getApplicationContext())
                     .build();
 
+            subscriber.setAdcMask(MentalabCodec.getAdsMask());
+            subscriber.setSamplingRate(MentalabCodec.getSamplingRate());
+
             MentalabCommands.record(subscriber); //todo: this logic needs to change to MentalabCommands.record()
             TimeUnit.SECONDS.sleep(10);
+            System.out.println("Done!");
         } catch (NoBluetoothException | IOException | InvalidDataException | InterruptedException e) {
             LOGGER.log(Level.SEVERE, "Error! Exiting system.", e);
             MentalabCommands.closeSockets();

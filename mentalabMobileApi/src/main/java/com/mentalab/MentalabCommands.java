@@ -154,9 +154,6 @@ public class MentalabCommands {
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public static void record(RecordSubscriber recordSubscriber) throws IOException, InterruptedException {
     final FileGenerator androidFileGenerator = new FileGenerator(recordSubscriber);
-//    recordSubscriber.setAdsMask(MentalabCodec.getAdsMask());
-    recordSubscriber.setSamplingRate(MentalabCodec.getSamplingRate());
-
     final Uri directory = recordSubscriber.getDirectory();
     final String filename = recordSubscriber.getFilename();
     final Map<MentalabConstants.Topic, Uri> generatedFiles = androidFileGenerator.generateFiles(directory, filename);
