@@ -1,6 +1,12 @@
 package com.mentalab;
 
-import com.mentalab.CommandTranslators.*;
+import com.mentalab.CommandTranslators.ChannelMaskTranslator;
+import com.mentalab.CommandTranslators.CommandTranslator;
+import com.mentalab.CommandTranslators.FormatMemoryCommandTranslator;
+import com.mentalab.CommandTranslators.ModuleDisableTranslator;
+import com.mentalab.CommandTranslators.ModuleEnableTranslator;
+import com.mentalab.CommandTranslators.SamplingRateCommandTranslator;
+import com.mentalab.CommandTranslators.SoftResetCommandTranslator;
 
 public class MentalabConstants {
 
@@ -95,9 +101,7 @@ public class MentalabConstants {
     public abstract CommandTranslator createInstance(Command command, int extraArguments);
   }
 
-  /**
-   * Topics available for Publisher Subscriber manager
-   */
+  /** Topics available for Publisher Subscriber manager */
   enum Topic {
     ExG,
     Orn,

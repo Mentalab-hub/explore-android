@@ -122,8 +122,8 @@ public class MentalabCodec {
       }
 
     } else if (packet instanceof CommandStatusPacket
-            || packet instanceof AckPacket
-            || packet instanceof CommandReceivedPacket) {
+        || packet instanceof AckPacket
+        || packet instanceof CommandReceivedPacket) {
       Log.d("DEBUG_SR", "Publishing packets of type command ");
       PubSubManager.getInstance().publish("Command", packet);
     }

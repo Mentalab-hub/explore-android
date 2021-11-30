@@ -14,11 +14,15 @@ import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 
 public class MentalabCommands {
