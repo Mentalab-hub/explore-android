@@ -141,9 +141,11 @@ public class RecordSubscriber extends Thread {
         this.generatedFies = generatedFies;
     }
 
-    public void setAdcMask(int adcMask) {
+
+    private void setAdcMask(int adcMask) {  // Todo: Private until we have Adc mask functionality
         this.adcMask = adcMask;
     }
+
 
     public void setSamplingRate(float samplingRate) {
         this.samplingRate = samplingRate;
@@ -167,22 +169,22 @@ public class RecordSubscriber extends Thread {
         }
 
 
-        public Builder setOverwrite(boolean overwrite) {
+        private Builder setOverwrite(boolean overwrite) { // Todo: Private until we have delete functionality
             this.overwrite = overwrite;
             return this;
         }
 
-        public Builder setBlocking(boolean blocking) {
+        private Builder setBlocking(boolean blocking) { // Todo: Private until we have blocking functionality
             this.blocking = blocking;
             return this;
         }
 
-        public Builder setFileType(MentalabConstants.FileType fileType) {
+        private Builder setFileType(MentalabConstants.FileType fileType) { // Todo: Private until we support other file types
             this.fileType = fileType;
             return this;
         }
 
-        public Builder setDuration(double duration) {
+        private Builder setDuration(double duration) { // Todo: Private until we have duration functionality
             this.duration = duration;
             return this;
         }
