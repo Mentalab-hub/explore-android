@@ -12,6 +12,9 @@ import java.util.Map;
 
 public class RecordSubscriber extends Thread {
 
+    private final static int NO_MARKER_COLS = 2;
+    private final static int NO_ORN_COLS = 9;
+
     private final Uri directory;
     private final String filename;
     private final Context context;
@@ -86,14 +89,13 @@ public class RecordSubscriber extends Thread {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void writeOrn(Packet packet) {
         //todo: validate what's being written
-        final int lineBreak = 9;
         double timestamp = packet.getTimeStamp();
 
         final Uri location = generatedFies.get(MentalabConstants.Topic.Orn);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writePacketToCSV(writer, packet, timestamp, lineBreak);
+            writePacketToCSV(writer, packet, timestamp, NO_ORN_COLS);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,14 +105,13 @@ public class RecordSubscriber extends Thread {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void writeMarker(Packet packet) {
         //todo: validate what's being written
-        final int lineBreak = 2;
         double timestamp = packet.getTimeStamp();
 
         final Uri location = generatedFies.get(MentalabConstants.Topic.Marker);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writePacketToCSV(writer, packet, timestamp, lineBreak);
+            writePacketToCSV(writer, packet, timestamp, NO_MARKER_COLS);
         } catch (IOException e) {
             e.printStackTrace();
         }
