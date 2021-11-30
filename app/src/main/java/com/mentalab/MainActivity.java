@@ -8,7 +8,6 @@ import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Queue;
