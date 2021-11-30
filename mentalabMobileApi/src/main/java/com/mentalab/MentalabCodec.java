@@ -187,6 +187,7 @@ public class MentalabCodec {
           mmInStream.read(buffer, 0, 4);
           double timeStamp =
               ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+          timeStamp = timeStamp / 10_000; // convert to seconds
 
           Log.d(TAG, "pid .." + pId + " payload is : " + payload);
 
