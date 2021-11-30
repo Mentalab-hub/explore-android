@@ -3,7 +3,11 @@ package com.mentalab;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
+import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
+import androidx.annotation.RequiresApi;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.MentalabConstants.DeviceConfigSwitches;
 import com.mentalab.MentalabConstants.SamplingRate;
@@ -20,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executors;
 
 public class MentalabCommands {
 
@@ -146,6 +151,37 @@ public class MentalabCommands {
     Log.d(TAG, "Connected to Mentalab Explore!");
   }
 
+
+  /**
+   * Record data to CSV. Requires appropriate permissions from android,
+   * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android permissions docs</a>.
+   *
+   * Currently, a lot of functionality missing including: blocking on record, setting a duration for recording,
+   * masking channels and overwriting previous files.
+   * @param recordSubscriber - The subscriber which subscribes to parsed data and holds information about where to record.
+   * @throws IOException - Can occur both in the generation of files and in the execution of the subscriber.
+   */
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  public static void record(RecordSubscriber recordSubscriber) throws IOException {
+    final Map<MentalabConstants.Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
+    recordSubscriber.setGeneratedFiles(generatedFiles);
+
+    Executors.newSingleThreadExecutor().execute(recordSubscriber);
+  }
+
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  private static Map<MentalabConstants.Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
+    final Context context = recordSubscriber.getContext();
+    final boolean overwrite = recordSubscriber.getOverwrite();
+    final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
+
+    final Uri directory = recordSubscriber.getDirectory();
+    final String filename = recordSubscriber.getFilename();
+    return androidFileGenerator.generateFiles(directory, filename);
+  }
+
+
   /**
    * Returns the device data stream
    *
@@ -186,6 +222,16 @@ public class MentalabCommands {
     return mmOutputStream;
   }
 
+  public static void closeSockets() {
+    try {
+      mmSocket.close();
+    } catch (IOException e) {
+      Log.e(TAG, "Unable to close socket.");
+    }
+    mmSocket = null;
+  }
+
+  /* */
   /**
    * Sets sampling rate of the device
    *

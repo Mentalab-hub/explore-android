@@ -109,6 +109,12 @@ public class MentalabConstants {
     Command;
   }
 
+
+  enum FileType {
+    CSV
+  }
+
+
   interface QueueAttribute {
     enum OrientationAttribute {
       ACC_X,

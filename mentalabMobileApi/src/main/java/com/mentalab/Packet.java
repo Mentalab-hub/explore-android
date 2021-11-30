@@ -55,6 +55,12 @@ abstract class Packet {
     return values;
   }
 
+
+  public double getTimeStamp() {
+    return timeStamp;
+  }
+
+
   /**
    * Converts binary data stream to human readable voltage values
    *

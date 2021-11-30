@@ -129,6 +129,17 @@ public class MentalabCodec {
     }
   }
 
+
+  public static int getAdsMask() {
+    return Objects.requireNonNull(decodedDataMap.get("Ads_Mask").poll()).intValue();
+  }
+
+
+  public static float getSamplingRate() {
+    return Objects.requireNonNull(decodedDataMap.get("Sampling_Rate").poll());
+  }
+
+
   // TODO Decouple executor class from Codec class
   public static void pushToLsl(String deviceName) {
     executor.execute(new LslPacketSubscriber(deviceName));
