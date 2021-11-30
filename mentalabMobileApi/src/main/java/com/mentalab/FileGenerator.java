@@ -51,30 +51,22 @@ public class FileGenerator {
         Uri exgFile;
         Uri ornFile;
         Uri markerFile;
-        if (overwrite) { //todo: delete doesn't work
-            deleteIfExists(directory, filename + "_Exg.csv");
-            exgFile = resolver.insert(directory, metaDataExg);
-            createdUris.put(MentalabConstants.Topic.ExG, exgFile);
-
-            deleteIfExists(directory, filename + "_Orn.csv");
-            ornFile = resolver.insert(directory, metaDataOrn);
-            createdUris.put(MentalabConstants.Topic.Orn, ornFile);
-
-            deleteIfExists(directory, filename + "_Markers.csv");
-            markerFile = resolver.insert(directory, metaDataMarkers);
-            createdUris.put(MentalabConstants.Topic.Marker, markerFile);
-        } else {
+        if (!overwrite) {
             exgFile = createNewFile(directory, filename, metaDataExg, MentalabConstants.Topic.ExG);
             createdUris.put(MentalabConstants.Topic.ExG, exgFile);
+            addExgHeader(exgFile);
+
             ornFile = createNewFile(directory, filename, metaDataOrn, MentalabConstants.Topic.Orn);
             createdUris.put(MentalabConstants.Topic.Orn, ornFile);
+            addOrnHeader(ornFile);
+
             markerFile = createNewFile(directory, filename, metaDataMarkers, MentalabConstants.Topic.Marker);
             createdUris.put(MentalabConstants.Topic.Marker, markerFile);
+            addMarkerHeader(markerFile);
+        } else {
+            //Todo: include a delete function
         }
 
-        addExgHeader(exgFile);
-        addOrnHeader(ornFile);
-        addMarkerHeader(markerFile);
         return createdUris;
     }
 
