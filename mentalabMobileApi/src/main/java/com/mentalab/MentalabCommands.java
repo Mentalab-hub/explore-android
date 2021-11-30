@@ -3,11 +3,8 @@ package com.mentalab;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.MentalabConstants.Command;
@@ -21,7 +18,6 @@ import com.mentalab.exception.NoConnectionException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.Executors;
 
@@ -162,38 +158,6 @@ public class MentalabCommands {
     Executors.newSingleThreadExecutor().execute(recordSubscriber);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.Q)
-  private static void list(RecordSubscriber recordSubscriber) {
-    Path path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toPath();
-    path.toFile().listFiles();
-
-    Uri downloadsUri = MediaStore.Downloads.getContentUri(MediaStore.VOLUME_EXTERNAL);
-    String projection = MediaStore.Downloads.DISPLAY_NAME;
-    Cursor cr = recordSubscriber
-            .getContext()
-            .getContentResolver()
-            .query(downloadsUri, new String[]{projection}, null, null, null);
-    if (cr.moveToFirst()) {
-      System.out.println("sdsdgk;");
-    }
-  }
-
-
-  /**
-   * Reset device to default settings
-   *
-   * <p>Defaults: 250Hz sampling rate, data collection from all modules is enabled.
-   *
-   * @throws CommandFailedException
-   * @throws NoConnectionException
-   * @throws NoBluetoothException
-   */
-  /*
-    public static void
-    softReset()
-            throws CommandFailedException, NoConnectionException, NoBluetoothException {...}
-
-  */
 
   /**
    * Returns the device data stream

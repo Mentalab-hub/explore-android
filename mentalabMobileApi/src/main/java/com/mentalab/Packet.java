@@ -44,9 +44,9 @@ abstract class Packet {
       double value;
 
       value =
-          ByteBuffer.wrap(new byte[] {bytes[index], bytes[index + 1]})
-              .order(ByteOrder.LITTLE_ENDIAN)
-                  .getShort();
+              ByteBuffer.wrap(new byte[]{bytes[index], bytes[index + 1]})
+                      .order(ByteOrder.LITTLE_ENDIAN)
+                      .getShort();
       if (signBit == 1) {
         value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
       }
