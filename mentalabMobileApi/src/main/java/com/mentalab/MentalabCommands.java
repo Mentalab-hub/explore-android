@@ -154,7 +154,7 @@ public class MentalabCommands {
 
   /**
    * Record data to CSV. Requires appropriate permissions from android,
-   * @see <a href="android permissions docs">https://developer.android.com/guide/topics/permissions/overview</a>.
+   * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android permissions docs</a>.
    *
    * Currently, a lot of functionality missing including: blocking on record, setting a duration for recording,
    * masking channels and overwriting previous files.
