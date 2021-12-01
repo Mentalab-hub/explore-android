@@ -79,7 +79,7 @@ MentalabConstants.DeviceConfigSwitches.Channels[6], false);
 Documentation
 =============
 
-For the full documentation of the API, please visit our [Javadoc page](https://javadoc.jitpack.io/com/github/Mentalab-hub/explore-android/V_0.2/javadoc/)
+For the full documentation of the API, please visit our [Javadoc page](https://github.com/Mentalab-hub/explore-android/tree/master/javadoc)
 
 Troubleshooting
 ===============
