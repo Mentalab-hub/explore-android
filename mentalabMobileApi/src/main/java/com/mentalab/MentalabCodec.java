@@ -5,6 +5,7 @@ import com.mentalab.CommandTranslators.CommandTranslator;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.packets.*;
 
 import java.io.IOException;
 import java.io.InputStream;

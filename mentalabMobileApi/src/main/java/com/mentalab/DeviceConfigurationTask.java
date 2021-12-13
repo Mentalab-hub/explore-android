@@ -2,6 +2,11 @@ package com.mentalab;
 
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.packets.AckPacket;
+import com.mentalab.packets.CommandReceivedPacket;
+import com.mentalab.packets.CommandStatusPacket;
+import com.mentalab.packets.Packet;
+
 import java.io.IOException;
 
 public class DeviceConfigurationTask extends Thread {

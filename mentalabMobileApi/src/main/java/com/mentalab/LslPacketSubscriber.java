@@ -3,6 +3,8 @@ package com.mentalab;
 import android.util.Log;
 import com.mentalab.LslLoader.ChannelFormat;
 import com.mentalab.LslLoader.StreamInfo;
+import com.mentalab.packets.Packet;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
