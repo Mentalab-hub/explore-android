@@ -1,8 +1,8 @@
-package com.mentalab.CommandTranslators;
+package com.mentalab.commandtranslators;
 
-public class SamplingRateCommandTranslator extends twoByteCommandTranslator {
+public class SoftResetCommandTranslator extends twoByteCommandTranslator {
 
-  public SamplingRateCommandTranslator(int opcode, int argument) {
+  public SoftResetCommandTranslator(int opcode, int argument) {
     super(opcode, argument);
   }
 

@@ -1,8 +1,8 @@
-package com.mentalab.CommandTranslators;
+package com.mentalab.commandtranslators;
 
-public class SoftResetCommandTranslator extends twoByteCommandTranslator {
+public class ModuleEnableTranslator extends twoByteCommandTranslator {
 
-  public SoftResetCommandTranslator(int opcode, int argument) {
+  public ModuleEnableTranslator(int opcode, int argument) {
     super(opcode, argument);
   }
 

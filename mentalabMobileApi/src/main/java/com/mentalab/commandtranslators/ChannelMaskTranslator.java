@@ -1,4 +1,4 @@
-package com.mentalab.CommandTranslators;
+package com.mentalab.commandtranslators;
 
 public class ChannelMaskTranslator extends twoByteCommandTranslator {
 

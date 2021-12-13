@@ -1,8 +1,8 @@
-package com.mentalab.CommandTranslators;
+package com.mentalab.commandtranslators;
 
-public class FormatMemoryCommandTranslator extends twoByteCommandTranslator {
+public class SamplingRateCommandTranslator extends twoByteCommandTranslator {
 
-  public FormatMemoryCommandTranslator(int opcode, int argument) {
+  public SamplingRateCommandTranslator(int opcode, int argument) {
     super(opcode, argument);
   }
 
