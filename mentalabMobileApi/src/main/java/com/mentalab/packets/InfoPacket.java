@@ -5,9 +5,9 @@ import java.util.ArrayList;
 /**
  * Interface for packets related to device information
  */
-abstract class InfoPacket extends Packet implements QueueablePacket {
-    ArrayList<Float> convertedSamples = null;
-    ArrayList<String> attributes;
+public abstract class InfoPacket extends Packet implements QueueablePacket {
+    public ArrayList<Float> convertedSamples = null;
+    public ArrayList<String> attributes;
 
     public InfoPacket(double timeStamp) {
         super(timeStamp);

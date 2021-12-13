@@ -1,34 +1,30 @@
 package com.mentalab.packets;
 
-import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
-import java.io.IOException;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ListIterator;
 
-/** Root packet interface */
-abstract class Packet {
 
-  // TODO refactor with Enum class
-  // TODO Have release build before final release
-  protected static final String TAG = "Explore";
-  private byte[] byteBuffer = null;
+public abstract class Packet {
+
+  private final byte[] byteBuffer = null;
+  private final double timeStamp;
+
   private int dataCount;
-  private double timeStamp;
 
-  public Packet(double timeStamp) {
+
+  protected Packet(double timeStamp) {
     this.timeStamp = timeStamp;
   }
 
-  /** String representation of attributes */
+
   static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {
     if (bytes.length % numOfbytesPerNumber != 0) {
       throw new InvalidDataException("Illegal length", null);
     }
+
     int arraySize = bytes.length / numOfbytesPerNumber;
     double[] values = new double[arraySize];
     for (int index = 0; index < bytes.length; index += numOfbytesPerNumber) {
@@ -55,23 +51,24 @@ abstract class Packet {
 
 
   /**
-   * Converts binary data stream to human readable voltage values
+   * Converts binary data stream to human-readable voltage values.
    *
    * @param byteBuffer
    */
   public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
 
+
   /** String representation of attributes */
   public abstract String toString();
 
+
   /** Number of element in each packet */
   public abstract int getDataCount();
+
 
   /** Get data values from packet structure */
   public ArrayList<Float> getData() {
     return null;
   }
-  ;
-
 }
 

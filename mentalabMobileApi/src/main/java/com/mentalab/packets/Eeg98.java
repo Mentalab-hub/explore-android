@@ -6,51 +6,53 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-// class Eeg implements DataPacket {}
-class Eeg98 extends DataPacket {
-    private static int channelNumber = 8;
+class Eeg98 extends EEGPacket {
+
+
+    private final static int CHANNEL_NUMBER = 8;
+
 
     public Eeg98(double timeStamp) {
         super(timeStamp);
     }
 
+
     @Override
     public void convertData(byte[] byteBuffer) {
-        List<Float> values = new ArrayList<Float>();
+        List<Float> values = new ArrayList<>();
         try {
-            double[] data = DataPacket.toInt32(byteBuffer);
+            double[] data = EEGPacket.toInt32(byteBuffer);
 
-            for (int index = 0; index < data.length; index++) {
-                // skip int representation for status bit
-                if (index % 9 == 0) continue;
+            for (int i = 0; i < data.length; i++) {
+                if (i % (CHANNEL_NUMBER + 1) == 0) {
+                    continue; // skip int representation of status bit
+                }
+
                 // calculation for gain adjustment
                 double exgUnit = Math.pow(10, -6);
                 double vRef = 2.4;
                 double gain = (exgUnit * (Math.pow(2, 23) - 1)) * 6;
-                values.add((float) (data[index] * (vRef / gain)));
+                values.add((float) (data[i] * (vRef / gain)));
             }
         } catch (InvalidDataException | IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // TODO: React appropriately
         }
         this.convertedSamples = new ArrayList<>(values);
     }
 
+
     @Override
     public String toString() {
-
-        String data = "ExG 8 channel: [";
-
+        StringBuilder data = new StringBuilder("ExG 8 channel: [");
         for (Float convertedSample : this.convertedSamples) {
-            data += convertedSample + " ,";
+            data.append(convertedSample).append(" ,");
         }
         return data + "]";
     }
 
-    /**
-     * Number of element in each packet
-     */
+
     @Override
     public int getDataCount() {
-        return 8;
+        return this.CHANNEL_NUMBER;
     }
 }

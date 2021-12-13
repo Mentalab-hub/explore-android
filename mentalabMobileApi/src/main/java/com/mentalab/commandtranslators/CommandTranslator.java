@@ -1,4 +1,4 @@
-package com.mentalab.CommandTranslators;
+package com.mentalab.commandtranslators;
 
 import android.util.Log;
 import java.nio.ByteBuffer;

@@ -1,11 +1,12 @@
 package com.mentalab.packets;
 
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-class CommandStatusPacket extends UtilPacket {
+public class CommandStatusPacket extends UtilPacket {
     boolean commandStatus;
 
     public CommandStatusPacket(double timeStamp) {
@@ -42,7 +43,7 @@ class CommandStatusPacket extends UtilPacket {
     }
 
     @Override
-    public String getPacketTopic() {
-        return "Command";
+    public Topic getTopic() {
+        return Topic.COMMAND;
     }
 }

@@ -1,7 +1,7 @@
 package com.mentalab;
 
 import android.util.Log;
-import com.mentalab.CommandTranslators.CommandTranslator;
+import com.mentalab.commandtranslators.CommandTranslator;
 import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
@@ -64,7 +64,7 @@ public class MentalabCodec {
   private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
       throws InvalidDataException {
 
-    for (Packet.PacketId packetId : Packet.PacketId.values()) {
+    for (PacketId packetId : PacketId.values()) {
       if (packetId.getNumVal() == pId) {
         Log.d(TAG, "Converting data for Explore");
         Packet packet = packetId.createInstance(timeStamp);
@@ -79,13 +79,13 @@ public class MentalabCodec {
   // TODO refactor this method with new interfaces
   private static void pushDataInQueue(Packet packet) {
 
-    if (packet instanceof DataPacket) {
-      DataPacket dataPacket = (DataPacket) packet;
+    if (packet instanceof EEGPacket) {
+      EEGPacket dataPacket = (EEGPacket) packet;
       int channelCount = dataPacket.getDataCount();
 
       for (int index = 0; index < channelCount; index++) {
         synchronized (decodedDataMap) {
-          ArrayList<Float> convertedSamples = ((DataPacket) packet).getData();
+          ArrayList<Float> convertedSamples = ((EEGPacket) packet).getData();
           String channelKey = "Channel_" + String.valueOf(index + 1);
           if (decodedDataMap.get(channelKey) == null) {
             decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
@@ -93,7 +93,7 @@ public class MentalabCodec {
 
           ConcurrentLinkedDeque<Float> floats =
               (ConcurrentLinkedDeque) decodedDataMap.get(channelKey);
-          floats.offerFirst(((DataPacket) packet).convertedSamples.get(index));
+          floats.offerFirst(((EEGPacket) packet).convertedSamples.get(index));
         }
       }
       // Lsl Packet Subscriber implementation

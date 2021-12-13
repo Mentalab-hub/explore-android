@@ -1,12 +1,12 @@
 package com.mentalab;
 
-import com.mentalab.CommandTranslators.ChannelMaskTranslator;
-import com.mentalab.CommandTranslators.CommandTranslator;
-import com.mentalab.CommandTranslators.FormatMemoryCommandTranslator;
-import com.mentalab.CommandTranslators.ModuleDisableTranslator;
-import com.mentalab.CommandTranslators.ModuleEnableTranslator;
-import com.mentalab.CommandTranslators.SamplingRateCommandTranslator;
-import com.mentalab.CommandTranslators.SoftResetCommandTranslator;
+import com.mentalab.commandtranslators.ChannelMaskTranslator;
+import com.mentalab.commandtranslators.CommandTranslator;
+import com.mentalab.commandtranslators.FormatMemoryCommandTranslator;
+import com.mentalab.commandtranslators.ModuleDisableTranslator;
+import com.mentalab.commandtranslators.ModuleEnableTranslator;
+import com.mentalab.commandtranslators.SamplingRateCommandTranslator;
+import com.mentalab.commandtranslators.SoftResetCommandTranslator;
 
 public class MentalabConstants {
 

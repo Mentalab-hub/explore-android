@@ -1,8 +1,9 @@
 package com.mentalab.packets;
 
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.Topic;
 
-class CommandReceivedPacket extends UtilPacket {
+public class CommandReceivedPacket extends UtilPacket {
     float markerCode;
 
     public CommandReceivedPacket(double timeStamp) {
@@ -34,8 +35,9 @@ class CommandReceivedPacket extends UtilPacket {
         return 1;
     }
 
+
     @Override
-    public String getPacketTopic() {
-        return "Command";
+    public Topic getTopic() {
+        return Topic.COMMAND;
     }
 }

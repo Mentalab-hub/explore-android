@@ -2,6 +2,7 @@ package com.mentalab.packets;
 
 import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.Topic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +10,7 @@ import java.util.Arrays;
 /**
  * Device related information packet to transmit firmware version, ADC mask and sampling rate
  */
-class Orientation extends InfoPacket implements PublishablePacket {
+public class Orientation extends InfoPacket implements PublishablePacket {
     ArrayList<Float> listValues = new ArrayList<Float>();
 
     public Orientation(double timeStamp) {
@@ -78,7 +79,7 @@ class Orientation extends InfoPacket implements PublishablePacket {
     }
 
     @Override
-    public String getPacketTopic() {
-        return "Orn";
+    public Topic getTopic() {
+        return Topic.ORN;
     }
 }

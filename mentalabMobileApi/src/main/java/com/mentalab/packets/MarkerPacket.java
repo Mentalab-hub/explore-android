@@ -1,13 +1,14 @@
 package com.mentalab.packets;
 
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-class MarkerPacket extends InfoPacket implements PublishablePacket {
+public class MarkerPacket extends InfoPacket implements PublishablePacket {
 
     int markerCode;
 
@@ -55,7 +56,7 @@ class MarkerPacket extends InfoPacket implements PublishablePacket {
     }
 
     @Override
-    public String getPacketTopic() {
-        return "Marker";
+    public Topic getTopic() {
+        return Topic.COMMAND;
     }
 }

@@ -1,6 +1,6 @@
 package com.mentalab.packets;
 
-enum PacketId {
+public enum PacketId {
     ORIENTATION(13) {
         @Override
         public Packet createInstance(double timeStamp) {

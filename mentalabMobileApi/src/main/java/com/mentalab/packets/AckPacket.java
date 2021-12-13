@@ -1,10 +1,12 @@
 package com.mentalab.packets;
 
+import com.mentalab.io.Topic;
+
 /**
  * Acknowledgement packet is sent when a configuration command is successfully executed on the
  * device
  */
-class AckPacket extends UtilPacket {
+public class AckPacket extends UtilPacket {
 
     public AckPacket(double timeStamp) {
         super(timeStamp);
@@ -25,7 +27,7 @@ class AckPacket extends UtilPacket {
     }
 
     @Override
-    public String getPacketTopic() {
-        return "Command";
+    public Topic getTopic() {
+        return Topic.COMMAND;
     }
 }
