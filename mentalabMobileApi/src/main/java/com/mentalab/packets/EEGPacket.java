@@ -7,19 +7,73 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class EEGPacket extends Packet implements PublishablePacket {
 
-    public ArrayList<Float> convertedSamples;
     private static final int BUFFER_LENGTH = 3; // TODO: Why is this the case?
 
-    public EEGPacket(double timeStamp) {
+    private final int channelNumber;
+
+    public ArrayList<Float> convertedSamples;
+
+
+    public EEGPacket(double timeStamp, int channelNumber) {
         super(timeStamp);
+        this.channelNumber = channelNumber;
     }
 
 
-    static double[] toInt32(byte[] byteArray) throws InvalidDataException, IOException {
+    @Override
+    public void convertData(byte[] byteBuffer) {
+        final List<Float> values = new ArrayList<>();
+        try {
+            double[] data = EEGPacket.toInt32(byteBuffer);
+
+            for (int i = 0; i < data.length; i++) {
+                if (i % (channelNumber + 1) == 0) {
+                    continue; // skip int representation of status bit
+                }
+
+                // calculation for gain adjustment
+                double exgUnit = Math.pow(10, -6);
+                double vRef = 2.4;
+                double gain = (exgUnit * (Math.pow(2, 23) - 1)) * 6;
+                values.add((float) (data[i] * (vRef / gain)));
+            }
+        } catch (InvalidDataException | IOException e) {
+            e.printStackTrace(); // TODO: React appropriately
+        }
+        this.convertedSamples = new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder data = new StringBuilder("ExG ");
+        data.append(channelNumber);
+        data.append(" channel: [");
+        for (Float convertedSample : this.convertedSamples) {
+            data.append(convertedSample).append(" ,");
+        }
+        return data + "]";
+    }
+
+
+    @Override
+    public int getDataCount() {
+        return this.channelNumber;
+    }
+
+
+    @Override
+    public Topic getTopic() {
+        return Topic.EXG;
+    }
+
+
+    private static double[] toInt32(byte[] byteArray) throws InvalidDataException, IOException {
         if (byteArray.length % BUFFER_LENGTH != 0) {
             throw new InvalidDataException("Byte buffer is not read properly", null);
         }
@@ -50,18 +104,11 @@ public abstract class EEGPacket extends Packet implements PublishablePacket {
             }
             values[i / 3] = value;
         }
-
         return values;
     }
 
 
     public ArrayList<Float> getData() {
         return convertedSamples;
-    }
-
-
-    @Override
-    public Topic getTopic() {
-        return Topic.EXG;
     }
 }
