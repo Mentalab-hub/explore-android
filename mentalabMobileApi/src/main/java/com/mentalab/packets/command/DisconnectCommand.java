@@ -1,15 +1,15 @@
-package com.mentalab.packets.sensors;
+package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
 import com.mentalab.packets.Packet;
 
 /**
- * Packet sent from the device to sync clocks
+ * Disconnection packet is sent when the host machine is disconnected from the device
  */
-class TimeStampPacket extends Packet {
+class DisconnectCommand extends Packet {
 
 
-    public TimeStampPacket(double timeStamp) {
+    public DisconnectCommand(double timeStamp) {
         super(timeStamp);
     }
 
@@ -22,12 +22,12 @@ class TimeStampPacket extends Packet {
     @NonNull
     @Override
     public String toString() {
-        return "TimeStampPacket";
+        return "DisconnectionPacket";
     }
 
 
     @Override
     public int getDataCount() {
-        return 0; // TODO: Explanation...
-    }
+        return 0;
+    } // TODO: Explain
 }

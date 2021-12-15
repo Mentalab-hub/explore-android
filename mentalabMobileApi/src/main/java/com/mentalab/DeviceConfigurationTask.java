@@ -2,9 +2,9 @@ package com.mentalab;
 
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.command.AcknowledgmentPacket;
-import com.mentalab.packets.command.CommandReceivedPacket;
-import com.mentalab.packets.command.CommandStatusPacket;
+import com.mentalab.packets.command.CommandAcknowledgment;
+import com.mentalab.packets.command.CommandReceived;
+import com.mentalab.packets.command.CommandStatus;
 import com.mentalab.packets.Packet;
 
 import java.io.IOException;
@@ -39,15 +39,15 @@ public class DeviceConfigurationTask extends Thread {
 
   public void commandCallback(Packet packet) {
     Log.d("DEBUG_SR", "Data received in callback");
-    if (packet instanceof AcknowledgmentPacket) {
+    if (packet instanceof CommandAcknowledgment) {
       Log.d("DEBUG_SR", "Ack packet received in callback");
     }
 
-    if (packet instanceof CommandReceivedPacket) {
+    if (packet instanceof CommandReceived) {
       Log.d("DEBUG_SR", "CommandReceivedPacket received in callback");
     }
 
-    if (packet instanceof CommandStatusPacket) {
+    if (packet instanceof CommandStatus) {
       Log.d("DEBUG_SR", "CommandStatusPacket received in callback");
     }
   }

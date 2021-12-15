@@ -10,12 +10,12 @@ import java.util.Arrays;
 /**
  * Device related information packet to transmit firmware version, ADC mask and sampling rate
  */
-public class DeviceInfoPacket extends InfoPacket {
+public class DeviceInfo extends InfoPacket {
 
     int adsMask;
     int samplingRate;
 
-    public DeviceInfoPacket(double timeStamp) {
+    public DeviceInfo(double timeStamp) {
         super(timeStamp);
         super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate"); // TODO: Could this be a Bean Object??
     }

@@ -4,9 +4,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.Topic;
-import com.mentalab.packets.Packet;
 import com.mentalab.packets.PublishablePacket;
-import com.mentalab.packets.info.InfoPacket;
 
 import java.util.ArrayList;
 import java.util.Arrays;

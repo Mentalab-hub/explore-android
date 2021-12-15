@@ -11,12 +11,12 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class MarkerPacket extends InfoPacket implements PublishablePacket {
+public class Marker extends InfoPacket implements PublishablePacket {
 
     int markerCode;
 
 
-    public MarkerPacket(double timeStamp) {
+    public Marker(double timeStamp) {
         super(timeStamp);
         super.attributes = Collections.singletonList("Marker");
     }

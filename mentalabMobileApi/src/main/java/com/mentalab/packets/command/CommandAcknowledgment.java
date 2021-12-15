@@ -1,33 +1,35 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
-import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.Topic;
 
-public class CommandReceivedPacket extends UtilPacket {
+/**
+ * Acknowledgement packet is sent when a configuration command is successfully executed on the
+ * device
+ */
+public class CommandAcknowledgment extends UtilPacket {
 
-    float markerCode; // TODO: Why is this here?
 
-    public CommandReceivedPacket(double timeStamp) {
+    public CommandAcknowledgment(double timeStamp) {
         super(timeStamp);
     }
 
 
     @Override
-    public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    public void convertData(byte[] byteBuffer) {
     }
 
 
     @NonNull
     @Override
     public String toString() {
-        return "Command received packet";
+        return "AckPacket";
     }
 
 
     @Override
     public int getDataCount() {
-        return 1;
+        return 0; // TODO: Explanation
     }
 
 

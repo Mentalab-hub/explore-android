@@ -7,12 +7,12 @@ import com.mentalab.io.Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class CommandStatusPacket extends UtilPacket {
+public class CommandStatus extends UtilPacket {
 
     boolean commandStatus;
 
 
-    public CommandStatusPacket(double timeStamp) {
+    public CommandStatus(double timeStamp) {
         super(timeStamp);
     }
 

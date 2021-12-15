@@ -1,13 +1,13 @@
 package com.mentalab.packets;
 
-import com.mentalab.packets.command.CommandReceivedPacket;
-import com.mentalab.packets.command.CommandStatusPacket;
+import com.mentalab.packets.command.CommandReceived;
+import com.mentalab.packets.command.CommandStatus;
 import com.mentalab.packets.sensors.exg.Eeg94;
 import com.mentalab.packets.sensors.exg.Eeg98;
-import com.mentalab.packets.info.DeviceInfoPacket;
+import com.mentalab.packets.info.DeviceInfo;
 import com.mentalab.packets.info.Environment;
 import com.mentalab.packets.info.Orientation;
-import com.mentalab.packets.sensors.MarkerPacket;
+import com.mentalab.packets.sensors.Marker;
 
 public enum PacketId {
     ORIENTATION(13) {
@@ -38,7 +38,7 @@ public enum PacketId {
     INFO(99) {
         @Override
         public Packet createInstance(double timeStamp) {
-            return new DeviceInfoPacket(timeStamp);
+            return new DeviceInfo(timeStamp);
         }
     },
     EEG94(144) {
@@ -80,19 +80,19 @@ public enum PacketId {
     CMDRCV(192) {
         @Override
         public Packet createInstance(double timeStamp) {
-            return new CommandReceivedPacket(timeStamp);
+            return new CommandReceived(timeStamp);
         }
     },
     CMDSTAT(193) {
         @Override
         public Packet createInstance(double timeStamp) {
-            return new CommandStatusPacket(timeStamp);
+            return new CommandStatus(timeStamp);
         }
     },
     MARKER(194) {
         @Override
         public Packet createInstance(double timeStamp) {
-            return new MarkerPacket(timeStamp);
+            return new Marker(timeStamp);
         }
     },
     CALIBINFO(195) {

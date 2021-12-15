@@ -6,12 +6,12 @@ import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.*;
-import com.mentalab.packets.command.AcknowledgmentPacket;
-import com.mentalab.packets.command.CommandReceivedPacket;
-import com.mentalab.packets.command.CommandStatusPacket;
+import com.mentalab.packets.command.CommandAcknowledgment;
+import com.mentalab.packets.command.CommandReceived;
+import com.mentalab.packets.command.CommandStatus;
 import com.mentalab.packets.sensors.exg.EEGPacket;
 import com.mentalab.packets.info.InfoPacket;
-import com.mentalab.packets.sensors.MarkerPacket;
+import com.mentalab.packets.sensors.Marker;
 import com.mentalab.packets.info.Orientation;
 
 import java.io.IOException;
@@ -125,13 +125,13 @@ public class MentalabCodec {
         PubSubManager.getInstance().publish("Orn", packet);
       }
 
-      if (packet instanceof MarkerPacket) {
+      if (packet instanceof Marker) {
         PubSubManager.getInstance().publish("Marker", packet);
       }
 
-    } else if (packet instanceof CommandStatusPacket
-        || packet instanceof AcknowledgmentPacket
-        || packet instanceof CommandReceivedPacket) {
+    } else if (packet instanceof CommandStatus
+        || packet instanceof CommandAcknowledgment
+        || packet instanceof CommandReceived) {
       Log.d("DEBUG_SR", "Publishing packets of type command ");
       PubSubManager.getInstance().publish("Command", packet);
     }
