@@ -1,5 +1,14 @@
 package com.mentalab.packets;
 
+import com.mentalab.packets.command.CommandReceivedPacket;
+import com.mentalab.packets.command.CommandStatusPacket;
+import com.mentalab.packets.sensors.exg.Eeg94;
+import com.mentalab.packets.sensors.exg.Eeg98;
+import com.mentalab.packets.info.DeviceInfoPacket;
+import com.mentalab.packets.info.Environment;
+import com.mentalab.packets.info.Orientation;
+import com.mentalab.packets.sensors.MarkerPacket;
+
 public enum PacketId {
     ORIENTATION(13) {
         @Override

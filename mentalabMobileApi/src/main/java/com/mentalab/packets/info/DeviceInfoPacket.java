@@ -1,4 +1,6 @@
-package com.mentalab.packets;
+package com.mentalab.packets.info;
+
+import androidx.annotation.NonNull;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -8,14 +10,16 @@ import java.util.Arrays;
 /**
  * Device related information packet to transmit firmware version, ADC mask and sampling rate
  */
-class DeviceInfoPacket extends InfoPacket {
+public class DeviceInfoPacket extends InfoPacket {
+
     int adsMask;
     int samplingRate;
 
     public DeviceInfoPacket(double timeStamp) {
         super(timeStamp);
-        attributes = new ArrayList<String>(Arrays.asList("Ads_Mask", "Sampling_Rate"));
+        super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate"); // TODO: Could this be a Bean Object??
     }
+
 
     @Override
     public void convertData(byte[] byteBuffer) {
@@ -23,30 +27,28 @@ class DeviceInfoPacket extends InfoPacket {
                 ByteBuffer.wrap(new byte[]{byteBuffer[2], 0, 0, 0})
                         .order(ByteOrder.LITTLE_ENDIAN)
                         .getInt();
-        samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
-        adsMask = byteBuffer[3] & 0xFF;
+        this.samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
+        this.adsMask = byteBuffer[3] & 0xFF;
 
-        this.convertedSamples =
-                new ArrayList<Float>(
-                        Arrays.asList(new Float[]{Float.valueOf(adsMask), Float.valueOf(samplingRate)}));
+        super.convertedSamples =
+                new ArrayList<>(
+                        Arrays.asList((float) adsMask, (float) samplingRate));
     }
 
-    /**
-     * Return list of elements in each packet
-     */
+
     @Override
     public ArrayList<Float> getData() {
-        return this.convertedSamples;
+        return super.convertedSamples;
     }
 
+
+    @NonNull
     @Override
     public String toString() {
         return "DeviceInfoPacket";
     }
 
-    /**
-     * Number of element in each packet
-     */
+
     @Override
     public int getDataCount() {
         return 2;

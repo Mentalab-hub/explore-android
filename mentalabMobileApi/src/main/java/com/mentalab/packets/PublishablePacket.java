@@ -6,6 +6,6 @@ import com.mentalab.io.Topic;
 /**
  * Placeholder class for publishable packets
  */
-interface PublishablePacket {
+public interface PublishablePacket {
     Topic getTopic();
 }

@@ -1,5 +1,6 @@
-package com.mentalab.packets;
+package com.mentalab.packets.command;
 
+import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.Topic;
 
@@ -7,40 +8,36 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class CommandStatusPacket extends UtilPacket {
+
     boolean commandStatus;
+
 
     public CommandStatusPacket(double timeStamp) {
         super(timeStamp);
     }
 
-    /**
-     * Converts binary data stream to human readable voltage values
-     *
-     * @param byteBuffer
-     */
+
     @Override
     public void convertData(byte[] byteBuffer) throws InvalidDataException {
-        double[] convertedRawValues = super.bytesToDouble(byteBuffer, 2);
+        double[] convertedRawValues = bytesToDouble(byteBuffer, 2); // TODO: Is this a function with side-effects? Why is it here?
         short status =
                 ByteBuffer.wrap(new byte[]{byteBuffer[5], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
         commandStatus = status != 0;
     }
 
-    /**
-     * String representation of attributes
-     */
+
+    @NonNull
     @Override
     public String toString() {
         return "Command status is " + commandStatus;
     }
 
-    /**
-     * Number of element in each packet
-     */
+
     @Override
     public int getDataCount() {
         return 1;
     }
+
 
     @Override
     public Topic getTopic() {

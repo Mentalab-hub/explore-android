@@ -1,4 +1,4 @@
 package com.mentalab.packets;
 
-interface QueueablePacket {
+public interface QueueablePacket {
 }

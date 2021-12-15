@@ -1,5 +1,6 @@
-package com.mentalab.packets;
+package com.mentalab.packets.info;
 
+import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 
 import java.nio.ByteBuffer;
@@ -8,23 +9,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class Environment extends InfoPacket {
-    float temperature, light, battery;
+public class Environment extends InfoPacket {
+
+
+    float temperature, light, battery; // TODO: Why are these here?
+
 
     public Environment(double timeStamp) {
         super(timeStamp);
-        super.attributes = new ArrayList(Arrays.asList("Temperature ", "Light ", "Battery "));
+        super.attributes = Arrays.asList("Temperature ", "Light ", "Battery "); // TODO: Could this be a Bean Object??
     }
 
-    /**
-     * Converts binary data stream to human readable voltage values
-     *
-     * @param byteBuffer
-     */
+
     @Override
     public void convertData(byte[] byteBuffer) throws InvalidDataException {
-        List<Float> listValues = new ArrayList<Float>();
-
+        final List<Float> listValues = new ArrayList<>();
         listValues.add(
                 (float)
                         ByteBuffer.wrap(new byte[]{byteBuffer[0], 0, 0, 0})
@@ -45,60 +44,57 @@ class Environment extends InfoPacket {
                                 / 6.8)
                                 * (1.8 / 2457));
 
-        listValues.add(getBatteryParcentage(batteryLevelRaw));
-        this.convertedSamples = new ArrayList<>(listValues);
+        listValues.add(getBatteryPercentage(batteryLevelRaw));
+        super.convertedSamples = new ArrayList<>(listValues);
     }
 
-    /**
-     * String representation of attributes
-     */
+
+    @NonNull
     @Override
     public String toString() {
-        String data = "Environment packets: [";
-
-        for (int index = 0; index < convertedSamples.size(); index += 1) {
-            if (index % 9 < 3) {
-                data += " Temperature: " + convertedSamples.get(index);
-            } else if (index % 9 < 6) {
-                data += " Light: " + convertedSamples.get(index);
+        final StringBuilder data = new StringBuilder("Environment packets: [");
+        for (int i = 0; i < super.convertedSamples.size(); i++) {
+            final float sample = super.convertedSamples.get(i);
+            if (i % 9 < 3) {
+                data.append(" Temperature: ").append(sample);
+            } else if (i % 9 < 6) {
+                data.append(" Light: ").append(sample);
             } else {
-                data += "Battery: " + convertedSamples.get(index);
+                data.append("Battery: ").append(sample);
             }
-
-            data += ",";
+            data.append(",");
         }
-
-        return data + "]";
+        data.append("]");
+        return data.toString();
     }
 
-    /**
-     * Number of element in each packet
-     */
+
     @Override
     public int getDataCount() {
-        return 3;
+        return super.attributes.size();
     }
 
-    float getBatteryParcentage(float voltage) {
-        double parcentage = 0;
+
+    private float getBatteryPercentage(float voltage) {
+        double perc;
         if (voltage < 3.1) {
-            parcentage = 1;
+            perc = 1d;
         } else if (voltage < 3.5) {
-            parcentage = (1 + (voltage - 3.1) / .4 * 10);
+            perc = 1d + (voltage - 3.1) / .4 * 10d;
         } else if (voltage < 3.8) {
-            parcentage = 10 + (voltage - 3.5) / .3 * 40;
+            perc = 10d + (voltage - 3.5) / .3 * 40d;
         } else if (voltage < 3.9) {
-            parcentage = 40 + (voltage - 3.8) / .1 * 20;
+            perc = 40d + (voltage - 3.8) / .1 * 20d;
         } else if (voltage < 4) {
-            parcentage = 60 + (voltage - 3.9) / .1 * 15;
+            perc = 60d + (voltage - 3.9) / .1 * 15d;
         } else if (voltage < 4.1) {
-            parcentage = 75 + (voltage - 4.) / .1 * 15;
+            perc = 75d + (voltage - 4.0) / .1 * 15d;
         } else if (voltage < 4.2) {
-            parcentage = 90 + (voltage - 4.1) / .1 * 10;
+            perc = 90d + (voltage - 4.1) / .1 * 10d;
         } else {
-            parcentage = 100;
+            perc = 100d;
         }
 
-        return (float) parcentage;
+        return (float) perc;
     }
 }

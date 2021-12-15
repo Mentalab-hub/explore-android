@@ -6,6 +6,13 @@ import com.mentalab.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.*;
+import com.mentalab.packets.command.AcknowledgmentPacket;
+import com.mentalab.packets.command.CommandReceivedPacket;
+import com.mentalab.packets.command.CommandStatusPacket;
+import com.mentalab.packets.sensors.exg.EEGPacket;
+import com.mentalab.packets.info.InfoPacket;
+import com.mentalab.packets.sensors.MarkerPacket;
+import com.mentalab.packets.info.Orientation;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,7 +130,7 @@ public class MentalabCodec {
       }
 
     } else if (packet instanceof CommandStatusPacket
-        || packet instanceof AckPacket
+        || packet instanceof AcknowledgmentPacket
         || packet instanceof CommandReceivedPacket) {
       Log.d("DEBUG_SR", "Publishing packets of type command ");
       PubSubManager.getInstance().publish("Command", packet);

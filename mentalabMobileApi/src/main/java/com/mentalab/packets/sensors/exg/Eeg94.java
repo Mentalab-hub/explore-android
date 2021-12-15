@@ -1,7 +1,6 @@
-package com.mentalab.packets;
+package com.mentalab.packets.sensors.exg;
 
-class Eeg94 extends EEGPacket {
-
+public class Eeg94 extends EEGPacket {
 
     private static final int CHANNEL_NUMBER = 4;
 

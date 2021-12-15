@@ -1,7 +1,10 @@
-package com.mentalab.packets;
+package com.mentalab.packets.sensors.exg;
 
+import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.Topic;
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.PublishablePacket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -13,10 +16,7 @@ import java.util.List;
 public abstract class EEGPacket extends Packet implements PublishablePacket {
 
     private static final int BUFFER_LENGTH = 3; // TODO: Why is this the case?
-
     private final int channelNumber;
-
-    public ArrayList<Float> convertedSamples;
 
 
     public EEGPacket(double timeStamp, int channelNumber) {
@@ -45,19 +45,21 @@ public abstract class EEGPacket extends Packet implements PublishablePacket {
         } catch (InvalidDataException | IOException e) {
             e.printStackTrace(); // TODO: React appropriately
         }
-        this.convertedSamples = new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
+        super.convertedSamples = new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
     }
 
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder data = new StringBuilder("ExG ");
         data.append(channelNumber);
         data.append(" channel: [");
-        for (Float convertedSample : this.convertedSamples) {
-            data.append(convertedSample).append(" ,");
+        for (float sample : super.convertedSamples) {
+            data.append(sample).append(" ,");
         }
-        return data + "]";
+        data.append("]");
+        return data.toString();
     }
 
 
@@ -109,6 +111,6 @@ public abstract class EEGPacket extends Packet implements PublishablePacket {
 
 
     public ArrayList<Float> getData() {
-        return convertedSamples;
+        return super.convertedSamples;
     }
 }

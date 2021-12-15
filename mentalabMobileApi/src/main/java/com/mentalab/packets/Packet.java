@@ -1,5 +1,6 @@
 package com.mentalab.packets;
 
+import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 
 import java.nio.ByteBuffer;
@@ -9,66 +10,73 @@ import java.util.ArrayList;
 
 public abstract class Packet {
 
-  private final byte[] byteBuffer = null;
-  private final double timeStamp;
+    private final byte[] byteBuffer = null;
+    private final double timeStamp;
 
-  private int dataCount;
-
-
-  protected Packet(double timeStamp) {
-    this.timeStamp = timeStamp;
-  }
+    public ArrayList<Float> convertedSamples;
 
 
-  static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {
-    if (bytes.length % numOfbytesPerNumber != 0) {
-      throw new InvalidDataException("Illegal length", null);
+    protected Packet(double timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
-    int arraySize = bytes.length / numOfbytesPerNumber;
-    double[] values = new double[arraySize];
-    for (int index = 0; index < bytes.length; index += numOfbytesPerNumber) {
-      int signBit = bytes[index + numOfbytesPerNumber - 1] >> 7;
-      double value;
 
-      value =
-          ByteBuffer.wrap(new byte[] {bytes[index], bytes[index + 1]})
-              .order(ByteOrder.LITTLE_ENDIAN)
-              .getShort();
-      if (signBit == 1) {
-        value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
-      }
+    protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {
+        if (bytes.length % numOfbytesPerNumber != 0) {
+            throw new InvalidDataException("Illegal length", null);
+        }
 
-      values[index / numOfbytesPerNumber] = value;
+        int arraySize = bytes.length / numOfbytesPerNumber;
+        double[] values = new double[arraySize];
+        for (int index = 0; index < bytes.length; index += numOfbytesPerNumber) {
+            int signBit = bytes[index + numOfbytesPerNumber - 1] >> 7;
+            double value;
+
+            value =
+                    ByteBuffer.wrap(new byte[]{bytes[index], bytes[index + 1]})
+                            .order(ByteOrder.LITTLE_ENDIAN)
+                            .getShort();
+            if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
+                value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
+            }
+
+            values[index / numOfbytesPerNumber] = value;
+        }
+        return values;
     }
-    return values;
-  }
 
 
-  public double getTimeStamp() {
-    return timeStamp;
-  }
+    public double getTimeStamp() {
+        return timeStamp;
+    }
 
 
-  /**
-   * Converts binary data stream to human-readable voltage values.
-   *
-   * @param byteBuffer
-   */
-  public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
+    /**
+     * Converts binary data stream to human-readable voltage values.
+     *
+     * @param byteBuffer
+     */
+    public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
 
 
-  /** String representation of attributes */
-  public abstract String toString();
+    /**
+     * String representation of attributes
+     */
+    @NonNull
+    public abstract String toString();
 
 
-  /** Number of element in each packet */
-  public abstract int getDataCount();
+    /**
+     * Number of element in each packet
+     */
+    public abstract int getDataCount();
 
 
-  /** Get data values from packet structure */
-  public ArrayList<Float> getData() {
-    return null;
-  }
+    /**
+     * Get data values from packet structure
+     */
+    public ArrayList<Float> getData() {
+        return null;
+    }
 }
 

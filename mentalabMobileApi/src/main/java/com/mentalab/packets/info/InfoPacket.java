@@ -1,13 +1,16 @@
-package com.mentalab.packets;
+package com.mentalab.packets.info;
 
-import java.util.ArrayList;
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.QueueablePacket;
+
+import java.util.List;
 
 /**
  * Interface for packets related to device information
  */
 public abstract class InfoPacket extends Packet implements QueueablePacket {
-    public ArrayList<Float> convertedSamples = null;
-    public ArrayList<String> attributes;
+
+    public List<String> attributes;
 
     public InfoPacket(double timeStamp) {
         super(timeStamp);

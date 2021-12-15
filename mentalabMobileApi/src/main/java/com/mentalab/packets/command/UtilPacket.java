@@ -1,13 +1,12 @@
-package com.mentalab.packets;
+package com.mentalab.packets.command;
 
-import java.util.ArrayList;
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.PublishablePacket;
 
 /**
  * Interface for packets related to device synchronization
  */
 abstract class UtilPacket extends Packet implements PublishablePacket {
-
-    protected ArrayList<Float> convertedSamples;
 
     public UtilPacket(double timeStamp) {
         super(timeStamp);
