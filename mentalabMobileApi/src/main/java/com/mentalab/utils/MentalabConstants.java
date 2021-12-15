@@ -1,4 +1,4 @@
-package com.mentalab;
+package com.mentalab.utils;
 
 import com.mentalab.commandtranslators.ChannelMaskTranslator;
 import com.mentalab.commandtranslators.CommandTranslator;
@@ -102,7 +102,7 @@ public class MentalabConstants {
   }
 
   /** Topics available for Publisher Subscriber manager */
-  enum Topic {
+  public enum Topic {
     ExG,
     Orn,
     Marker,

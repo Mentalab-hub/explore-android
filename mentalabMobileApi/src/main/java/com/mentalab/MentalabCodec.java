@@ -2,7 +2,7 @@ package com.mentalab;
 
 import android.util.Log;
 import com.mentalab.commandtranslators.CommandTranslator;
-import com.mentalab.MentalabConstants.Command;
+import com.mentalab.utils.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.*;

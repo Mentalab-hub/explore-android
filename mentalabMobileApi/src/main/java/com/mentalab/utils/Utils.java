@@ -1,4 +1,4 @@
-package com.mentalab;
+package com.mentalab.utils;
 
 public class Utils {
 

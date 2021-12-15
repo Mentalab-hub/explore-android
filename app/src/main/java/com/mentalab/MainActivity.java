@@ -1,5 +1,6 @@
 package com.mentalab;
 
+import android.bluetooth.BluetoothDevice;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.annotation.RequiresApi;
@@ -8,6 +9,8 @@ import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Queue;
@@ -22,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      Set<String> deviceList = MentalabCommands.scan();
+      Set<BluetoothDevice> deviceList = MentalabCommands.scan();
       MentalabCommands.connect(deviceList.iterator().next());
       InputStream inputStream = MentalabCommands.getRawData();
       Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     } catch (NoConnectionException exception) {
       exception.printStackTrace();
     } catch (CommandFailedException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }

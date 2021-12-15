@@ -4,7 +4,7 @@ import com.mentalab.packets.command.CommandReceived;
 import com.mentalab.packets.command.CommandStatus;
 import com.mentalab.packets.sensors.exg.Eeg94;
 import com.mentalab.packets.sensors.exg.Eeg98;
-import com.mentalab.packets.info.DeviceInfo;
+import com.mentalab.packets.info.Device;
 import com.mentalab.packets.info.Environment;
 import com.mentalab.packets.info.Orientation;
 import com.mentalab.packets.sensors.Marker;
@@ -38,7 +38,7 @@ public enum PacketId {
     INFO(99) {
         @Override
         public Packet createInstance(double timeStamp) {
-            return new DeviceInfo(timeStamp);
+            return new Device(timeStamp);
         }
     },
     EEG94(144) {

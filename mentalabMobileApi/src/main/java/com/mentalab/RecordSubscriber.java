@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
 import com.mentalab.packets.Packet;
+import com.mentalab.utils.MentalabConstants;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
