@@ -2,7 +2,7 @@ package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.io.Topic;
+import com.mentalab.io.constants.Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

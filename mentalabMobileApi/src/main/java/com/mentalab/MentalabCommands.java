@@ -1,16 +1,15 @@
 package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import com.mentalab.utils.MentalabConstants;
+import com.mentalab.io.constants.Switch;
+import com.mentalab.io.constants.Topic;
 import com.mentalab.utils.MentalabConstants.Command;
-import com.mentalab.utils.MentalabConstants.DeviceConfigSwitches;
-import com.mentalab.utils.MentalabConstants.SamplingRate;
+import com.mentalab.io.constants.SamplingRate;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
@@ -30,8 +29,7 @@ import static com.mentalab.utils.Utils.TAG;
 public final class MentalabCommands {
 
     private final static Set<BluetoothDevice> bondedExploreDevices = new HashSet<>();
-
-    private static String connectedDeviceName = null;
+    private static ExploreDevice connectedDevice;
 
 
     private MentalabCommands() { // Static class
@@ -49,7 +47,6 @@ public final class MentalabCommands {
 
         for (BluetoothDevice bt : bondedDevices) {
             final String b = bt.getName();
-            Log.d(TAG, "Considering paired device: " + b + "...");
             if (b.startsWith("Explore_")) {
                 bondedExploreDevices.add(bt);
                 Log.i(Utils.TAG, "Explore device available: " + b);
@@ -67,19 +64,33 @@ public final class MentalabCommands {
      * @throws NoBluetoothException
      */
     public static void connect(String deviceName) throws NoBluetoothException, NoConnectionException, IOException {
-        if (bondedExploreDevices.isEmpty()) {
-            scan();
-        }
-
-        final BluetoothDevice device = BluetoothManager.getDevice(deviceName, bondedExploreDevices);
-        BluetoothManager.connectToDevice(device);
-        connectedDeviceName = deviceName;
+        final ExploreDevice device = getExploreDevice(deviceName);
+        connectedDevice = BluetoothManager.connectToDevice(device);
         Log.i(TAG, "Connected to: " + deviceName);
     }
 
 
     public static void connect(BluetoothDevice device) throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException {
         connect(device.getName());
+    }
+
+
+    public static ExploreDevice getExploreDevice(String deviceName) throws NoConnectionException, NoBluetoothException {
+        if (bondedExploreDevices.isEmpty()) {
+            scan();
+        }
+
+        BluetoothDevice device = null;
+        for (BluetoothDevice d : bondedExploreDevices) {
+            if (d.getName().equals(deviceName)) {
+                device = d;
+            }
+        }
+
+        if (device == null) {
+            throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable.");
+        }
+        return new ExploreDevice(device);
     }
 
 
@@ -95,15 +106,14 @@ public final class MentalabCommands {
      */
     @RequiresApi(api = Build.VERSION_CODES.Q)
     public static void record(RecordSubscriber recordSubscriber) throws IOException {
-        final Map<MentalabConstants.Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
+        final Map<Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
         recordSubscriber.setGeneratedFiles(generatedFiles);
-
         Executors.newSingleThreadExecutor().execute(recordSubscriber);
     }
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private static Map<MentalabConstants.Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
+    private static Map<Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
         final Context context = recordSubscriber.getContext();
         final boolean overwrite = recordSubscriber.getOverwrite();
         final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
@@ -122,11 +132,7 @@ public final class MentalabCommands {
      * @throws NoBluetoothException If Bluetooth connection is lost during communication
      */
     public static InputStream getRawData() throws NoBluetoothException, IOException {
-        final BluetoothSocket socket = BluetoothManager.getBTSocket();
-        if (socket == null) {
-            throw new NoBluetoothException("No Bluetooth socket available.");
-        }
-        return socket.getInputStream();
+        return BluetoothManager.getBTSocket().getInputStream();
     }
 
 
@@ -138,11 +144,7 @@ public final class MentalabCommands {
      * @throws NoBluetoothException
      */
     public static OutputStream getOutputStream() throws NoBluetoothException, IOException {
-        final BluetoothSocket socket = BluetoothManager.getBTSocket();
-        if (socket == null) {
-            throw new NoBluetoothException("No Bluetooth socket available.");
-        }
-        return socket.getOutputStream();
+        return BluetoothManager.getBTSocket().getOutputStream();
     }
 
 
@@ -185,9 +187,10 @@ public final class MentalabCommands {
         MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
     }
 
+
     /**
      * Enables or disables data collection per module or channel. Only support enabling/disabling one
-     * module in one call. Mixing enable and disable switch will lead to erroneous result
+     * module in one call. Mixing enable and disable switch will lead to erroneous result //todo: what?
      *
      * <p>By default data from all modules is collected. Disable modules you do not need to save
      * bandwidth and power. Calling setEnabled with a partial map is supported. Trying to enable a
@@ -195,63 +198,13 @@ public final class MentalabCommands {
      * CommandFailedException is received from this method, none or only some of the switches may have
      * been set.
      *
-     * @param switches Map of modules to on (true) or off (false) state accelerometer, magnetometer,
+     * @param onOff Map of modules to on (true) or off (false) state accelerometer, magnetometer,
      *                 gyroscope, environment, channel0 ..channel7
-     * @throws CommandFailedException
-     * @throws NoConnectionException
-     * @throws NoBluetoothException
      */
-    public static void setEnabled(Map<String, Boolean> switches) throws InvalidCommandException {
-        byte[] encodedBytes;
-        ArrayList<String> keySet = new ArrayList<>(switches.keySet());
-        boolean isModulesOnly =
-                keySet.stream()
-                        .allMatch(element -> Arrays.asList(DeviceConfigSwitches.Modules).contains(element));
-
-        if (isModulesOnly) {
-            Log.d("DEBUG_SR", "Only Module!!");
-
-            if (switches.values().iterator().next())
-                encodedBytes =
-                        MentalabCodec.encodeCommand(
-                                Command.CMD_MODULE_ENABLE,
-                                generateExtraParameters(
-                                        Command.CMD_MODULE_ENABLE, new String[]{keySet.iterator().next()}, null));
-            else {
-                encodedBytes =
-                        MentalabCodec.encodeCommand(
-                                Command.CMD_MODULE_DISABLE,
-                                generateExtraParameters(
-                                        Command.CMD_MODULE_DISABLE, new String[]{keySet.iterator().next()}, null));
-            }
-        } else {
-            boolean isChannelsOnly =
-                    keySet.stream()
-                            .allMatch(element -> Arrays.asList(DeviceConfigSwitches.Channels).contains(element));
-            if (isChannelsOnly) {
-                Log.d("DEBUG_SR", "Only Channels!!");
-                encodedBytes =
-                        MentalabCodec.encodeCommand(
-                                Command.CMD_CHANNEL_SET,
-                                generateExtraParameters(
-                                        Command.CMD_CHANNEL_SET,
-                                        switches.keySet().toArray(new String[0]),
-                                        switches.values().toArray(new Boolean[0])));
-
-            } else {
-                Log.d("DEBUG_SR", "Mixed Modules, has to throw Exception");
-                throw new InvalidCommandException("Invalid Command", null);
-            }
-        }
-
-        for (byte encodedByte : encodedBytes) {
-            Log.d(
-                    "DEBUG_SR",
-                    "Converted data for index: " + "is " + String.format("%02X", encodedByte));
-        }
-
-        MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+    public static void setEnabled(Map<Switch, Boolean> onOff) throws InvalidCommandException {
+        connectedDevice.setEnabled(onOff);
     }
+
 
     /**
      * Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
@@ -260,33 +213,7 @@ public final class MentalabCommands {
      * @throws IOException
      */
     public static void pushToLsl() {
-        MentalabCodec.pushToLsl(connectedDeviceName);
-    }
-
-    private static int generateExtraParameters(Command command, String[] arguments, Boolean[] switches) {
-        int argument = 255;
-        if (command == Command.CMD_MODULE_ENABLE || command == Command.CMD_MODULE_DISABLE) {
-            for (int index = 0; index < DeviceConfigSwitches.Modules.length; index++) {
-                if (DeviceConfigSwitches.Modules[index].equals(arguments[0])) {
-                    return index;
-                }
-            }
-        } else {
-            for (int i = 0; i < DeviceConfigSwitches.Channels.length; i++) {
-                for (int indexArguments = 0; indexArguments < arguments.length; indexArguments++) {
-                    if (arguments[indexArguments].equals(DeviceConfigSwitches.Channels[i])) {
-                        if (switches[indexArguments]) {
-                            argument = argument | (1 << i);
-                        } else {
-                            argument = argument & ~(1 << i);
-                        }
-                        break;
-                    }
-                }
-            }
-            return argument;
-        }
-        return argument;
+        MentalabCodec.pushToLsl(connectedDevice);
     }
 
 

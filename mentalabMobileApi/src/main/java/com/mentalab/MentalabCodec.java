@@ -1,5 +1,6 @@
 package com.mentalab;
 
+import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 import com.mentalab.commandtranslators.CommandTranslator;
 import com.mentalab.utils.MentalabConstants.Command;
@@ -61,7 +62,7 @@ public class MentalabCodec {
    * @throws InvalidCommandException when the command is not recognized
    * @return byte[] encoded commands that can be sent to the device
    */
-  static byte[] encodeCommand(Command command, int extraArguments) throws InvalidCommandException {
+  static byte[] encodeCommand(Command command, int extraArguments) {
 
     CommandTranslator translator = command.createInstance(command, extraArguments);
     byte[] translatedBytes = translator.translateCommand(extraArguments);
@@ -149,8 +150,8 @@ public class MentalabCodec {
 
 
   // TODO Decouple executor class from Codec class
-  public static void pushToLsl(String deviceName) {
-    executor.execute(new LslPacketSubscriber(deviceName));
+  public static void pushToLsl(BluetoothDevice device) {
+    executor.execute(new LslPacketSubscriber(device));
   }
 
   static synchronized ExecutorService getExecutorService() {

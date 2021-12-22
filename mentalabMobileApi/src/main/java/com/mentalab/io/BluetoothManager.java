@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
+import com.mentalab.ExploreDevice;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 
@@ -29,7 +30,7 @@ public class BluetoothManager {
     }
 
 
-    public static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
+    private static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (btAdapter == null) {
@@ -39,22 +40,7 @@ public class BluetoothManager {
     }
 
 
-    public static BluetoothDevice getDevice(String deviceName, Set<BluetoothDevice> bondedExploreDevices) throws NoConnectionException {
-        BluetoothDevice device = null;
-        for (BluetoothDevice d : bondedExploreDevices) {
-            if (d.getName().equals(deviceName)) {
-                device = d;
-            }
-        }
-
-        if (device == null) {
-            throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable.");
-        }
-        return device;
-    }
-
-
-    public static BluetoothSocket establishRFCommWithDevice(BluetoothDevice device) throws NoConnectionException, IOException {
+    private static void establishRFCommWithDevice(BluetoothDevice device) throws NoConnectionException, IOException {
         closeSocket();
 
         try {
@@ -66,18 +52,18 @@ public class BluetoothManager {
         }
         Log.i(TAG, "Received rfComm socket.");
 
-        return mmSocket;
     }
 
 
-    public static void connectToDevice(BluetoothDevice device) throws NoConnectionException, IOException {
-        BluetoothManager.establishRFCommWithDevice(device);
+    public static ExploreDevice connectToDevice(ExploreDevice device) throws NoConnectionException, IOException {
+        BluetoothManager.establishRFCommWithDevice(device.getBluetoothDevice());
         try {
             mmSocket.connect();
         } catch (IOException e) {
             BluetoothManager.closeSocket();
             throw new IOException(e);
         }
+        return device;
     }
 
 
@@ -90,7 +76,10 @@ public class BluetoothManager {
     }
 
 
-    public static BluetoothSocket getBTSocket() {
+    public static BluetoothSocket getBTSocket() throws NoBluetoothException {
+        if (mmSocket == null) {
+            throw new NoBluetoothException("No Bluetooth socket available.");
+        }
         return mmSocket;
     }
 }

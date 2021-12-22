@@ -10,25 +10,6 @@ import com.mentalab.commandtranslators.SoftResetCommandTranslator;
 
 public class MentalabConstants {
 
-  public enum SamplingRate {
-    // enum fields
-    SR_250(0x01),
-    SR_500(0x02),
-    SR_1000(0x03);
-
-    // internal state
-    private int samplingRate;
-
-    // constructor
-    private SamplingRate(final int samplingRate) {
-      this.samplingRate = samplingRate;
-    }
-
-    public int getValue() {
-      return samplingRate;
-    }
-  }
-
   public enum Command {
     // enum fields
     CMD_SAMPLING_RATE_SET(0xA1) {
@@ -99,19 +80,6 @@ public class MentalabConstants {
     }
 
     public abstract CommandTranslator createInstance(Command command, int extraArguments);
-  }
-
-  /** Topics available for Publisher Subscriber manager */
-  public enum Topic {
-    ExG,
-    Orn,
-    Marker,
-    Command;
-  }
-
-
-  enum FileType {
-    CSV
   }
 
 

@@ -1,7 +1,7 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
-import com.mentalab.io.Topic;
+import com.mentalab.io.constants.Topic;
 
 /**
  * Acknowledgement packet is sent when a configuration command is successfully executed on the

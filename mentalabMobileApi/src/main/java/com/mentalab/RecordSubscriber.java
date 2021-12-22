@@ -4,8 +4,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
+import com.mentalab.io.constants.FileType;
+import com.mentalab.io.constants.Topic;
 import com.mentalab.packets.Packet;
-import com.mentalab.utils.MentalabConstants;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -23,11 +24,11 @@ public class RecordSubscriber extends Thread {
 
     private boolean overwrite;
     private boolean blocking;
-    private MentalabConstants.FileType fileType;
+    private FileType fileType;
     private int adcMask = 0;
     private float samplingRate = Integer.MAX_VALUE;
     private Double duration;
-    private Map<MentalabConstants.Topic, Uri> generatedFies;
+    private Map<Topic, Uri> generatedFies;
 
 
     private RecordSubscriber(Uri directory, String filename, Context context) {
@@ -64,9 +65,9 @@ public class RecordSubscriber extends Thread {
 
     @Override
     public void run() {
-        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.ExG.name(), this::writeExg);
-        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Orn.name(), this::writeOrn);
-        PubSubManager.getInstance().subscribe(MentalabConstants.Topic.Marker.name(), this::writeMarker);
+        PubSubManager.getInstance().subscribe(Topic.EXG.name(), this::writeExg);
+        PubSubManager.getInstance().subscribe(Topic.ORN.name(), this::writeOrn);
+        PubSubManager.getInstance().subscribe(Topic.MARKER.name(), this::writeMarker);
     }
 
 
@@ -76,7 +77,7 @@ public class RecordSubscriber extends Thread {
         final int noChannels = packet.getDataCount();
         double timestamp = packet.getTimeStamp();
 
-        final Uri location = generatedFies.get(MentalabConstants.Topic.ExG);
+        final Uri location = generatedFies.get(Topic.EXG);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver()
@@ -93,7 +94,7 @@ public class RecordSubscriber extends Thread {
         //todo: validate what's being written
         double timestamp = packet.getTimeStamp();
 
-        final Uri location = generatedFies.get(MentalabConstants.Topic.Orn);
+        final Uri location = generatedFies.get(Topic.ORN);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
@@ -109,7 +110,7 @@ public class RecordSubscriber extends Thread {
         //todo: validate what's being written
         double timestamp = packet.getTimeStamp();
 
-        final Uri location = generatedFies.get(MentalabConstants.Topic.Marker);
+        final Uri location = generatedFies.get(Topic.MARKER);
         try (final BufferedWriter writer =
                      new BufferedWriter(
                              new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
@@ -140,7 +141,7 @@ public class RecordSubscriber extends Thread {
     }
 
 
-    public void setGeneratedFiles(Map<MentalabConstants.Topic, Uri> generatedFies) {
+    public void setGeneratedFiles(Map<Topic, Uri> generatedFies) {
         this.generatedFies = generatedFies;
     }
 
@@ -162,7 +163,7 @@ public class RecordSubscriber extends Thread {
 
         private boolean overwrite = false;
         private boolean blocking = false;
-        private MentalabConstants.FileType fileType = MentalabConstants.FileType.CSV;
+        private FileType fileType = FileType.CSV;
         private Double duration = null;
 
         public Builder(Uri destination, String filename, Context context) {
@@ -182,7 +183,7 @@ public class RecordSubscriber extends Thread {
             return this;
         }
 
-        private Builder setFileType(MentalabConstants.FileType fileType) { // Todo: Private until we support other file types
+        private Builder setFileType(FileType fileType) { // Todo: Private until we support other file types
             this.fileType = fileType;
             return this;
         }

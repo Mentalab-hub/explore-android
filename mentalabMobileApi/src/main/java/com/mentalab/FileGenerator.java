@@ -5,7 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
-import com.mentalab.utils.MentalabConstants;
+import com.mentalab.io.constants.Topic;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -29,25 +29,25 @@ public class FileGenerator {
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public Map<MentalabConstants.Topic, Uri> generateFiles(Uri directory, String filename) throws IOException {
+    public Map<Topic, Uri> generateFiles(Uri directory, String filename) throws IOException {
         //todo: handle & validate filename
         final ContentValues metaDataExg = createMetaDataForFile(filename + "_Exg");
         final ContentValues metaDataOrn = createMetaDataForFile(filename + "_Orn");
         final ContentValues metaDataMarkers = createMetaDataForFile(filename + "_Markers");
 
-        final Map<MentalabConstants.Topic, Uri> createdUris = new HashMap<>();
+        final Map<Topic, Uri> createdUris = new HashMap<>();
         if (!overwrite) {
-            final Uri exgFile = createFile(directory, metaDataExg, MentalabConstants.Topic.ExG);
+            final Uri exgFile = createFile(directory, metaDataExg, Topic.EXG);
             addExgHeader(exgFile);
-            createdUris.put(MentalabConstants.Topic.ExG, exgFile);
+            createdUris.put(Topic.EXG, exgFile);
 
-            final Uri ornFile = createFile(directory, metaDataOrn, MentalabConstants.Topic.Orn);
+            final Uri ornFile = createFile(directory, metaDataOrn, Topic.ORN);
             addOrnHeader(ornFile);
-            createdUris.put(MentalabConstants.Topic.Orn, ornFile);
+            createdUris.put(Topic.ORN, ornFile);
 
-            final Uri markerFile = createFile(directory, metaDataMarkers, MentalabConstants.Topic.Marker);
+            final Uri markerFile = createFile(directory, metaDataMarkers, Topic.MARKER);
             addMarkerHeader(markerFile);
-            createdUris.put(MentalabConstants.Topic.Marker, markerFile);
+            createdUris.put(Topic.MARKER, markerFile);
         } else {
             //Todo: include a delete function
         }
@@ -97,7 +97,7 @@ public class FileGenerator {
     }
 
 
-    private Uri createFile(Uri directory, ContentValues metaData, MentalabConstants.Topic topic) {
+    private Uri createFile(Uri directory, ContentValues metaData, Topic topic) {
         Uri location;
         int i = 1;
         while ((location = context.getContentResolver().insert(directory, metaData)) == null) {

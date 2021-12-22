@@ -1,5 +1,6 @@
 package com.mentalab;
 
+import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 import com.mentalab.LslLoader.ChannelFormat;
 import com.mentalab.LslLoader.StreamInfo;
@@ -17,14 +18,13 @@ public class LslPacketSubscriber extends Thread {
   static LslLoader.StreamOutlet lslStreamOutletOrn;
   static LslLoader.StreamOutlet lslStreamOutletMarker;
   static LslLoader lslLoader = new LslLoader();
-  private static String connectedDeviceName = null;
+  private static BluetoothDevice connectedDevice = null;
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
   private LslLoader.StreamInfo lslStreamInfoMarker;
 
-  public LslPacketSubscriber(String deviceName) {
-    Log.d(TAG, "In Constructor!!!!");
-    connectedDeviceName = deviceName;
+  public LslPacketSubscriber(BluetoothDevice device) {
+    connectedDevice = device;
   }
 
   @Override
@@ -33,12 +33,12 @@ public class LslPacketSubscriber extends Thread {
 
       lslStreamInfoOrn =
           new StreamInfo(
-              connectedDeviceName + "_ORN",
+              connectedDevice.getName() + "_ORN",
               "ORN",
               dataCountOrientation,
               nominalSamplingRateOrientation,
               ChannelFormat.float32,
-              connectedDeviceName + "_ORN");
+              connectedDevice.getName() + "_ORN");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
@@ -46,12 +46,12 @@ public class LslPacketSubscriber extends Thread {
 
       lslStreamInfoMarker =
           new StreamInfo(
-              connectedDeviceName + "_Marker",
+              connectedDevice.getName() + "_Marker",
               "Markers",
               1,
               0,
               ChannelFormat.int32,
-              connectedDeviceName + "_Markers");
+              connectedDevice.getName() + "_Markers");
 
       if (lslStreamInfoMarker == null) {
         throw new IOException("Stream Info is Null!!");
@@ -72,12 +72,12 @@ public class LslPacketSubscriber extends Thread {
     if (lslStreamInfoExg == null) {
       lslStreamInfoExg =
           new StreamInfo(
-              connectedDeviceName + "_ExG",
+              connectedDevice + "_ExG",
               "ExG",
               packet.getDataCount(),
               250,
               LslLoader.ChannelFormat.float32,
-              connectedDeviceName + "_ExG");
+              connectedDevice + "_ExG");
       if (lslStreamInfoExg != null) {
         try {
           lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
