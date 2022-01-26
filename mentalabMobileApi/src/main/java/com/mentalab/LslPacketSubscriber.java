@@ -18,13 +18,13 @@ public class LslPacketSubscriber extends Thread {
   static LslLoader.StreamOutlet lslStreamOutletOrn;
   static LslLoader.StreamOutlet lslStreamOutletMarker;
   static LslLoader lslLoader = new LslLoader();
-  private static BluetoothDevice connectedDevice = null;
+  private static String connectedDeviceName = null;
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
   private LslLoader.StreamInfo lslStreamInfoMarker;
 
-  public LslPacketSubscriber(BluetoothDevice device) {
-    connectedDevice = device;
+  public LslPacketSubscriber(String deviceName) {
+    connectedDeviceName = deviceName;
   }
 
   @Override
@@ -33,12 +33,12 @@ public class LslPacketSubscriber extends Thread {
 
       lslStreamInfoOrn =
           new StreamInfo(
-              connectedDevice.getName() + "_ORN",
+              connectedDeviceName + "_ORN",
               "ORN",
               dataCountOrientation,
               nominalSamplingRateOrientation,
               ChannelFormat.float32,
-              connectedDevice.getName() + "_ORN");
+              connectedDeviceName + "_ORN");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
@@ -46,15 +46,15 @@ public class LslPacketSubscriber extends Thread {
 
       lslStreamInfoMarker =
           new StreamInfo(
-              connectedDevice.getName() + "_Marker",
+              connectedDeviceName + "_Marker",
               "Markers",
               1,
               0,
               ChannelFormat.int32,
-              connectedDevice.getName() + "_Markers");
+              connectedDeviceName + "_Markers");
 
       if (lslStreamInfoMarker == null) {
-        throw new IOException("Stream Info is Null!!");
+        throw new IOException("Stream Info is Null");
       }
       lslStreamOutletMarker = new LslLoader.StreamOutlet(lslStreamInfoMarker);
       Log.d(TAG, "Subscribing!!");
@@ -72,12 +72,12 @@ public class LslPacketSubscriber extends Thread {
     if (lslStreamInfoExg == null) {
       lslStreamInfoExg =
           new StreamInfo(
-              connectedDevice + "_ExG",
+              connectedDeviceName + "_ExG",
               "ExG",
               packet.getDataCount(),
               250,
               LslLoader.ChannelFormat.float32,
-              connectedDevice + "_ExG");
+              connectedDeviceName + "_ExG");
       if (lslStreamInfoExg != null) {
         try {
           lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);

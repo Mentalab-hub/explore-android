@@ -6,6 +6,7 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.io.constants.Switch;
+import com.mentalab.io.constants.Switch.Group;
 import com.mentalab.utils.MentalabConstants;
 
 import java.util.Map;
@@ -37,9 +38,10 @@ public class ExploreDevice {
      *
      * @param onOffSwitches Map of modules to on (true) or off (false) state accelerometer, magnetometer,
      *                      gyroscope, environment, channel0 ..channel7
-     * @throws CommandFailedException
+     * @throws InvalidCommandException
      * @throws NoConnectionException
      * @throws NoBluetoothException
+     * @throws CommandFailedException
      */
     public void setEnabled(Map<Switch, Boolean> onOffSwitches) throws InvalidCommandException {
         if (allSwitchesOfType(onOffSwitches, Switch.Group.Module)) {
@@ -47,20 +49,15 @@ public class ExploreDevice {
                 MentalabConstants.Command cmd = aSwitch.getValue() ?
                         MentalabConstants.Command.CMD_MODULE_ENABLE :
                         MentalabConstants.Command.CMD_MODULE_DISABLE;
-
                 byte[] encodedBytes =
-                        MentalabCodec.encodeCommand(cmd, generateExtraParameters(cmd, new String[]{aSwitch.getKey()}, null));
-
-                if (encodedBytes == null) {
-                    throw new InvalidCommandException("Failed to encode command for switch: " + aSwitch + ". Exiting.");
-                }
+                        MentalabCodec.encodeCommand(cmd, getModuleIndex(aSwitch.getKey()));
                 MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
             }
         } else if (allSwitchesOfType(onOffSwitches, Switch.Group.Channel)) {
             byte[] encodedBytes =
                     MentalabCodec.encodeCommand(
                             MentalabConstants.Command.CMD_CHANNEL_SET,
-                            generateExtraParameters(
+                        generateBinaryChannelMask(
                                     MentalabConstants.Command.CMD_CHANNEL_SET,
                                     onOffSwitches.keySet().toArray(new String[0]),
                                     onOffSwitches.values().toArray(new Boolean[0])));
@@ -77,16 +74,9 @@ public class ExploreDevice {
                 .allMatch(aSwitch -> aSwitch.isInGroup(group));
     }
 
-
-    private static int generateExtraParameters(MentalabConstants.Command command, String[] arguments, Boolean[] switches) {
+    //TODO change device config to switch enumerator
+    private static int generateBinaryChannelMask(MentalabConstants.Command command, String[] arguments, Boolean[] switches) {
         int argument = 255; // TODO: what?
-        if (command == MentalabConstants.Command.CMD_MODULE_ENABLE || command == MentalabConstants.Command.CMD_MODULE_DISABLE) { //todo: this asks - is the commmand changing a module. Split into new function
-            for (int index = 0; index < MentalabConstants.DeviceConfigSwitches.Modules.length; index++) {
-                if (MentalabConstants.DeviceConfigSwitches.Modules[index].equals(arguments[0])) {
-                    return index;
-                }
-            }
-        } else {
             for (int i = 0; i < MentalabConstants.DeviceConfigSwitches.Channels.length; i++) {
                 for (int indexArguments = 0; indexArguments < arguments.length; indexArguments++) {
                     if (arguments[indexArguments].equals(MentalabConstants.DeviceConfigSwitches.Channels[i])) {
@@ -100,7 +90,17 @@ public class ExploreDevice {
                 }
             }
             return argument;
+    }
+
+    private int getModuleIndex(Switch switchName){
+        Group[] moduleValues = Group.Module.values();
+        for(int index = 0;index < moduleValues.length; index ++ )
+        {
+            if(switchName.name().equals(moduleValues[index])){
+                return index;
+            }
         }
-        return argument;
+        //TODO throw invalid command exception
+        return 0;
     }
 }

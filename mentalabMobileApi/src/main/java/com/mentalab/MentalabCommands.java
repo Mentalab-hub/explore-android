@@ -213,7 +213,7 @@ public final class MentalabCommands {
      * @throws IOException
      */
     public static void pushToLsl() {
-        MentalabCodec.pushToLsl(connectedDevice);
+        MentalabCodec.pushToLsl(connectedDevice.getBluetoothDevice().getName());
     }
 
 

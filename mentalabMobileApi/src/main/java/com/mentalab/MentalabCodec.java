@@ -46,13 +46,13 @@ public class MentalabCodec {
    * }<pre>
    *
    * @throws InvalidDataException throws when invalid data is received
-   * @stream InputStream of device bytes
+   * @param stream Input stream of device bytes
    * @return Immutable Map of Queues of Numbers
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
     decoderTask = executor.submit(new ConnectedThread(stream));
-    Log.d(TAG, "Started execution of decoder!!");
+    Log.d(TAG, "Started execution of decoder");
     return decodedDataMap;
   }
 
@@ -150,8 +150,8 @@ public class MentalabCodec {
 
 
   // TODO Decouple executor class from Codec class
-  public static void pushToLsl(BluetoothDevice device) {
-    executor.execute(new LslPacketSubscriber(device));
+  public static void pushToLsl(String deviceName) {
+    executor.execute(new LslPacketSubscriber(deviceName));
   }
 
   static synchronized ExecutorService getExecutorService() {
