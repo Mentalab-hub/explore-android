@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import com.mentalab.io.constants.Switch;
+import com.mentalab.io.Switch;
 import com.mentalab.io.constants.Topic;
 import com.mentalab.utils.MentalabConstants.Command;
 import com.mentalab.io.constants.SamplingRate;
@@ -189,20 +189,52 @@ public final class MentalabCommands {
 
 
     /**
-     * Enables or disables data collection per module or channel. Only support enabling/disabling one
-     * module in one call. Mixing enable and disable switch will lead to erroneous result //todo: what?
+     * Enables or disables data collection of a channel.
+     * Mixing enable and disable switch will lead to erroneous result //todo: what?
      *
-     * <p>By default data from all modules is collected. Disable modules you do not need to save
-     * bandwidth and power. Calling setEnabled with a partial map is supported. Trying to enable a
+     * <p>By default data from all channels is collected. Disable channels you do not need to save
+     * bandwidth and power. Calling setChannels with only some channels is supported. Trying to enable a
      * channel that the device does not have results in a CommandFailedException thrown. When a
      * CommandFailedException is received from this method, none or only some of the switches may have
      * been set.
      *
-     * @param onOff Map of modules to on (true) or off (false) state accelerometer, magnetometer,
-     *                 gyroscope, environment, channel0 ..channel7
+     * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
+     * @throws InvalidCommandException If the provided Switches are not all type Channel.
      */
-    public static void setEnabled(Map<Switch, Boolean> onOff) throws InvalidCommandException {
-        connectedDevice.setEnabled(onOff);
+    public static void setChannels(List<Switch> channels) throws InvalidCommandException {
+        if (channels.stream().anyMatch(s -> s.isInGroup(Switch.Group.Module))) {
+            throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
+        }
+        connectedDevice.setActiveChannels(channels);
+    }
+
+
+    /**
+     * Set a single channel on or off.
+     * @param channel Switch The channel you would like to turn on (true) or off (false).
+     *
+     * @throws InvalidCommandException If the provided Switch is not of type Channel.
+     */
+    public static void setChannel(Switch channel) throws InvalidCommandException {
+        List<Switch> channelToList = new ArrayList<>();
+        channelToList.add(channel);
+        setChannels(channelToList);
+    }
+
+
+    /**
+     * Enables or disables data collection of a module.
+     *
+     * <p>By default data from all modules is collected. Disable modules you do not need to save
+     * bandwidth and power. Calling setModules with only some modules is supported.
+     *
+     * @param module The module to be turned on or off ORN, ENVIRONMENT, EXG
+     */
+    public static void setModule(Switch module) throws InvalidCommandException {
+        if (module.isInGroup(Switch.Group.Channel)) {
+            throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
+        }
+        connectedDevice.setActiveModules(module);
     }
 
 
