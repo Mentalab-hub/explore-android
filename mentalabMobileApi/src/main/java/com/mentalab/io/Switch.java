@@ -38,7 +38,7 @@ public enum Switch {
         return this.group == group;
     }
 
-
+    
     public boolean isOn() {
         return this.on;
     }

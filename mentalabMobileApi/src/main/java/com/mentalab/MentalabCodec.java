@@ -3,6 +3,9 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 import com.mentalab.commandtranslators.CommandTranslator;
+import com.mentalab.io.Switch;
+import com.mentalab.io.Switch.Group;
+import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.utils.MentalabConstants.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
@@ -24,8 +27,7 @@ import java.util.concurrent.*;
 public class MentalabCodec {
 
   private static final String TAG = "Explore";
-  private static final int NTHREADPOOL = 100;
-  private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
+
   public static Map<String, Queue<Float>> decodedDataMap = null;
   private static Future<?> decoderTask = null;
 
@@ -51,7 +53,7 @@ public class MentalabCodec {
    */
   public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
 
-    decoderTask = executor.submit(new ConnectedThread(stream));
+    decoderTask = ExecutorServiceManager.getExecutorService().submit(new ConnectedThread(stream));
     Log.d(TAG, "Started execution of decoder!!");
     return decodedDataMap;
   }
@@ -69,7 +71,7 @@ public class MentalabCodec {
     return translatedBytes;
   }
 
-  private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
+  private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
       throws InvalidDataException {
 
     for (PacketId packetId : PacketId.values()) {
@@ -79,62 +81,32 @@ public class MentalabCodec {
         if (packet != null) {
           packet.convertData(byteBuffer);
           Log.d(TAG, "Data decoded is " + packet.toString());
-          pushDataInQueue(packet);
+          return packet;
         }
       }
     }
+    return null;
   }
-  // TODO refactor this method with new interfaces
   private static void pushDataInQueue(Packet packet) {
 
-    if (packet instanceof EEGPacket) {
-      EEGPacket dataPacket = (EEGPacket) packet;
-      int channelCount = dataPacket.getDataCount();
 
-      for (int index = 0; index < channelCount; index++) {
-        synchronized (decodedDataMap) {
-          ArrayList<Float> convertedSamples = ((EEGPacket) packet).getData();
-          String channelKey = "Channel_" + String.valueOf(index + 1);
-          if (decodedDataMap.get(channelKey) == null) {
-            decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
-          }
 
-          ConcurrentLinkedDeque<Float> floats =
-              (ConcurrentLinkedDeque) decodedDataMap.get(channelKey);
-          floats.offerFirst(((EEGPacket) packet).convertedSamples.get(index));
-        }
-      }
-      // Lsl Packet Subscriber implementation
-      PubSubManager.getInstance().publish("ExG", packet);
-
-    } else if (packet instanceof InfoPacket) {
-
+    if (packet instanceof QueueablePacket){
       int channelCount = packet.getDataCount();
-
+      ArrayList<Float> convertedSamples = packet.getData();
+      List<String> attributes = packet.attributes;
       for (int index = 0; index < channelCount; index++) {
         synchronized (decodedDataMap) {
-          String channelKey = ((InfoPacket) packet).attributes.get(index);
+          String channelKey = attributes.get(index);
           if (decodedDataMap.get(channelKey) == null) {
             decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
           }
+
           ConcurrentLinkedDeque<Float> floats =
               (ConcurrentLinkedDeque) decodedDataMap.get(channelKey);
-          floats.offerFirst(((InfoPacket) packet).convertedSamples.get(index));
+          floats.offerFirst(convertedSamples.get(index));
         }
       }
-      if (packet instanceof Orientation) {
-        PubSubManager.getInstance().publish("Orn", packet);
-      }
-
-      if (packet instanceof Marker) {
-        PubSubManager.getInstance().publish("Marker", packet);
-      }
-
-    } else if (packet instanceof CommandStatus
-        || packet instanceof CommandAcknowledgment
-        || packet instanceof CommandReceived) {
-      Log.d("DEBUG_SR", "Publishing packets of type command ");
-      PubSubManager.getInstance().publish("Command", packet);
     }
   }
 
@@ -151,12 +123,10 @@ public class MentalabCodec {
 
   // TODO Decouple executor class from Codec class
   public static void pushToLsl(BluetoothDevice device) {
-    executor.execute(new LslPacketSubscriber(device));
+    ExecutorServiceManager.getExecutorService().execute(new LslPacketSubscriber(device));
   }
 
-  static synchronized ExecutorService getExecutorService() {
-    return executor;
-  }
+
 
   static void stopDecoder() {
     decoderTask.cancel(true);
@@ -206,7 +176,13 @@ public class MentalabCodec {
           Log.d(TAG, "reading count is ...." + read);
           // parsing payload data
 
-          parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+          Packet packet = parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+          if (packet instanceof QueueablePacket){
+            pushDataInQueue(packet);
+          }
+          if (packet instanceof PublishablePacket){
+            PubSubManager.getInstance().publish(((PublishablePacket) packet).getTopic().toString(), packet);
+          }
 
         } catch (IOException | InvalidDataException exception) {
           exception.printStackTrace();
@@ -221,4 +197,6 @@ public class MentalabCodec {
       }
     }
   }
+
+  private static void pushDataInQueue(){}
 }

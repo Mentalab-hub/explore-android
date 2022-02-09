@@ -6,6 +6,7 @@ import com.mentalab.exception.InvalidDataException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class Packet {
@@ -13,6 +14,7 @@ public abstract class Packet {
     private final byte[] byteBuffer = null;
     private final double timeStamp;
 
+    public List<String> attributes;
     public ArrayList<Float> convertedSamples;
 
 
@@ -78,5 +80,6 @@ public abstract class Packet {
     public ArrayList<Float> getData() {
         return null;
     }
+
 }
 

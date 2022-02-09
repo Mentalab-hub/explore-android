@@ -10,7 +10,7 @@ import java.util.List;
  */
 public abstract class InfoPacket extends Packet implements QueueablePacket {
 
-    public List<String> attributes;
+
 
     public InfoPacket(double timeStamp) {
         super(timeStamp);

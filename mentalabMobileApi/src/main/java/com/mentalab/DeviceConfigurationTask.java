@@ -2,6 +2,7 @@ package com.mentalab;
 
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.command.CommandAcknowledgment;
 import com.mentalab.packets.command.CommandReceived;
 import com.mentalab.packets.command.CommandStatus;
@@ -32,7 +33,7 @@ public class DeviceConfigurationTask extends Thread {
       Thread.sleep(1000);
       Log.d("DEBUG_SR", "Finished sending data..now waiting for acknowledgement!");
 
-    } catch (IOException | NoBluetoothException | InterruptedException exception) {
+    } catch (IOException | NoBluetoothException | InterruptedException | NoConnectionException exception) {
       exception.printStackTrace();
     }
   }
