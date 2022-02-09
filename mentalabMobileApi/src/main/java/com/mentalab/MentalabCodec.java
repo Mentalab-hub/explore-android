@@ -88,9 +88,7 @@ public class MentalabCodec {
     return null;
   }
   private static void pushDataInQueue(Packet packet) {
-
-
-
+    
     if (packet instanceof QueueablePacket){
       int channelCount = packet.getDataCount();
       ArrayList<Float> convertedSamples = packet.getData();
@@ -197,6 +195,4 @@ public class MentalabCodec {
       }
     }
   }
-
-  private static void pushDataInQueue(){}
 }
