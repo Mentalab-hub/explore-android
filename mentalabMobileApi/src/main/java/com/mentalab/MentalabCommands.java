@@ -8,12 +8,10 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.io.Switch;
 import com.mentalab.io.constants.Topic;
+import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.utils.MentalabConstants.Command;
 import com.mentalab.io.constants.SamplingRate;
-import com.mentalab.exception.CommandFailedException;
-import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.NoConnectionException;
+import com.mentalab.exception.*;
 import com.mentalab.io.BluetoothManager;
 import com.mentalab.utils.Utils;
 
@@ -131,7 +129,9 @@ public final class MentalabCommands {
      * @throws IOException
      * @throws NoBluetoothException If Bluetooth connection is lost during communication
      */
-    public static InputStream getRawData() throws NoBluetoothException, IOException {
+    public static InputStream getRawData()
+        throws NoBluetoothException, IOException, NoConnectionException {
+        verifyBtConnectionStatus();
         return BluetoothManager.getBTSocket().getInputStream();
     }
 
@@ -143,7 +143,9 @@ public final class MentalabCommands {
      * @throws NoConnectionException when Bluetooth connection is lost during communication
      * @throws NoBluetoothException
      */
-    public static OutputStream getOutputStream() throws NoBluetoothException, IOException {
+    public static OutputStream getOutputStream()
+        throws NoBluetoothException, IOException, NoConnectionException {
+        verifyBtConnectionStatus();
         return BluetoothManager.getBTSocket().getOutputStream();
     }
 
@@ -158,9 +160,11 @@ public final class MentalabCommands {
      * @throws CommandFailedException
      * @throws NoBluetoothException
      */
-    public static void setSamplingRate(SamplingRate samplingRate) throws InvalidCommandException {
+    public static void setSamplingRate(SamplingRate samplingRate)
+        throws NoBluetoothException, NoConnectionException {
+        verifyBtConnectionStatus();
         final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
-        MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
     }
 
 
@@ -170,9 +174,11 @@ public final class MentalabCommands {
      * @throws CommandFailedException
      * @throws NoBluetoothException
      */
-    public static void formatDeviceMemory() throws InvalidCommandException {
+    public static void formatDeviceMemory()
+        throws NoBluetoothException, NoConnectionException {
+        verifyBtConnectionStatus();
         final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MEMORY_FORMAT, 0);
-        MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
     }
 
 
@@ -182,9 +188,11 @@ public final class MentalabCommands {
      * @throws CommandFailedException when sampling rate change fails
      * @throws NoBluetoothException
      */
-    public static void softReset() throws InvalidCommandException {
+    public static void softReset()
+        throws NoBluetoothException, NoConnectionException {
+        verifyBtConnectionStatus();
         final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SOFT_RESET, 0);
-        MentalabCodec.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
     }
 
 
@@ -245,11 +253,18 @@ public final class MentalabCommands {
      * @throws IOException
      */
     public static void pushToLsl() {
-        MentalabCodec.pushToLsl(connectedDevice);
+        //MentalabCodec.pushToLsl(connectedDevice);
     }
 
 
     public void clearDeviceList() {
         bondedExploreDevices.clear();
+    }
+
+    private static void verifyBtConnectionStatus() throws NoBluetoothException, NoConnectionException{
+        BluetoothManager.getBluetoothAdapter();
+        if (connectedDevice == null){
+            throw new NoConnectionException("Explore Device is not connected", null);
+        }
     }
 }

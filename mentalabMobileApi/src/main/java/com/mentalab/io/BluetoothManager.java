@@ -30,7 +30,7 @@ public class BluetoothManager {
     }
 
 
-    private static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
+    public static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (btAdapter == null) {
