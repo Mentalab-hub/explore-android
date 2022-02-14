@@ -1,34 +1,36 @@
-package com.mentalab;
+package com.mentalab.tasks;
 
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
-import com.mentalab.LslLoader.ChannelFormat;
-import com.mentalab.LslLoader.StreamInfo;
+import com.mentalab.PubSubManager;
 import com.mentalab.packets.Packet;
-
+import com.mentalab.tasks.LslLoader.ChannelFormat;
+import com.mentalab.tasks.LslLoader.StreamInfo;
+import com.mentalab.tasks.LslLoader.StreamOutlet;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
-public class LslPacketSubscriber extends Thread {
+public class LslStreamerTask implements Callable<Void> {
 
   private static final String TAG = "EXPLORE_LSL_DEV";
   private static final int nominalSamplingRateOrientation = 20;
   private static final int dataCountOrientation = 9;
-  static LslLoader.StreamOutlet lslStreamOutletExg;
-  static LslLoader.StreamOutlet lslStreamOutletOrn;
-  static LslLoader.StreamOutlet lslStreamOutletMarker;
+  static StreamOutlet lslStreamOutletExg;
+  static StreamOutlet lslStreamOutletOrn;
+  static StreamOutlet lslStreamOutletMarker;
   static LslLoader lslLoader = new LslLoader();
-  private static BluetoothDevice connectedDevice = null;
+  private static BluetoothDevice connectedDevice;
   private LslLoader.StreamInfo lslStreamInfoExg;
   private LslLoader.StreamInfo lslStreamInfoOrn;
   private LslLoader.StreamInfo lslStreamInfoMarker;
 
-  public LslPacketSubscriber(BluetoothDevice device) {
+  public LslStreamerTask(BluetoothDevice device) {
     connectedDevice = device;
   }
 
   @Override
-  public void run() {
+  public Void call() {
     try {
 
       lslStreamInfoOrn =
@@ -54,7 +56,7 @@ public class LslPacketSubscriber extends Thread {
               connectedDevice.getName() + "_Markers");
 
       if (lslStreamInfoMarker == null) {
-        throw new IOException("Stream Info is Null!!");
+        throw new IOException("Stream Info is Null");
       }
       lslStreamOutletMarker = new LslLoader.StreamOutlet(lslStreamInfoMarker);
       Log.d(TAG, "Subscribing!!");
@@ -64,8 +66,11 @@ public class LslPacketSubscriber extends Thread {
 
       PubSubManager.getInstance().subscribe("Marker", this::packetCallbackMarker);
     } catch (IOException exception) {
-      exception.printStackTrace();
+      lslStreamOutletExg.close();
+      lslStreamOutletOrn.close();
+      lslStreamOutletMarker.close();
     }
+    return null;
   }
 
   public void packetCallbackExG(Packet packet) {

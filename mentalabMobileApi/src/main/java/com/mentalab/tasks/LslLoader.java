@@ -1,4 +1,4 @@
-package com.mentalab;
+package com.mentalab.tasks;
 
 import android.util.Log;
 import com.sun.jna.Library;

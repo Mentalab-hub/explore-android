@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.io.Switch;
 import com.mentalab.service.ExecutorServiceManager;
+import com.mentalab.tasks.DeviceConfigurationTask;
 import com.mentalab.utils.MentalabConstants;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class ExploreDevice {
         if (encodedBytes == null) {
             throw new InvalidCommandException("Failed to encode command for switches. Exiting.");
         }
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+        ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
     }
 
 
@@ -59,6 +60,6 @@ public class ExploreDevice {
         if (encodedBytes == null) {
             throw new InvalidCommandException("Failed to encode command for switch: " + aSwitch + ". Exiting.");
         }
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+        ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
     }
 }
