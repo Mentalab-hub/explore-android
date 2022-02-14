@@ -43,8 +43,6 @@ public class MainActivity extends AppCompatActivity {
       exception.printStackTrace();
     } catch (NoConnectionException exception) {
       exception.printStackTrace();
-    } catch (CommandFailedException e) {
-      e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
