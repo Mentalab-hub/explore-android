@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public final class MentalabCommands {
 
@@ -162,12 +163,12 @@ public final class MentalabCommands {
    * @throws CommandFailedException
    * @throws NoBluetoothException
    */
-  public static void setSamplingRate(SamplingRate samplingRate)
+  public static Future<Boolean> setSamplingRate(SamplingRate samplingRate)
       throws NoBluetoothException, NoConnectionException, CommandFailedException {
     verifyBtConnectionStatus();
     final byte[] encodedBytes =
         MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
-    ExecutorServiceManager.getExecutorService()
+    return ExecutorServiceManager.getExecutorService()
         .submit(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
   }
 
@@ -176,11 +177,13 @@ public final class MentalabCommands {
    *
    * @throws CommandFailedException
    * @throws NoBluetoothException
+   * @return
    */
-  public static void formatDeviceMemory() throws NoBluetoothException, NoConnectionException {
+  public static Future<Boolean> formatDeviceMemory()
+      throws NoBluetoothException, NoConnectionException, CommandFailedException {
     verifyBtConnectionStatus();
     final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MEMORY_FORMAT, 0);
-    ExecutorServiceManager.getExecutorService()
+    return ExecutorServiceManager.getExecutorService()
         .submit(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
   }
 
@@ -189,11 +192,13 @@ public final class MentalabCommands {
    *
    * @throws CommandFailedException when sampling rate change fails
    * @throws NoBluetoothException
+   * @return
    */
-  public static void softReset() throws NoBluetoothException, NoConnectionException {
+  public static Future<Boolean> softReset()
+      throws NoBluetoothException, NoConnectionException, CommandFailedException {
     verifyBtConnectionStatus();
     final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SOFT_RESET, 0);
-    ExecutorServiceManager.getExecutorService()
+    return ExecutorServiceManager.getExecutorService()
         .submit(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
   }
 

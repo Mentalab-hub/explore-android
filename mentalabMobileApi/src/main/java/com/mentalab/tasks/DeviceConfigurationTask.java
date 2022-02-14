@@ -17,7 +17,7 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
 
   // OutputStream btOutputStream;
   byte[] byteArray;
-  boolean result;
+  volatile boolean result;
 
   public DeviceConfigurationTask(byte[] encodedBytes) {
     // btOutputStream = outputStream;
