@@ -32,7 +32,6 @@ public class BluetoothManager {
 
     public static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-
         if (btAdapter == null) {
             throw new NoBluetoothException("Bluetooth service not available", null);
         }
@@ -42,7 +41,6 @@ public class BluetoothManager {
 
     private static void establishRFCommWithDevice(BluetoothDevice device) throws NoConnectionException, IOException {
         closeSocket();
-
         try {
             final UUID uuid = UUID.fromString(UUID_BLUETOOTH_SPP);
             mmSocket = device.createRfcommSocketToServiceRecord(uuid);

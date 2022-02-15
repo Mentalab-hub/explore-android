@@ -4,13 +4,17 @@ import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.io.Switch;
 import com.mentalab.service.ExecutorServiceManager;
-import com.mentalab.utils.MentalabConstants;
+import com.mentalab.commandtranslators.Command;
+import com.mentalab.utils.DeviceConfigurationTask;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 public class ExploreDevice {
 
     private final BluetoothDevice btDevice;
+
+    private int noChannels = 4; // default 4
 
 
     public ExploreDevice(BluetoothDevice btDevice) {
@@ -29,16 +33,18 @@ public class ExploreDevice {
      * @param switches List of channel switches, indicating which channels should be on and off
      * @throws InvalidCommandException
      */
-    public void setActiveChannels(List<Switch> switches) throws InvalidCommandException {
-        final MentalabConstants.Command cmd = MentalabConstants.Command.CMD_CHANNEL_SET;
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(cmd, generateChannelsArg(switches));
+    public Future<Boolean> setActiveChannels(List<Switch> switches) throws InvalidCommandException {
+        final Command cmd = Command.CMD_CHANNEL_SET;
+        cmd.setValue(generateChannelsArg(switches));
+        final byte[] encodedBytes = MentalabCodec.encodeCommand(cmd);
         if (encodedBytes == null) {
             throw new InvalidCommandException("Failed to encode command for switches. Exiting.");
         }
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
     }
 
 
+    // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
     private static int generateChannelsArg(List<Switch> switches) {
         StringBuilder binaryArgument = new StringBuilder("11111111"); // When 8 channels are active, we will be sending binary 11111111 = 255
         for (Switch aSwitch : switches) {
@@ -50,15 +56,14 @@ public class ExploreDevice {
     }
 
 
-    public void setActiveModules(Switch aSwitch) throws InvalidCommandException {
-        final MentalabConstants.Command cmd = aSwitch.isOn() ?
-                MentalabConstants.Command.CMD_MODULE_ENABLE :
-                MentalabConstants.Command.CMD_MODULE_DISABLE;
+    public void setActiveModules(Switch s) throws InvalidCommandException {
+        final Command cmd = s.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
+        cmd.setValue(s.getID());
 
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(cmd, aSwitch.getID());
+        final byte[] encodedBytes = MentalabCodec.encodeCommand(cmd);
         if (encodedBytes == null) {
-            throw new InvalidCommandException("Failed to encode command for switch: " + aSwitch + ". Exiting.");
+            throw new InvalidCommandException("Failed to encode command for switch: " + s + ". Exiting.");
         }
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes));
+        ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
     }
 }

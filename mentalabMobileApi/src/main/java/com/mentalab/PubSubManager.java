@@ -1,15 +1,17 @@
 package com.mentalab;
 
+import com.mentalab.io.constants.Topic;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 class PubSubManager {
+
   private static final PubSubManager pubSubSingleton = new PubSubManager();
 
-  private Map<String, ArrayList<Consumer<?>>> topicsSubscribers =
-      new HashMap<String, ArrayList<Consumer<?>>>();
+  private final Map<Topic, ArrayList<Consumer<?>>> topicsSubscribers = new HashMap<>();
 
   public static PubSubManager getInstance() {
     return pubSubSingleton;
@@ -24,11 +26,11 @@ class PubSubManager {
     }
   }
 
-  public synchronized <T> void subscribe(String topicName, Consumer<T> subscriberCallback) {
-    ArrayList<Consumer<?>> subscribers = this.topicsSubscribers.get(topicName);
+  public synchronized <T> void subscribe(Topic topic, Consumer<T> subscriberCallback) {
+    ArrayList<Consumer<?>> subscribers = this.topicsSubscribers.get(topic);
     if (subscribers == null) {
       subscribers = new ArrayList<Consumer<?>>();
-      topicsSubscribers.put(topicName, subscribers);
+      topicsSubscribers.put(topic, subscribers);
     }
     subscribers.add(subscriberCallback);
   }

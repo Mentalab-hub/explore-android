@@ -9,17 +9,19 @@ import androidx.annotation.RequiresApi;
 import com.mentalab.io.Switch;
 import com.mentalab.io.constants.Topic;
 import com.mentalab.service.ExecutorServiceManager;
-import com.mentalab.utils.MentalabConstants.Command;
+import com.mentalab.commandtranslators.Command;
 import com.mentalab.io.constants.SamplingRate;
 import com.mentalab.exception.*;
 import com.mentalab.io.BluetoothManager;
+import com.mentalab.utils.DeviceConfigurationTask;
+import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import static com.mentalab.utils.Utils.TAG;
 
@@ -61,15 +63,17 @@ public final class MentalabCommands {
      * @throws NoConnectionException
      * @throws NoBluetoothException
      */
-    public static void connect(String deviceName) throws NoBluetoothException, NoConnectionException, IOException {
+    public static ExploreDevice connect(String deviceName) throws NoBluetoothException, NoConnectionException, IOException {
         final ExploreDevice device = getExploreDevice(deviceName);
         connectedDevice = BluetoothManager.connectToDevice(device);
         Log.i(TAG, "Connected to: " + deviceName);
+        return connectedDevice;
     }
 
 
-    public static void connect(BluetoothDevice device) throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException {
+    public static ExploreDevice connect(BluetoothDevice device) throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException {
         connect(device.getName());
+        return connectedDevice;
     }
 
 
@@ -93,7 +97,7 @@ public final class MentalabCommands {
 
 
     /**
-     * Record data to CSV. Requires appropriate permissions from android,
+     * Record data to CSV. Requires appropriate permissions from Android.
      *
      * @param recordSubscriber - The subscriber which subscribes to parsed data and holds information about where to record.
      * @throws IOException - Can occur both in the generation of files and in the execution of the subscriber.
@@ -129,9 +133,7 @@ public final class MentalabCommands {
      * @throws IOException
      * @throws NoBluetoothException If Bluetooth connection is lost during communication
      */
-    public static InputStream getRawData()
-        throws NoBluetoothException, IOException, NoConnectionException {
-        verifyBtConnectionStatus();
+    public static InputStream getRawData() throws NoBluetoothException, IOException, NoConnectionException {
         return BluetoothManager.getBTSocket().getInputStream();
     }
 
@@ -143,9 +145,7 @@ public final class MentalabCommands {
      * @throws NoConnectionException when Bluetooth connection is lost during communication
      * @throws NoBluetoothException
      */
-    public static OutputStream getOutputStream()
-        throws NoBluetoothException, IOException, NoConnectionException {
-        verifyBtConnectionStatus();
+    public static OutputStream getOutputStream() throws NoBluetoothException, IOException, NoConnectionException {
         return BluetoothManager.getBTSocket().getOutputStream();
     }
 
@@ -154,45 +154,31 @@ public final class MentalabCommands {
      * Sets sampling rate of the device
      *
      * <p>Sampling rate only applies to ExG data. Orientation and Environment data are always sampled
-     * at 20Hz. Currently available sampling rates are 250,500 and 1000 Hz. Default is 250Hz.
+     * at 20Hz.
      *
-     * @param samplingRate enum
-     * @throws CommandFailedException
-     * @throws NoBluetoothException
+     * @param sr SamplingRate Can be either 250, 500 or 1000 Hz. Default is 250Hz.
      */
-    public static void setSamplingRate(SamplingRate samplingRate)
-        throws NoBluetoothException, NoConnectionException {
-        verifyBtConnectionStatus();
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, samplingRate.getValue());
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+    public static Future<Boolean> setSamplingRate(SamplingRate sr) {
+        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, sr.getValue());
+        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
     }
 
 
     /**
      * Formats internal memory of device.
-     *
-     * @throws CommandFailedException
-     * @throws NoBluetoothException
      */
-    public static void formatDeviceMemory()
-        throws NoBluetoothException, NoConnectionException {
-        verifyBtConnectionStatus();
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MEMORY_FORMAT, 0);
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+    public static Future<Boolean> formatDeviceMemory() {
+        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MEMORY_FORMAT);
+        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
     }
 
 
     /**
-     * Formats internal memory of device
-     *
-     * @throws CommandFailedException when sampling rate change fails
-     * @throws NoBluetoothException
+     * Formats internal memory of device. However, when the sampling rate has changed, this command fails.
      */
-    public static void softReset()
-        throws NoBluetoothException, NoConnectionException {
-        verifyBtConnectionStatus();
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SOFT_RESET, 0);
-        ExecutorServiceManager.getExecutorService().execute(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+    public static Future<Boolean> softReset() {
+        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SOFT_RESET);
+        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
     }
 
 
@@ -209,11 +195,11 @@ public final class MentalabCommands {
      * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
      * @throws InvalidCommandException If the provided Switches are not all type Channel.
      */
-    public static void setChannels(List<Switch> channels) throws InvalidCommandException {
+    public static Future<Boolean> setChannels(List<Switch> channels) throws InvalidCommandException {
         if (channels.stream().anyMatch(s -> s.isInGroup(Switch.Group.Module))) {
             throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
         }
-        connectedDevice.setActiveChannels(channels);
+        return connectedDevice.setActiveChannels(channels);
     }
 
 
@@ -223,10 +209,10 @@ public final class MentalabCommands {
      *
      * @throws InvalidCommandException If the provided Switch is not of type Channel.
      */
-    public static void setChannel(Switch channel) throws InvalidCommandException {
+    public static Future<Boolean> setChannel(Switch channel) throws InvalidCommandException {
         List<Switch> channelToList = new ArrayList<>();
         channelToList.add(channel);
-        setChannels(channelToList);
+        return setChannels(channelToList);
     }
 
 
@@ -238,7 +224,7 @@ public final class MentalabCommands {
      *
      * @param module The module to be turned on or off ORN, ENVIRONMENT, EXG
      */
-    public static void setModule(Switch module) throws InvalidCommandException {
+    public static Future<Boolean> setModule(Switch module) throws InvalidCommandException {
         if (module.isInGroup(Switch.Group.Channel)) {
             throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
         }
@@ -253,7 +239,7 @@ public final class MentalabCommands {
      * @throws IOException
      */
     public static void pushToLsl() {
-        //MentalabCodec.pushToLsl(connectedDevice);
+        MentalabCodec.pushToLsl(connectedDevice);
     }
 
 
@@ -261,10 +247,8 @@ public final class MentalabCommands {
         bondedExploreDevices.clear();
     }
 
-    private static void verifyBtConnectionStatus() throws NoBluetoothException, NoConnectionException{
-        BluetoothManager.getBluetoothAdapter();
-        if (connectedDevice == null){
-            throw new NoConnectionException("Explore Device is not connected", null);
-        }
+
+    public void close() {
+        ExecutorServiceManager.shutDownHook();
     }
 }
