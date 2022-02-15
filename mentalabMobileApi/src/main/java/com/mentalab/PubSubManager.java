@@ -1,13 +1,13 @@
 package com.mentalab;
 
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-class PubSubManager {
+public class PubSubManager {
 
   private static final PubSubManager pubSubSingleton = new PubSubManager();
 

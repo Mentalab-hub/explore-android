@@ -7,7 +7,7 @@ public class SamplingRateCommandTranslator extends twoByteCommandTranslator {
   }
 
   @Override
-  public byte[] translateCommand(int argument) {
+  public byte[] translateCommand() {
     return convertIntegerToByteArray();
 
     // return new int[]{this.pId, this.count,

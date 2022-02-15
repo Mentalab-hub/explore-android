@@ -1,4 +1,4 @@
-package com.mentalab.io.constants;
+package com.mentalab.utils.constants;
 
 public enum Topic {
     EXG,

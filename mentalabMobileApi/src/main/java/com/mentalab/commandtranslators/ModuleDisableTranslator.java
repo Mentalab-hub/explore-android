@@ -7,7 +7,7 @@ public class ModuleDisableTranslator extends twoByteCommandTranslator {
   }
 
   @Override
-  public byte[] translateCommand(int argument) {
+  public byte[] translateCommand() {
     return convertIntegerToByteArray();
   }
 }

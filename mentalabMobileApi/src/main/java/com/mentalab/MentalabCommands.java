@@ -7,13 +7,13 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.io.Switch;
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.Topic;
 import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.commandtranslators.Command;
-import com.mentalab.io.constants.SamplingRate;
+import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.exception.*;
 import com.mentalab.io.BluetoothManager;
-import com.mentalab.utils.DeviceConfigurationTask;
+import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
 
@@ -184,12 +184,12 @@ public final class MentalabCommands {
 
     /**
      * Enables or disables data collection of a channel.
-     * Mixing enable and disable switch will lead to erroneous result //todo: what?
+     * Sending a mix of enable and disable switches does not work. \\todo: CHECK FOR THIS
      *
      * <p>By default data from all channels is collected. Disable channels you do not need to save
      * bandwidth and power. Calling setChannels with only some channels is supported. Trying to enable a
      * channel that the device does not have results in a CommandFailedException thrown. When a
-     * CommandFailedException is received from this method, none or only some of the switches may have
+     * CommandFailedException is received from this method, none or only some switches may have
      * been set.
      *
      * @param channels List of channels to set on (true) or off (false) channel0 ... channel7

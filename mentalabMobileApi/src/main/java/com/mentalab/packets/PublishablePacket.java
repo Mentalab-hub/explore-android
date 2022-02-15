@@ -1,6 +1,6 @@
 package com.mentalab.packets;
 
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.Topic;
 
 
 /**

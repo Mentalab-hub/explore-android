@@ -16,7 +16,7 @@ public abstract class CommandTranslator {
 
     int[] fletcherBytes = new int[]{0xAF, 0xBE, 0xAD, 0xDE};
 
-    public abstract byte[] translateCommand(int arguments);
+    public abstract byte[] translateCommand();
 
     byte[] convertIntegerToByteArray() {
         byte[] convertedData = new byte[dataLength];

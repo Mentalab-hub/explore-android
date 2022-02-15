@@ -4,8 +4,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
-import com.mentalab.io.constants.FileType;
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.FileType;
+import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
 
 import java.io.BufferedWriter;

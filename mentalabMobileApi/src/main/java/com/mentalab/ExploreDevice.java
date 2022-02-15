@@ -5,7 +5,7 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.io.Switch;
 import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.commandtranslators.Command;
-import com.mentalab.utils.DeviceConfigurationTask;
+import com.mentalab.service.DeviceConfigurationTask;
 
 import java.util.List;
 import java.util.concurrent.Future;
@@ -35,7 +35,7 @@ public class ExploreDevice {
      */
     public Future<Boolean> setActiveChannels(List<Switch> switches) throws InvalidCommandException {
         final Command cmd = Command.CMD_CHANNEL_SET;
-        cmd.setValue(generateChannelsArg(switches));
+        cmd.setArg(generateChannelsArg(switches));
         final byte[] encodedBytes = MentalabCodec.encodeCommand(cmd);
         if (encodedBytes == null) {
             throw new InvalidCommandException("Failed to encode command for switches. Exiting.");
@@ -58,7 +58,7 @@ public class ExploreDevice {
 
     public void setActiveModules(Switch s) throws InvalidCommandException {
         final Command cmd = s.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
-        cmd.setValue(s.getID());
+        cmd.setArg(s.getID());
 
         final byte[] encodedBytes = MentalabCodec.encodeCommand(cmd);
         if (encodedBytes == null) {

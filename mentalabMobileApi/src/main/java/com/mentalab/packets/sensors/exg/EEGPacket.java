@@ -2,7 +2,7 @@ package com.mentalab.packets.sensors.exg;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PublishablePacket;
 

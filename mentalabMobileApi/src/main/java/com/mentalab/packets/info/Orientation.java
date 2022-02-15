@@ -3,7 +3,7 @@ package com.mentalab.packets.info;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.PublishablePacket;
 
 import java.util.ArrayList;

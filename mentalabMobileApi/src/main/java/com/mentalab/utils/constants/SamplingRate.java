@@ -1,4 +1,4 @@
-package com.mentalab.io.constants;
+package com.mentalab.utils.constants;
 
 public enum SamplingRate {
     SR_250(0x01), //todo: what is this?

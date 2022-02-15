@@ -1,11 +1,11 @@
-package com.mentalab.utils;
+package com.mentalab.service;
 
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.BluetoothManager;
 import com.mentalab.io.OneTopicSubscriber;
 import com.mentalab.io.Subscriber;
-import com.mentalab.io.constants.Topic;
+import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.command.CommandAcknowledgment;
 import com.mentalab.packets.command.CommandReceived;
 import com.mentalab.packets.command.CommandStatus;

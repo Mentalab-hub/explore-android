@@ -2,21 +2,18 @@ package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
+import com.mentalab.commandtranslators.Command;
 import com.mentalab.commandtranslators.CommandTranslator;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
-import com.mentalab.packets.PublishablePacket;
 import com.mentalab.packets.QueueablePacket;
+import com.mentalab.service.ConnectedThread;
 import com.mentalab.service.ExecutorServiceManager;
-import com.mentalab.commandtranslators.Command;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Future;
 
@@ -62,36 +59,33 @@ public class MentalabCodec {
      * @throws InvalidCommandException when the command is not recognized
      */
     static byte[] encodeCommand(Command command) {
-        CommandTranslator translator = command.createInstance(command);
-        return translator.translateCommand(command.getValue());
+        CommandTranslator translator = command.createCommandTranslator();
+        return translator.translateCommand();
     }
 
 
-    static byte[] encodeCommand(Command command, int value) {
-        command.setValue(value);
-        return encodeCommand(command);
+    static byte[] encodeCommand(Command command, int arg) {
+        return encodeCommand(command.setArg(arg));
     }
 
 
-    private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
-            throws InvalidDataException {
-
+    public static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer) throws InvalidDataException {
         for (PacketId packetId : PacketId.values()) {
-            if (packetId.getNumVal() == pId) {
-                Log.d(TAG, "Converting data for Explore");
-                Packet packet = packetId.createInstance(timeStamp);
-                if (packet != null) {
-                    packet.convertData(byteBuffer);
-                    Log.d(TAG, "Data decoded is " + packet.toString());
-                    return packet;
-                }
+            if (packetId.getNumVal() != pId) {
+                continue;
+            }
+
+            Packet packet = packetId.createInstance(timeStamp);
+            if (packet != null) {
+                packet.convertData(byteBuffer);
+                return packet;
             }
         }
         return null;
     }
 
 
-    private static void pushDataInQueue(Packet packet) {
+    public static void pushDataInQueue(Packet packet) {
         if (packet instanceof QueueablePacket) {
             int channelCount = packet.getDataCount();
             ArrayList<Float> convertedSamples = packet.getData();
@@ -132,70 +126,4 @@ public class MentalabCodec {
     }
 
 
-    private static class ConnectedThread implements Callable<Void> {
-        private final InputStream mmInStream;
-
-        public ConnectedThread(InputStream inputStream) {
-            mmInStream = inputStream;
-            initializeMapInstance();
-        }
-
-
-        public Void call() throws InterruptedException {
-
-            int pId = 0;
-            while (true) {
-                try {
-                    byte[] buffer = new byte[1024];
-                    // reading PID
-                    mmInStream.read(buffer, 0, 1);
-                    pId = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-                    Log.d(TAG, "pid .." + pId);
-                    buffer = new byte[1024];
-
-                    // reading count
-                    mmInStream.read(buffer, 0, 1);
-                    int count = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-                    buffer = new byte[1024];
-
-                    // reading payload
-                    mmInStream.read(buffer, 0, 2);
-                    int payload = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-                    buffer = new byte[1024];
-
-                    // reading timestamp
-                    mmInStream.read(buffer, 0, 4);
-                    double timeStamp =
-                            ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-                    timeStamp = timeStamp / 10_000; // convert to seconds
-
-                    Log.d(TAG, "pid .." + pId + " payload is : " + payload);
-
-                    // reading payload data
-                    buffer = new byte[payload - 4];
-                    int read = mmInStream.read(buffer, 0, buffer.length);
-                    Log.d(TAG, "reading count is ...." + read);
-                    // parsing payload data
-
-                    Packet packet = parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
-                    if (packet instanceof QueueablePacket) {
-                        pushDataInQueue(packet);
-                    }
-                    if (packet instanceof PublishablePacket) {
-                        PubSubManager.getInstance().publish(((PublishablePacket) packet).getTopic().toString(), packet);
-                    }
-
-                } catch (IOException | InvalidDataException exception) {
-                    exception.printStackTrace();
-                }
-            }
-        }
-
-        void initializeMapInstance() {
-
-            if (decodedDataMap == null) {
-                decodedDataMap = new HashMap<>();
-            }
-        }
-    }
 }
