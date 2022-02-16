@@ -26,9 +26,9 @@ public class ConnectedThread implements Callable<Void> {
     }
 
 
-    public Void call() throws InterruptedException {
+    public Void call() {
 
-        int pId = 0;
+        int pId;
         while (true) {
             try {
                 byte[] buffer = new byte[1024];

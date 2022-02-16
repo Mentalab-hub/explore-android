@@ -6,22 +6,24 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import com.mentalab.io.Switch;
-import com.mentalab.utils.constants.Topic;
-import com.mentalab.service.ExecutorServiceManager;
-import com.mentalab.commandtranslators.Command;
-import com.mentalab.utils.constants.SamplingRate;
-import com.mentalab.exception.*;
+import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.NoConnectionException;
 import com.mentalab.io.BluetoothManager;
-import com.mentalab.service.DeviceConfigurationTask;
+import com.mentalab.io.Switch;
+import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
+import com.mentalab.utils.constants.SamplingRate;
+import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.mentalab.utils.Utils.TAG;
 
@@ -134,7 +136,10 @@ public final class MentalabCommands {
      * @throws NoBluetoothException If Bluetooth connection is lost during communication
      */
     public static InputStream getRawData() throws NoBluetoothException, IOException, NoConnectionException {
-        return BluetoothManager.getBTSocket().getInputStream();
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        return connectedDevice.getInputStream();
     }
 
 
@@ -146,7 +151,10 @@ public final class MentalabCommands {
      * @throws NoBluetoothException
      */
     public static OutputStream getOutputStream() throws NoBluetoothException, IOException, NoConnectionException {
-        return BluetoothManager.getBTSocket().getOutputStream();
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        return connectedDevice.getOutputStream();
     }
 
 
@@ -158,27 +166,33 @@ public final class MentalabCommands {
      *
      * @param sr SamplingRate Can be either 250, 500 or 1000 Hz. Default is 250Hz.
      */
-    public static Future<Boolean> setSamplingRate(SamplingRate sr) {
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SAMPLING_RATE_SET, sr.getValue());
-        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
+    public static Future<Boolean> setSamplingRate(SamplingRate sr) throws NoConnectionException, InvalidCommandException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        return connectedDevice.setSamplingRate(sr);
     }
 
 
     /**
      * Formats internal memory of device.
      */
-    public static Future<Boolean> formatDeviceMemory() {
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_MEMORY_FORMAT);
-        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes));
+    public static Future<Boolean> formatDeviceMemory() throws NoConnectionException, InvalidCommandException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        return connectedDevice.formatDeviceMemory();
     }
 
 
     /**
      * Formats internal memory of device. However, when the sampling rate has changed, this command fails.
      */
-    public static Future<Boolean> softReset() {
-        final byte[] encodedBytes = MentalabCodec.encodeCommand(Command.CMD_SOFT_RESET);
-        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(encodedBytes)); // TODO: How are we managing executors?
+    public static Future<Boolean> softReset() throws NoConnectionException, InvalidCommandException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        return connectedDevice.softReset();
     }
 
 
@@ -195,7 +209,10 @@ public final class MentalabCommands {
      * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
      * @throws InvalidCommandException If the provided Switches are not all type Channel.
      */
-    public static Future<Boolean> setChannels(List<Switch> channels) throws InvalidCommandException {
+    public static Future<Boolean> setChannels(List<Switch> channels) throws InvalidCommandException, NoConnectionException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
         if (channels.stream().anyMatch(s -> s.isInGroup(Switch.Group.Module))) {
             throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
         }
@@ -205,11 +222,11 @@ public final class MentalabCommands {
 
     /**
      * Set a single channel on or off.
-     * @param channel Switch The channel you would like to turn on (true) or off (false).
      *
+     * @param channel Switch The channel you would like to turn on (true) or off (false).
      * @throws InvalidCommandException If the provided Switch is not of type Channel.
      */
-    public static Future<Boolean> setChannel(Switch channel) throws InvalidCommandException {
+    public static Future<Boolean> setChannel(Switch channel) throws InvalidCommandException, NoConnectionException {
         List<Switch> channelToList = new ArrayList<>();
         channelToList.add(channel);
         return setChannels(channelToList);
@@ -224,11 +241,14 @@ public final class MentalabCommands {
      *
      * @param module The module to be turned on or off ORN, ENVIRONMENT, EXG
      */
-    public static Future<Boolean> setModule(Switch module) throws InvalidCommandException {
+    public static Future<Boolean> setModule(Switch module) throws InvalidCommandException, NoConnectionException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
         if (module.isInGroup(Switch.Group.Channel)) {
             throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
         }
-        connectedDevice.setActiveModules(module);
+        return connectedDevice.setActiveModules(module);
     }
 
 
@@ -248,7 +268,10 @@ public final class MentalabCommands {
     }
 
 
-    public void close() {
+    public void close() throws IOException {
+        clearDeviceList();
+        connectedDevice = null;
+        BluetoothManager.closeSocket();
         ExecutorServiceManager.shutDownHook();
     }
 }

@@ -17,7 +17,7 @@ import static com.mentalab.utils.Utils.TAG;
 public class BluetoothManager {
 
     private final static String UUID_BLUETOOTH_SPP = "00001101-0000-1000-8000-00805f9b34fb";
-    private static BluetoothSocket mmSocket = null;
+    protected static BluetoothSocket mmSocket = null;
 
 
     public static Set<BluetoothDevice> getBondedDevices() throws NoBluetoothException {
