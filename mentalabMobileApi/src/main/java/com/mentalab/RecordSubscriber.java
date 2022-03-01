@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
+import com.mentalab.io.ContentServer;
 import com.mentalab.utils.constants.FileType;
 import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
@@ -65,9 +66,9 @@ public class RecordSubscriber extends Thread {
 
     @Override
     public void run() {
-        PubSubManager.getInstance().subscribe(Topic.EXG.name(), this::writeExg);
-        PubSubManager.getInstance().subscribe(Topic.ORN.name(), this::writeOrn);
-        PubSubManager.getInstance().subscribe(Topic.MARKER.name(), this::writeMarker);
+        ContentServer.getInstance().subscribe(Topic.EXG.name(), this::writeExg);
+        ContentServer.getInstance().subscribe(Topic.ORN.name(), this::writeOrn);
+        ContentServer.getInstance().subscribe(Topic.MARKER.name(), this::writeMarker);
     }
 
 

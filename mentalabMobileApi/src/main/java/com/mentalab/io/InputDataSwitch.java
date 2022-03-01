@@ -2,7 +2,7 @@ package com.mentalab.io;
 
 // Fantastic solution to hierarchical enums:
 // https://stackoverflow.com/questions/19680418/how-to-use-enum-with-grouping-and-subgrouping-hierarchy-nesting
-public enum Switch {
+public enum InputDataSwitch {
     ENVIRONMENT(Group.Module, true, 0),
     ORN(Group.Module, true, 1),
     EXG(Group.Module, true, 2),
@@ -21,7 +21,7 @@ public enum Switch {
     private final int id;
 
 
-    Switch(Group group, boolean on, int id) {
+    InputDataSwitch(Group group, boolean on, int id) {
         this.group = group;
         this.on = on;
         this.id = id;

@@ -1,15 +1,16 @@
 package com.mentalab.io;
 
-import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
+import com.mentalab.utils.constants.Topic;
 
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 
-public interface Subscriber {
+public abstract class Subscriber implements Consumer<Packet> {
 
-    LinkedBlockingQueue<Packet> messagesReceived = new LinkedBlockingQueue<>();
+    Topic t;
 
-    void receiveMessage(Topic t, Packet m);
 
-    LinkedBlockingQueue<Packet> getMessagesReceived();
+    public Topic getTopic() {
+        return t;
+    }
 }

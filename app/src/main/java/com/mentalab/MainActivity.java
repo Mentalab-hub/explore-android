@@ -27,8 +27,6 @@ public class MainActivity extends AppCompatActivity {
     try {
       Set<BluetoothDevice> deviceList = MentalabCommands.scan();
       MentalabCommands.connect(deviceList.iterator().next());
-      InputStream inputStream = MentalabCommands.getRawData();
-      Map<String, Queue<Float>> map = MentalabCodec.decode(inputStream);
 
       // Map<String, Boolean> configMap = Map.of(DeviceConfigSwitches.Channels[7], false,
       // MentalabConstants.DeviceConfigSwitches.Channels[6], false);

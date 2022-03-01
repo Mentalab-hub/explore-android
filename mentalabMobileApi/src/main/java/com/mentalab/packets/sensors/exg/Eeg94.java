@@ -1,7 +1,5 @@
 package com.mentalab.packets.sensors.exg;
 
-import com.mentalab.io.Switch;
-import com.mentalab.io.Switch.Group;
 import java.util.Arrays;
 
 public class Eeg94 extends EEGPacket {

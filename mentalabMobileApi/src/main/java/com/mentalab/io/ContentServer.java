@@ -1,42 +1,44 @@
 package com.mentalab.io;
 
-import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
+import com.mentalab.utils.constants.Topic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ContentServer {
 
-    private final Map<Topic, List<Subscriber>> subscribers;
+    private static ContentServer INSTANCE;
 
-    private static final ContentServer serverInstance = new ContentServer();
-
-
-    private ContentServer() {
-        this.subscribers = new HashMap<>();
-        for (Topic t : Topic.values()) {
-            this.subscribers.put(t, new LinkedList<>());
-        }
-    }
-
+    private ContentServer() {}
 
     public static ContentServer getInstance() {
-        return serverInstance;
+        if (INSTANCE == null) {
+            INSTANCE = new ContentServer();
+        }
+        return INSTANCE;
     }
 
+    private final Map<Topic, ArrayList<Subscriber>> topicSubscribers = new HashMap<>();
 
-    public void sendMessage(Topic t, Packet m) {
-        List<Subscriber> subs = subscribers.get(t);
-        for (Subscriber s : subs) {
-            s.receiveMessage(t, m);
+
+
+    public synchronized void publish(Topic topic, Packet message) {
+        final ArrayList<Subscriber> subscribers = this.topicSubscribers.get(topic);
+        if (subscribers == null) {
+            return;
+        }
+
+        for (Subscriber s : subscribers) {
+            s.accept(message);
         }
     }
 
 
-    public void registerSubscriber(Subscriber s, Topic t) {
-        subscribers.get(t).add(s);
+    public synchronized void registerSubscriber(Subscriber sub) {
+        ArrayList<Subscriber> subs = this.topicSubscribers.computeIfAbsent(sub.getTopic(), k -> new ArrayList<>());
+        subs.add(sub);
     }
 }

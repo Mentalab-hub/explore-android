@@ -9,13 +9,14 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.QueueablePacket;
-import com.mentalab.service.ConnectedThread;
+import com.mentalab.service.ParseRawDataTask;
 import com.mentalab.service.ExecutorServiceManager;
 
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.mentalab.utils.Utils.TAG;
 
@@ -24,6 +25,7 @@ public class MentalabCodec {
 
     public static Map<String, Queue<Float>> decodedDataMap = null;
     private static Future<?> decoderTask = null;
+
 
     /**
      * Decodes a device raw data stream
@@ -45,10 +47,9 @@ public class MentalabCodec {
      * @stream InputStream of device bytes
      * @return Immutable Map of Queues of Numbers
      */
-    public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
-        decoderTask = ExecutorServiceManager.getExecutorService().submit(new ConnectedThread(stream));
-        Log.d(TAG, "Started execution of decoder!!");
-        return decodedDataMap;
+    public static Future<Void> decode(InputStream rawData) throws InvalidDataException {
+        ParseRawDataTask.setInputStream(rawData);
+        return ExecutorServiceManager.submitDecoderTask(ParseRawDataTask.getInstance());
     }
 
 
@@ -117,7 +118,7 @@ public class MentalabCodec {
 
 
     public static void pushToLsl(BluetoothDevice device) {
-        ExecutorServiceManager.getExecutorService().execute(new LslPacketSubscriber(device));
+        ExecutorServiceManager.submitTask(new LslPacketSubscriber(device));
     }
 
 

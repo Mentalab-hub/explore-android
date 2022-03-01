@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.BluetoothManager;
-import com.mentalab.io.Switch;
+import com.mentalab.io.InputDataSwitch;
 import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.commandtranslators.Command;
 import com.mentalab.service.DeviceConfigurationTask;
@@ -39,7 +39,7 @@ public class ExploreDevice extends BluetoothManager {
      * @param switches List of channel switches, indicating which channels should be on and off
      * @throws InvalidCommandException
      */
-    public Future<Boolean> setActiveChannels(List<Switch> switches) throws InvalidCommandException {
+    public Future<Boolean> setActiveChannels(List<InputDataSwitch> switches) throws InvalidCommandException {
         final Command c = Command.CMD_CHANNEL_SET;
         c.setArg(generateChannelsArg(switches));
 
@@ -48,9 +48,9 @@ public class ExploreDevice extends BluetoothManager {
 
 
     // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
-    private static int generateChannelsArg(List<Switch> switches) {
+    private static int generateChannelsArg(List<InputDataSwitch> switches) {
         StringBuilder binaryArgument = new StringBuilder("11111111"); // When 8 channels are active, we will be sending binary 11111111 = 255
-        for (Switch aSwitch : switches) {
+        for (InputDataSwitch aSwitch : switches) {
             if (!aSwitch.isOn()) {
                 binaryArgument.setCharAt(aSwitch.getID(), '0');
             }
@@ -59,7 +59,7 @@ public class ExploreDevice extends BluetoothManager {
     }
 
 
-    public Future<Boolean> setActiveModules(Switch s) throws InvalidCommandException {
+    public Future<Boolean> setActiveModules(InputDataSwitch s) throws InvalidCommandException {
         final Command c = s.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
         c.setArg(s.getID());
 
@@ -120,6 +120,6 @@ public class ExploreDevice extends BluetoothManager {
         if (encodedBytes == null) {
             throw new InvalidCommandException("Failed to encode command. Exiting.");
         }
-        return ExecutorServiceManager.getExecutorService().submit(new DeviceConfigurationTask(this, encodedBytes));
+        return ExecutorServiceManager.submitTask(new DeviceConfigurationTask(this, encodedBytes));
     }
 }

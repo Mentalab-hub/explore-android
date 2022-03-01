@@ -43,4 +43,9 @@ public class CommandStatus extends UtilPacket {
     public Topic getTopic() {
         return Topic.COMMAND;
     }
+
+
+    public boolean getResult() {
+        return commandStatus;
+    }
 }

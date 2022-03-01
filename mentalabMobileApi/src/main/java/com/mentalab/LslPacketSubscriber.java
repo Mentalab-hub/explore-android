@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 import com.mentalab.LslLoader.ChannelFormat;
 import com.mentalab.LslLoader.StreamInfo;
+import com.mentalab.io.ContentServer;
 import com.mentalab.packets.Packet;
 
 import java.io.IOException;
@@ -58,11 +59,11 @@ public class LslPacketSubscriber extends Thread {
       }
       lslStreamOutletMarker = new LslLoader.StreamOutlet(lslStreamInfoMarker);
       Log.d(TAG, "Subscribing!!");
-      PubSubManager.getInstance().subscribe("ExG", this::packetCallbackExG);
+      ContentServer.getInstance().subscribe("ExG", this::packetCallbackExG);
 
-      PubSubManager.getInstance().subscribe("Orn", this::packetCallbackOrn);
+      ContentServer.getInstance().subscribe("Orn", this::packetCallbackOrn);
 
-      PubSubManager.getInstance().subscribe("Marker", this::packetCallbackMarker);
+      ContentServer.getInstance().subscribe("Marker", this::packetCallbackMarker);
     } catch (IOException exception) {
       exception.printStackTrace();
     }

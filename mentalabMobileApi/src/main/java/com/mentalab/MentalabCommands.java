@@ -6,12 +6,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import com.mentalab.exception.CommandFailedException;
-import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.NoConnectionException;
+import com.mentalab.exception.*;
 import com.mentalab.io.BluetoothManager;
-import com.mentalab.io.Switch;
+import com.mentalab.io.InputDataSwitch;
+import com.mentalab.io.Subscriber;
 import com.mentalab.service.ExecutorServiceManager;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
@@ -65,21 +63,22 @@ public final class MentalabCommands {
      * @throws NoConnectionException
      * @throws NoBluetoothException
      */
-    public static ExploreDevice connect(String deviceName) throws NoBluetoothException, NoConnectionException, IOException {
+    public static ExploreDevice connect(String deviceName) throws NoBluetoothException, NoConnectionException, IOException, InvalidDataException {
         final ExploreDevice device = getExploreDevice(deviceName);
         connectedDevice = BluetoothManager.connectToDevice(device);
         Log.i(TAG, "Connected to: " + deviceName);
+        decode();
         return connectedDevice;
     }
 
 
-    public static ExploreDevice connect(BluetoothDevice device) throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException {
+    public static ExploreDevice connect(BluetoothDevice device) throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException, InvalidDataException {
         connect(device.getName());
         return connectedDevice;
     }
 
 
-    public static ExploreDevice getExploreDevice(String deviceName) throws NoConnectionException, NoBluetoothException {
+    private static ExploreDevice getExploreDevice(String deviceName) throws NoConnectionException, NoBluetoothException {
         if (bondedExploreDevices.isEmpty()) {
             scan();
         }
@@ -95,36 +94,6 @@ public final class MentalabCommands {
             throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable.");
         }
         return new ExploreDevice(device);
-    }
-
-
-    /**
-     * Record data to CSV. Requires appropriate permissions from Android.
-     *
-     * @param recordSubscriber - The subscriber which subscribes to parsed data and holds information about where to record.
-     * @throws IOException - Can occur both in the generation of files and in the execution of the subscriber.
-     * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android permissions docs</a>.
-     * <p>
-     * Currently, a lot of functionality missing including: blocking on record, setting a duration for recording,
-     * masking channels and overwriting previous files.
-     */
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    public static void record(RecordSubscriber recordSubscriber) throws IOException {
-        final Map<Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
-        recordSubscriber.setGeneratedFiles(generatedFiles);
-        Executors.newSingleThreadExecutor().execute(recordSubscriber);
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    private static Map<Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
-        final Context context = recordSubscriber.getContext();
-        final boolean overwrite = recordSubscriber.getOverwrite();
-        final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
-
-        final Uri directory = recordSubscriber.getDirectory();
-        final String filename = recordSubscriber.getFilename();
-        return androidFileGenerator.generateFiles(directory, filename);
     }
 
 
@@ -155,6 +124,15 @@ public final class MentalabCommands {
             throw new NoConnectionException("Not connected to a device. Exiting.");
         }
         return connectedDevice.getOutputStream();
+    }
+
+
+    private static void decode() throws NoConnectionException, IOException, NoBluetoothException, InvalidDataException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        final InputStream rawData = getRawData();
+        MentalabCodec.decode(rawData);
     }
 
 
@@ -209,11 +187,11 @@ public final class MentalabCommands {
      * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
      * @throws InvalidCommandException If the provided Switches are not all type Channel.
      */
-    public static Future<Boolean> setChannels(List<Switch> channels) throws InvalidCommandException, NoConnectionException {
+    public static Future<Boolean> setChannels(List<InputDataSwitch> channels) throws InvalidCommandException, NoConnectionException {
         if (connectedDevice == null) {
             throw new NoConnectionException("Not connected to a device. Exiting.");
         }
-        if (channels.stream().anyMatch(s -> s.isInGroup(Switch.Group.Module))) {
+        if (channels.stream().anyMatch(s -> s.isInGroup(InputDataSwitch.Group.Module))) {
             throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
         }
         return connectedDevice.setActiveChannels(channels);
@@ -226,8 +204,8 @@ public final class MentalabCommands {
      * @param channel Switch The channel you would like to turn on (true) or off (false).
      * @throws InvalidCommandException If the provided Switch is not of type Channel.
      */
-    public static Future<Boolean> setChannel(Switch channel) throws InvalidCommandException, NoConnectionException {
-        List<Switch> channelToList = new ArrayList<>();
+    public static Future<Boolean> setChannel(InputDataSwitch channel) throws InvalidCommandException, NoConnectionException {
+        List<InputDataSwitch> channelToList = new ArrayList<>();
         channelToList.add(channel);
         return setChannels(channelToList);
     }
@@ -241,11 +219,11 @@ public final class MentalabCommands {
      *
      * @param module The module to be turned on or off ORN, ENVIRONMENT, EXG
      */
-    public static Future<Boolean> setModule(Switch module) throws InvalidCommandException, NoConnectionException {
+    public static Future<Boolean> setModule(InputDataSwitch module) throws InvalidCommandException, NoConnectionException {
         if (connectedDevice == null) {
             throw new NoConnectionException("Not connected to a device. Exiting.");
         }
-        if (module.isInGroup(Switch.Group.Channel)) {
+        if (module.isInGroup(InputDataSwitch.Group.Channel)) {
             throw new InvalidCommandException("Attempting to turn off channels with a module switch. Exiting.");
         }
         return connectedDevice.setActiveModules(module);
@@ -260,6 +238,36 @@ public final class MentalabCommands {
      */
     public static void pushToLsl() {
         MentalabCodec.pushToLsl(connectedDevice);
+    }
+
+
+    /**
+     * Record data to CSV. Requires appropriate permissions from Android.
+     *
+     * @param recordSubscriber - The subscriber which subscribes to parsed data and holds information about where to record.
+     * @throws IOException - Can occur both in the generation of files and in the execution of the subscriber.
+     * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android permissions docs</a>.
+     * <p>
+     * Currently, a lot of functionality missing including: blocking on record, setting a duration for recording,
+     * masking channels and overwriting previous files.
+     */
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    public static void record(RecordSubscriber recordSubscriber) throws IOException {
+        final Map<Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
+        recordSubscriber.setGeneratedFiles(generatedFiles);
+        Executors.newSingleThreadExecutor().execute(recordSubscriber);
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private static Map<Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
+        final Context context = recordSubscriber.getContext();
+        final boolean overwrite = recordSubscriber.getOverwrite();
+        final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
+
+        final Uri directory = recordSubscriber.getDirectory();
+        final String filename = recordSubscriber.getFilename();
+        return androidFileGenerator.generateFiles(directory, filename);
     }
 
 
