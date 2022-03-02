@@ -12,6 +12,8 @@ import com.mentalab.packets.command.CommandReceived;
 import com.mentalab.packets.command.CommandStatus;
 import java.io.IOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class DeviceConfigurationTask implements Callable<Boolean> {
 
