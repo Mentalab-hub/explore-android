@@ -1,4 +1,4 @@
-package com.mentalab.io;
+package com.mentalab.utils.constants;
 
 // Fantastic solution to hierarchical enums:
 // https://stackoverflow.com/questions/19680418/how-to-use-enum-with-grouping-and-subgrouping-hierarchy-nesting

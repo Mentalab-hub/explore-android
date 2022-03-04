@@ -4,8 +4,9 @@ import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.BluetoothManager;
-import com.mentalab.io.InputDataSwitch;
-import com.mentalab.service.ExecutorServiceManager;
+import com.mentalab.service.LslStreamerTask;
+import com.mentalab.utils.constants.InputDataSwitch;
+import com.mentalab.service.ExploreExecutor;
 import com.mentalab.commandtranslators.Command;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.utils.constants.SamplingRate;
@@ -19,8 +20,8 @@ import java.util.concurrent.Future;
 public class ExploreDevice extends BluetoothManager {
 
     private final BluetoothDevice btDevice;
-
-    private int noChannels = 4; // default 4 todo: how do we change this
+    private String deviceName;
+    private int noChannels; // default 4 todo: how do we change this
 
 
     public ExploreDevice(BluetoothDevice btDevice) {
@@ -120,6 +121,21 @@ public class ExploreDevice extends BluetoothManager {
         if (encodedBytes == null) {
             throw new InvalidCommandException("Failed to encode command. Exiting.");
         }
-        return ExecutorServiceManager.submitTask(new DeviceConfigurationTask(this, encodedBytes));
+        return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
+    }
+
+
+    public Future<Boolean> pushToLSL() {
+        return ExploreExecutor.submitTask(new LslStreamerTask(this));
+    }
+
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+
+    public int getNoChannels() {
+        return noChannels;
     }
 }

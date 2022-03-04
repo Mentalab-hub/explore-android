@@ -1,4 +1,4 @@
-package com.mentalab;
+package com.mentalab.service;
 
 import android.content.Context;
 import android.net.Uri;
@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Map;
 
-public class RecordSubscriber extends Thread {
+public class RecordTask extends Thread {
 
     private final static int NO_MARKER_COLS = 2;
     private final static int NO_ORN_COLS = 9;
@@ -32,7 +32,7 @@ public class RecordSubscriber extends Thread {
     private Map<Topic, Uri> generatedFies;
 
 
-    private RecordSubscriber(Uri directory, String filename, Context context) {
+    private RecordTask(Uri directory, String filename, Context context) {
         this.directory = directory; //todo: validate
         if (filename.contains(".")) {
             this.filename = filename.split("\\.")[0]; //todo: validate
@@ -195,8 +195,8 @@ public class RecordSubscriber extends Thread {
         }
 
 
-        public RecordSubscriber build() {
-            RecordSubscriber subscriber = new RecordSubscriber(directory, filename, context);
+        public RecordTask build() {
+            RecordTask subscriber = new RecordTask(directory, filename, context);
             subscriber.overwrite = this.overwrite;
             subscriber.blocking = this.blocking;
             subscriber.fileType = this.fileType;

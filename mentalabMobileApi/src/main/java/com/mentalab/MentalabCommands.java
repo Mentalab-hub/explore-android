@@ -8,9 +8,9 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.*;
 import com.mentalab.io.BluetoothManager;
-import com.mentalab.io.InputDataSwitch;
-import com.mentalab.io.Subscriber;
-import com.mentalab.service.ExecutorServiceManager;
+import com.mentalab.service.RecordTask;
+import com.mentalab.utils.constants.InputDataSwitch;
+import com.mentalab.service.ExploreExecutor;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.SamplingRate;
@@ -132,7 +132,7 @@ public final class MentalabCommands {
             throw new NoConnectionException("Not connected to a device. Exiting.");
         }
         final InputStream rawData = getRawData();
-        MentalabCodec.decode(rawData);
+        MentalabCodec.startDecode(rawData);
     }
 
 
@@ -232,12 +232,12 @@ public final class MentalabCommands {
 
     /**
      * Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
-     *
-     * @throws CommandFailedException when LSL service initialization fails
-     * @throws IOException
      */
-    public static void pushToLsl() {
-        MentalabCodec.pushToLsl(connectedDevice);
+    public static void pushToLsl() throws NoConnectionException {
+        if (connectedDevice == null) {
+            throw new NoConnectionException("Not connected to a device. Exiting.");
+        }
+        connectedDevice.pushToLSL();
     }
 
 
@@ -252,7 +252,7 @@ public final class MentalabCommands {
      * masking channels and overwriting previous files.
      */
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    public static void record(RecordSubscriber recordSubscriber) throws IOException {
+    public static void record(RecordTask recordSubscriber) throws IOException {
         final Map<Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
         recordSubscriber.setGeneratedFiles(generatedFiles);
         Executors.newSingleThreadExecutor().execute(recordSubscriber);
@@ -260,7 +260,7 @@ public final class MentalabCommands {
 
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private static Map<Topic, Uri> generateFiles(RecordSubscriber recordSubscriber) throws IOException {
+    private static Map<Topic, Uri> generateFiles(RecordTask recordSubscriber) throws IOException {
         final Context context = recordSubscriber.getContext();
         final boolean overwrite = recordSubscriber.getOverwrite();
         final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
@@ -280,6 +280,6 @@ public final class MentalabCommands {
         clearDeviceList();
         connectedDevice = null;
         BluetoothManager.closeSocket();
-        ExecutorServiceManager.shutDownHook();
+        ExploreExecutor.shutDownHook();
     }
 }

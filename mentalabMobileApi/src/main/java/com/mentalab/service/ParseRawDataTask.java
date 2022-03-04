@@ -1,11 +1,10 @@
 package com.mentalab.service;
 
 import com.mentalab.MentalabCodec;
-import com.mentalab.io.ContentServer;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PublishablePacket;
-import com.mentalab.packets.QueueablePacket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,8 +15,12 @@ import java.util.concurrent.Callable;
 public class ParseRawDataTask implements Callable<Void> {
 
     private static ParseRawDataTask INSTANCE;
+    private static InputStream mmInStream;
+    private byte[] buffer = new byte[1024];
+
 
     private ParseRawDataTask() {}
+
 
     public static ParseRawDataTask getInstance() {
         if (INSTANCE == null) {
@@ -25,9 +28,6 @@ public class ParseRawDataTask implements Callable<Void> {
         }
         return INSTANCE;
     }
-
-    private static InputStream mmInStream;
-    private byte[] buffer = new byte[1024];
 
 
     public static void setInputStream(InputStream inputStream) {
@@ -48,11 +48,8 @@ public class ParseRawDataTask implements Callable<Void> {
             mmInStream.read(buffer, 0, buffer.length); // read into buffer
 
             // parsing payload data
-            Packet packet = MentalabCodec.parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
-            if (packet instanceof QueueablePacket) {
-                MentalabCodec.pushDataInQueue(packet);
-            }
-            if (packet instanceof PublishablePacket) {
+            final Packet packet = MentalabCodec.parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+            if (packet != null) {
                 ContentServer.getInstance().publish(((PublishablePacket) packet).getTopic(), packet);
             }
         }
