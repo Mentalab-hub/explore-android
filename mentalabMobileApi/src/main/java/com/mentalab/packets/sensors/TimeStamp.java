@@ -2,6 +2,7 @@ package com.mentalab.packets.sensors;
 
 import androidx.annotation.NonNull;
 import com.mentalab.packets.Packet;
+import com.mentalab.utils.constants.Topic;
 
 /**
  * Packet sent from the device to sync clocks
@@ -29,5 +30,11 @@ class TimeStamp extends Packet {
     @Override
     public int getDataCount() {
         return 0; // TODO: Explanation...
+    }
+
+
+    @Override
+    public Topic getTopic() {
+        return Topic.TIMESTAMP;
     }
 }

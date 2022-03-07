@@ -1,7 +1,6 @@
 package com.mentalab.packets.command;
 
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.PublishablePacket;
 
 /**
  * Interface for packets related to device synchronization

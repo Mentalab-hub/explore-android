@@ -2,22 +2,15 @@ package com.mentalab.service;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
-import androidx.annotation.RequiresApi;
-import com.mentalab.io.ContentServer;
+import com.mentalab.MentalabCommands;
+import com.mentalab.io.*;
 import com.mentalab.utils.constants.FileType;
 import com.mentalab.utils.constants.Topic;
-import com.mentalab.packets.Packet;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
-public class RecordTask extends Thread {
-
-    private final static int NO_MARKER_COLS = 2;
-    private final static int NO_ORN_COLS = 9;
+public class RecordTask implements Callable<Boolean> {
 
     private final Uri directory;
     private final String filename;
@@ -29,7 +22,7 @@ public class RecordTask extends Thread {
     private int adcMask = 0;
     private float samplingRate = Integer.MAX_VALUE;
     private Double duration;
-    private Map<Topic, Uri> generatedFies;
+    private Map<Topic, Uri> generatedFiles;
 
 
     private RecordTask(Uri directory, String filename, Context context) {
@@ -65,80 +58,11 @@ public class RecordTask extends Thread {
 
 
     @Override
-    public void run() {
-        ContentServer.getInstance().subscribe(Topic.EXG.name(), this::writeExg);
-        ContentServer.getInstance().subscribe(Topic.ORN.name(), this::writeOrn);
-        ContentServer.getInstance().subscribe(Topic.MARKER.name(), this::writeMarker);
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void writeExg(Packet packet) {
-        //todo: validate what's being written
-        final int noChannels = packet.getDataCount();
-        double timestamp = packet.getTimeStamp();
-
-        final Uri location = generatedFies.get(Topic.EXG);
-        try (final BufferedWriter writer =
-                     new BufferedWriter(
-                             new OutputStreamWriter(context.getContentResolver()
-                                     .openOutputStream(location, "wa")))) {
-            writePacketToCSV(writer, packet, timestamp, noChannels);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void writeOrn(Packet packet) {
-        //todo: validate what's being written
-        double timestamp = packet.getTimeStamp();
-
-        final Uri location = generatedFies.get(Topic.ORN);
-        try (final BufferedWriter writer =
-                     new BufferedWriter(
-                             new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writePacketToCSV(writer, packet, timestamp, NO_ORN_COLS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void writeMarker(Packet packet) {
-        //todo: validate what's being written
-        double timestamp = packet.getTimeStamp();
-
-        final Uri location = generatedFies.get(Topic.MARKER);
-        try (final BufferedWriter writer =
-                     new BufferedWriter(
-                             new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writePacketToCSV(writer, packet, timestamp, NO_MARKER_COLS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private void writePacketToCSV(BufferedWriter writer, Packet packet, double timestamp, int lineBreak) throws IOException {
-        writer.write(String.valueOf(timestamp));
-        writer.write(",");
-        writer.write(packet.getData().get(0).toString());
-        for (int i = 1; i < packet.getData().size(); i++) {
-            writer.write(",");
-            writer.write(packet.getData().get(i).toString());
-
-            final int channelNo = i % lineBreak + 1; // 1, 2, 3, 4,...
-            if (channelNo == lineBreak) { // break line after 2, 4 or 8 entries
-                writer.newLine();
-                timestamp += 1 / samplingRate;
-                if ((packet.getData().size() - i) > 2) {
-                    writer.write(String.valueOf(timestamp));
-                }
-            }
-        }
+    public Boolean call() {
+        ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.EXG, context, ));
+        ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.ORN, context, ));
+        ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.MARKER, context, ));
+        return true; // todo: check success
     }
 
 

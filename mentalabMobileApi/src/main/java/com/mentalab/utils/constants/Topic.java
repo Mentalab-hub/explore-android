@@ -4,5 +4,7 @@ public enum Topic {
     EXG,
     COMMAND,
     ORN,
-    MARKER
+    MARKER,
+    INFO,
+    TIMESTAMP
 }

@@ -2,6 +2,7 @@ package com.mentalab.packets;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.utils.constants.Topic;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -11,7 +12,6 @@ import java.util.List;
 
 public abstract class Packet {
 
-    private final byte[] byteBuffer = null;
     private final double timeStamp;
 
     public List<String> attributes;
@@ -81,5 +81,7 @@ public abstract class Packet {
         return null;
     }
 
+
+    public abstract Topic getTopic();
 }
 

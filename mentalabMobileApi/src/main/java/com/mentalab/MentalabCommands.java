@@ -257,7 +257,7 @@ public final class MentalabCommands {
     public static void record(RecordTask recordSubscriber) throws IOException {
         final Map<Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
         recordSubscriber.setGeneratedFiles(generatedFiles);
-        Executors.newSingleThreadExecutor().execute(recordSubscriber);
+        ExploreExecutor.submitTask(recordSubscriber);
     }
 
 
@@ -282,6 +282,7 @@ public final class MentalabCommands {
         clearDeviceList();
         connectedDevice = null;
         BluetoothManager.closeSocket();
-        ExploreExecutor.shutDownHook();
+        ExploreExecutor.shutDown();
+        MentalabCodec.shutdown();
     }
 }

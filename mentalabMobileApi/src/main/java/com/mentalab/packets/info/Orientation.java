@@ -4,7 +4,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.utils.constants.Topic;
-import com.mentalab.packets.PublishablePacket;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +11,7 @@ import java.util.Arrays;
 /**
  * Device related information packet to transmit firmware version, ADC mask and sampling rate
  */
-public class Orientation extends InfoPacket implements PublishablePacket {
+public class Orientation extends InfoPacket {
 
     final ArrayList<Float> listValues = new ArrayList<>();
 

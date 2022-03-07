@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.PublishablePacket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class EEGPacket extends Packet implements PublishablePacket {
+public abstract class EEGPacket extends Packet {
 
     private static final int BUFFER_LENGTH = 3; // TODO: Why is this the case?
     private final int channelNumber;
