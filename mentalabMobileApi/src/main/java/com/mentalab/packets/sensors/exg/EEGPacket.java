@@ -14,7 +14,7 @@ import java.util.List;
 
 public abstract class EEGPacket extends Packet {
 
-    private static final int BUFFER_LENGTH = 3; // TODO: Why is this the case?
+    private static final int BUFFER_LENGTH = 3; // EEG packets are 24 bits = 3 bytes
     private final int channelNumber;
 
 
@@ -84,21 +84,18 @@ public abstract class EEGPacket extends Packet {
 
         for (int i = 0; i < byteArray.length; i += 3) {
             if (i == 0) {
-                byte channelMask = byteArray[i]; // TODO: Why is this here?
+                continue;  // skip first byte because 0 is the adc mask
             }
 
             int signBit = byteArray[i + 2] >> 7;
             double value;
             if (signBit == 0)
-                value =
-                        ByteBuffer.wrap(
-                                        new byte[]{byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
+                value = ByteBuffer.wrap(new byte[]{byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
                                 .order(ByteOrder.LITTLE_ENDIAN)
                                 .getInt();
             else {
                 int twosComplimentValue =
-                        ByteBuffer.wrap(
-                                        new byte[]{byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
+                        ByteBuffer.wrap(new byte[]{byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
                                 .order(ByteOrder.LITTLE_ENDIAN)
                                 .getInt();
                 value = -1 * (Math.pow(2, 24) - twosComplimentValue);

@@ -29,5 +29,5 @@ class DisconnectCommand extends Packet {
     @Override
     public int getDataCount() {
         return 0;
-    } // TODO: Explain
+    }
 }

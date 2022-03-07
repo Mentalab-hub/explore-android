@@ -5,19 +5,19 @@ public enum Command {
     CMD_SAMPLING_RATE_SET(0xA1) {
         @Override
         public CommandTranslator createCommandTranslator() {
-            return new SamplingRateCommandTranslator(this.getOperationCode(), this.getArg());
+            return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
         }
     },
     CMD_CHANNEL_SET(0xA2) {
         @Override
         public CommandTranslator createCommandTranslator() {
-            return new ChannelMaskTranslator(this.getOperationCode(), this.getArg());
+            return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
         }
     },
     CMD_MEMORY_FORMAT(0xA3) {
         @Override
         public CommandTranslator createCommandTranslator() {
-            return new FormatMemoryCommandTranslator(this.getOperationCode(), this.getArg());
+            return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
         }
     },
     CMD_REC_TIME_SET(0xB1) {
@@ -29,13 +29,13 @@ public enum Command {
     CMD_MODULE_DISABLE(0xA4) {
         @Override
         public CommandTranslator createCommandTranslator() {
-            return new ModuleDisableTranslator(this.getOperationCode(), this.getArg());
+            return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
         }
     },
     CMD_MODULE_ENABLE(0xA5) {
         @Override
         public CommandTranslator createCommandTranslator() {
-            return new ModuleEnableTranslator(this.getOperationCode(), this.getArg());
+            return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
         }
     },
     CMD_ZM_DISABLE(0xA6) {
@@ -53,7 +53,7 @@ public enum Command {
     CMD_SOFT_RESET(0xA8) {
         @Override
         public CommandTranslator createCommandTranslator() {
-            return new SoftResetCommandTranslator(this.getOperationCode(), this.getArg());
+            return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
         }
     };
 

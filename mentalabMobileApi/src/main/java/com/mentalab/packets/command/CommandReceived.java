@@ -6,7 +6,7 @@ import com.mentalab.utils.constants.Topic;
 
 public class CommandReceived extends UtilPacket {
 
-    float markerCode; // TODO: Why is this here?
+    float markerCode;
 
     public CommandReceived(double timeStamp) {
         super(timeStamp);

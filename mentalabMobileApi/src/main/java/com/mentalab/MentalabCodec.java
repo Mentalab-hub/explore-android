@@ -7,6 +7,7 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
+import com.mentalab.packets.info.InfoPacket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,7 +102,10 @@ public final class MentalabCodec {
 
                 // parsing payload data
                 final Packet packet = MentalabCodec.parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
-                if (packet != null) {
+                if (packet instanceof InfoPacket) {
+                    // todo: change Explore device
+                }
+                if (packet != null && publishable) {
                     ContentServer.getInstance().publish(packet.getTopic(), packet);
                 }
             }

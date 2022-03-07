@@ -31,10 +31,4 @@ class TimeStamp extends Packet {
     public int getDataCount() {
         return 0; // TODO: Explanation...
     }
-
-
-    @Override
-    public Topic getTopic() {
-        return Topic.TIMESTAMP;
-    }
 }

@@ -12,10 +12,4 @@ public abstract class InfoPacket extends Packet {
     public InfoPacket(double timeStamp) {
         super(timeStamp);
     }
-
-
-    @Override
-    public Topic getTopic() {
-        return Topic.INFO;
-    }
 }

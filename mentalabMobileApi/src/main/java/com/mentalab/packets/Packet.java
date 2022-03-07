@@ -23,7 +23,7 @@ public abstract class Packet {
     }
 
 
-    protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {
+    protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) throws InvalidDataException {  // TODO: IntelliJ suggests the second parameter is always 2
         if (bytes.length % numOfbytesPerNumber != 0) {
             throw new InvalidDataException("Illegal length", null);
         }
@@ -34,8 +34,7 @@ public abstract class Packet {
             int signBit = bytes[index + numOfbytesPerNumber - 1] >> 7;
             double value;
 
-            value =
-                    ByteBuffer.wrap(new byte[]{bytes[index], bytes[index + 1]})
+            value = ByteBuffer.wrap(new byte[]{bytes[index], bytes[index + 1]})
                             .order(ByteOrder.LITTLE_ENDIAN)
                             .getShort();
             if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
