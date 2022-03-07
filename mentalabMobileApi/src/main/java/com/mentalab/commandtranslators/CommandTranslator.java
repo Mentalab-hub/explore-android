@@ -6,17 +6,20 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public abstract class CommandTranslator {
+
+    private final static int[] FLETCHER_BYTES = new int[]{0xAF, 0xBE, 0xAD, 0xDE};
+
     int pId;
     int count = 0x00;
     int hostTimestamp;
     int opcode;
-    int extraArgument;
+    int arg;
     int payload;
     int dataLength;
 
-    int[] fletcherBytes = new int[]{0xAF, 0xBE, 0xAD, 0xDE};
 
     public abstract byte[] translateCommand();
+
 
     byte[] convertIntegerToByteArray() {
         byte[] convertedData = new byte[dataLength];
@@ -24,6 +27,7 @@ public abstract class CommandTranslator {
         convertedData[1] = (byte) count;
         convertedData[2] = (byte) payload;
         convertedData[3] = (byte) 0;
+
         ByteBuffer timestampBuffer = ByteBuffer.allocate(4);
         timestampBuffer.order(ByteOrder.LITTLE_ENDIAN);
         timestampBuffer.putInt(hostTimestamp);
@@ -37,10 +41,10 @@ public abstract class CommandTranslator {
 
         convertedData[index++] = (byte) opcode;
 
-        convertedData[index++] = (byte) extraArgument;
+        convertedData[index++] = (byte) arg;
         Log.d("DEBUG_SR", "Index is: " + index);
         for (int fletcherArrayIndex = 0; fletcherArrayIndex < 4; fletcherArrayIndex++) {
-            convertedData[fletcherArrayIndex + index] = (byte) fletcherBytes[fletcherArrayIndex];
+            convertedData[fletcherArrayIndex + index] = (byte) FLETCHER_BYTES[fletcherArrayIndex];
         }
 
         return convertedData;

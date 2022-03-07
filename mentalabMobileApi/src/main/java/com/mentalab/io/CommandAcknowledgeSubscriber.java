@@ -21,12 +21,16 @@ public class CommandAcknowledgeSubscriber extends Subscriber {
         } else {
             result = false;
         }
-        result.notify();
+        synchronized (this) {
+            result.notify();
+        }
     }
 
 
     public boolean getAcknowledgement() throws InterruptedException {
-        result.wait(3_000);
+        synchronized (this) {
+            result.wait(3_000);
+        }
         return result;
     }
 }

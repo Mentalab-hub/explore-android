@@ -64,17 +64,19 @@ public final class MentalabCommands {
      * @throws NoBluetoothException
      */
     public static ExploreDevice connect(String deviceName) throws NoBluetoothException, NoConnectionException, IOException, InvalidDataException {
+        if (!deviceName.startsWith("Explore_")) {
+            throw new NoConnectionException("Device names must begin with 'Explore_'. Provided device name: " + deviceName + ". Exiting.");
+        }
         final ExploreDevice device = getExploreDevice(deviceName);
         connectedDevice = BluetoothManager.connectToDevice(device);
         Log.i(TAG, "Connected to: " + deviceName);
-        decode();
+        decodeRawData();
         return connectedDevice;
     }
 
 
     public static ExploreDevice connect(BluetoothDevice device) throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException, InvalidDataException {
-        connect(device.getName());
-        return connectedDevice;
+        return connect(device.getName());
     }
 
 
@@ -93,7 +95,7 @@ public final class MentalabCommands {
         if (device == null) {
             throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable.");
         }
-        return new ExploreDevice(device);
+        return new ExploreDevice(device, deviceName);
     }
 
 
@@ -127,7 +129,7 @@ public final class MentalabCommands {
     }
 
 
-    private static void decode() throws NoConnectionException, IOException, NoBluetoothException, InvalidDataException {
+    private static void decodeRawData() throws NoConnectionException, IOException, NoBluetoothException, InvalidDataException {
         if (connectedDevice == null) {
             throw new NoConnectionException("Not connected to a device. Exiting.");
         }
@@ -205,7 +207,7 @@ public final class MentalabCommands {
      * @throws InvalidCommandException If the provided Switch is not of type Channel.
      */
     public static Future<Boolean> setChannel(InputDataSwitch channel) throws InvalidCommandException, NoConnectionException {
-        List<InputDataSwitch> channelToList = new ArrayList<>();
+        final List<InputDataSwitch> channelToList = new ArrayList<>();
         channelToList.add(channel);
         return setChannels(channelToList);
     }

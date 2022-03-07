@@ -38,7 +38,8 @@ public class ContentServer {
 
 
     public synchronized void registerSubscriber(Subscriber sub) {
-        ArrayList<Subscriber> subs = this.topicSubscribers.computeIfAbsent(sub.getTopic(), k -> new ArrayList<>());
-        subs.add(sub);
+        this.topicSubscribers
+                .computeIfAbsent(sub.getTopic(), k -> new ArrayList<>())
+                .add(sub);
     }
 }

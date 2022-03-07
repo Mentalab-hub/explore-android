@@ -20,12 +20,13 @@ import java.util.concurrent.Future;
 public class ExploreDevice extends BluetoothManager {
 
     private final BluetoothDevice btDevice;
-    private String deviceName;
+    private final String deviceName;
     private int noChannels; // default 4 todo: how do we change this
 
 
-    public ExploreDevice(BluetoothDevice btDevice) {
+    public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
         this.btDevice = btDevice;
+        this.deviceName = deviceName;
     }
 
 
