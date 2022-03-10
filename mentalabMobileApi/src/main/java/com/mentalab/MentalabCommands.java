@@ -70,7 +70,6 @@ public final class MentalabCommands {
         final ExploreDevice device = getExploreDevice(deviceName);
         connectedDevice = BluetoothManager.connectToDevice(device);
         Log.i(TAG, "Connected to: " + deviceName);
-        decodeRawData();
         return connectedDevice;
     }
 
@@ -129,12 +128,12 @@ public final class MentalabCommands {
     }
 
 
-    private static void decodeRawData() throws NoConnectionException, IOException, NoBluetoothException, InvalidDataException {
+    public static void decodeRawData(ExploreDevice exploreDevice) throws NoConnectionException, IOException, NoBluetoothException {
         if (connectedDevice == null) {
             throw new NoConnectionException("Not connected to a device. Exiting.");
         }
         final InputStream rawData = getRawData();
-        MentalabCodec.startDecode(rawData);
+        MentalabCodec.startDecode(rawData, exploreDevice);
     }
 
 

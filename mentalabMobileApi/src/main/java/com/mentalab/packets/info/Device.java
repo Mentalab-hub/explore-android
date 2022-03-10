@@ -18,7 +18,7 @@ public class Device extends InfoPacket {
 
     public Device(double timeStamp) {
         super(timeStamp);
-        super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate"); // TODO: Could this be a Bean Object??
+        super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate");
     }
 
 
@@ -53,5 +53,13 @@ public class Device extends InfoPacket {
     @Override
     public int getDataCount() {
         return 2;
+    }
+
+    public int getChannelMask(){
+        return adsMask;
+    }
+
+    public int getSamplingRate(){
+        return samplingRate;
     }
 }

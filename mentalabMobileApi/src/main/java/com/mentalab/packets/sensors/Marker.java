@@ -47,7 +47,6 @@ public class Marker extends InfoPacket {
     }
 
 
-    @Override
     public Topic getTopic() {
         return Topic.MARKER;
     }

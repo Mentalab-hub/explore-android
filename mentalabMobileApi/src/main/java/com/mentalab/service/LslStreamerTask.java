@@ -64,11 +64,11 @@ public class LslStreamerTask implements Callable<Boolean> {
             }
             lslStreamOutletMarker = new LslLoader.StreamOutlet(lslStreamInfoMarker);
             Log.d(TAG, "Subscribing!!");
-            ContentServer.getInstance().subscribe("ExG", this::packetCallbackExG);
+            //ContentServer.getInstance().subscribe("ExG", this::packetCallbackExG);
 
-            ContentServer.getInstance().subscribe("Orn", this::packetCallbackOrn);
+            //ContentServer.getInstance().subscribe("Orn", this::packetCallbackOrn);
 
-            ContentServer.getInstance().subscribe("Marker", this::packetCallbackMarker);
+            //ContentServer.getInstance().subscribe("Marker", this::packetCallbackMarker);
         } catch (IOException exception) {
             exception.printStackTrace();
         }

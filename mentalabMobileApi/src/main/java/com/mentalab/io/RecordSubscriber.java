@@ -28,12 +28,12 @@ public class RecordSubscriber extends Subscriber {
         final int noChannels = packet.getDataCount();
         double timestamp = packet.getTimeStamp();
 
-        final Uri location = generatedFiles.get(t);
-        try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
-            writePacketToCSV(writer, packet, timestamp, noChannels);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //final Uri location = generatedFiles.get(t);
+//        try (final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(context.getContentResolver().openOutputStream(location, "wa")))) {
+//            writePacketToCSV(writer, packet, timestamp, noChannels);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
 
@@ -48,7 +48,7 @@ public class RecordSubscriber extends Subscriber {
             final int channelNo = i % lineBreak + 1; // 1, 2, 3, 4,...
             if (channelNo == lineBreak) { // break line after 2, 4 or 8 entries
                 writer.newLine();
-                timestamp += 1 / samplingRate;
+                //timestamp += 1 / samplingRate; commented to fix build error
                 if ((packet.getData().size() - i) > 2) {
                     writer.write(String.valueOf(timestamp));
                 }

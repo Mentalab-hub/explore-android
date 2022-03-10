@@ -38,13 +38,6 @@ public class CommandStatus extends UtilPacket {
         return 1;
     }
 
-
-    @Override
-    public Topic getTopic() {
-        return Topic.COMMAND;
-    }
-
-
     public boolean getResult() {
         return commandStatus;
     }

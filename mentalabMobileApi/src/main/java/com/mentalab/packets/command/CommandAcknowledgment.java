@@ -33,8 +33,5 @@ public class CommandAcknowledgment extends UtilPacket {
     }
 
 
-    @Override
-    public Topic getTopic() {
-        return Topic.COMMAND;
-    }
+
 }

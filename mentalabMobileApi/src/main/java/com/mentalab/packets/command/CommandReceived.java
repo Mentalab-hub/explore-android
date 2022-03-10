@@ -30,9 +30,4 @@ public class CommandReceived extends UtilPacket {
         return 1;
     }
 
-
-    @Override
-    public Topic getTopic() {
-        return Topic.COMMAND;
-    }
 }

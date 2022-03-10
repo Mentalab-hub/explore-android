@@ -2,6 +2,7 @@ package com.mentalab.packets.sensors.exg;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 import com.mentalab.packets.Packet;
 
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class EEGPacket extends Packet {
+public abstract class EEGPacket extends Packet implements Publishable {
 
     private static final int BUFFER_LENGTH = 3; // EEG packets are 24 bits = 3 bytes
     private final int channelNumber;

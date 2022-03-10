@@ -6,7 +6,7 @@ import com.mentalab.packets.sensors.exg.Eeg94;
 import com.mentalab.packets.sensors.exg.Eeg98;
 import com.mentalab.packets.info.Device;
 import com.mentalab.packets.info.Environment;
-import com.mentalab.packets.info.Orientation;
+import com.mentalab.packets.sensors.Orientation;
 import com.mentalab.packets.sensors.Marker;
 
 public enum PacketId {

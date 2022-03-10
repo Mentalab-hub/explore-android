@@ -59,15 +59,15 @@ public class RecordTask implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
-        ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.EXG, context, ));
-        ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.ORN, context, ));
-        ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.MARKER, context, ));
+        //ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.EXG, context, ));
+        //ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.ORN, context, ));
+        //ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.MARKER, context, ));
         return true; // todo: check success
     }
 
 
     public void setGeneratedFiles(Map<Topic, Uri> generatedFies) {
-        this.generatedFies = generatedFies;
+        //this.generatedFies = generatedFies;
     }
 
 
