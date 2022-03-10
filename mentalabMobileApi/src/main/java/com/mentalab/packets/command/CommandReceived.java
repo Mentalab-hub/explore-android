@@ -6,28 +6,23 @@ import com.mentalab.exception.InvalidDataException;
 
 public class CommandReceived extends UtilPacket {
 
-    float markerCode;
+  float markerCode;
 
-    public CommandReceived(double timeStamp) {
-        super(timeStamp);
-    }
+  public CommandReceived(double timeStamp) {
+    super(timeStamp);
+  }
 
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {}
 
-    @Override
-    public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    }
+  @NonNull
+  @Override
+  public String toString() {
+    return "Command received packet";
+  }
 
-
-    @NonNull
-    @Override
-    public String toString() {
-        return "Command received packet";
-    }
-
-
-    @Override
-    public int getDataCount() {
-        return 1;
-    }
-
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
 }

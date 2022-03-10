@@ -13,43 +13,37 @@ import java.util.Collections;
 
 public class Marker extends InfoPacket {
 
-    private int markerCode;
+  private int markerCode;
 
+  public Marker(double timeStamp) {
+    super(timeStamp);
+    super.attributes = Collections.singletonList("Marker");
+  }
 
-    public Marker(double timeStamp) {
-        super(timeStamp);
-        super.attributes = Collections.singletonList("Marker");
-    }
+  @Override
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    this.markerCode =
+        ByteBuffer.wrap(new byte[] {byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
+    super.convertedSamples = new ArrayList<>(Collections.singletonList((float) markerCode));
+  }
 
+  @NonNull
+  @Override
+  public String toString() {
+    return "Marker: " + markerCode;
+  }
 
-    @Override
-    public void convertData(byte[] byteBuffer) throws InvalidDataException {
-        this.markerCode = ByteBuffer.wrap(new byte[]{byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN)
-            .getShort();
-        super.convertedSamples = new ArrayList<>(Collections.singletonList((float) markerCode));
-    }
+  @Override
+  public int getDataCount() {
+    return 1;
+  }
 
+  @Override
+  public ArrayList<Float> getData() {
+    return new ArrayList<>(markerCode);
+  }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return "Marker: " + markerCode;
-    }
-
-
-    @Override
-    public int getDataCount() {
-        return 1;
-    }
-
-
-    @Override
-    public ArrayList<Float> getData() {
-        return new ArrayList<>(markerCode);
-    }
-
-
-    public Topic getTopic() {
-        return Topic.MARKER;
-    }
+  public Topic getTopic() {
+    return Topic.MARKER;
+  }
 }
