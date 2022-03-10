@@ -4,5 +4,5 @@ import com.mentalab.utils.constants.Topic;
 
 public interface Publishable {
 
-  abstract Topic getTopic();
+    abstract Topic getTopic();
 }

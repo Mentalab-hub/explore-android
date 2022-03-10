@@ -1,32 +1,33 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
+
 import com.mentalab.exception.InvalidDataException;
 
 public class CommandReceived extends UtilPacket {
 
-  float markerCode;
+    float markerCode;
 
-  public CommandReceived(double timeStamp) {
-    super(timeStamp);
-  }
-
-
-  @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-  }
+    public CommandReceived(double timeStamp) {
+        super(timeStamp);
+    }
 
 
-  @NonNull
-  @Override
-  public String toString() {
-    return "Command received packet";
-  }
+    @Override
+    public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    }
 
 
-  @Override
-  public int getDataCount() {
-    return 1;
-  }
+    @NonNull
+    @Override
+    public String toString() {
+        return "Command received packet";
+    }
+
+
+    @Override
+    public int getDataCount() {
+        return 1;
+    }
 
 }

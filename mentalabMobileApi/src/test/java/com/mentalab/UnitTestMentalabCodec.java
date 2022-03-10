@@ -1,6 +1,7 @@
 package com.mentalab;
 
 import com.mentalab.exception.InvalidDataException;
+
 import org.junit.Test;
 
 /**
@@ -10,8 +11,8 @@ import org.junit.Test;
  */
 public class UnitTestMentalabCodec {
 
-  @Test(expected = InvalidDataException.class)
-  public void nullCheckDecodeIsCorrect() throws InvalidDataException {
-    //MentalabCodec.startDecode(null);
-  }
+    @Test(expected = InvalidDataException.class)
+    public void nullCheckDecodeIsCorrect() throws InvalidDataException {
+        //MentalabCodec.startDecode(null);
+    }
 }

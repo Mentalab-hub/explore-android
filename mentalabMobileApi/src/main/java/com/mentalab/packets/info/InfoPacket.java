@@ -8,7 +8,7 @@ import com.mentalab.packets.Packet;
 public abstract class InfoPacket extends Packet {
 
 
-  public InfoPacket(double timeStamp) {
-    super(timeStamp);
-  }
+    public InfoPacket(double timeStamp) {
+        super(timeStamp);
+    }
 }

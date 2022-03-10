@@ -9,27 +9,27 @@ import androidx.annotation.NonNull;
 public class CommandAcknowledgment extends UtilPacket {
 
 
-  public CommandAcknowledgment(double timeStamp) {
-    super(timeStamp);
-  }
+    public CommandAcknowledgment(double timeStamp) {
+        super(timeStamp);
+    }
 
 
-  @Override
-  public void convertData(byte[] byteBuffer) {
-  }
+    @Override
+    public void convertData(byte[] byteBuffer) {
+    }
 
 
-  @NonNull
-  @Override
-  public String toString() {
-    return "AckPacket";
-  }
+    @NonNull
+    @Override
+    public String toString() {
+        return "AckPacket";
+    }
 
 
-  @Override
-  public int getDataCount() {
-    return 0; // TODO: Explanation
-  }
+    @Override
+    public int getDataCount() {
+        return 0; // TODO: Explanation
+    }
 
 
 }

@@ -1,6 +1,7 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
+
 import com.mentalab.packets.Packet;
 
 /**
@@ -9,25 +10,25 @@ import com.mentalab.packets.Packet;
 class DisconnectCommand extends Packet {
 
 
-  public DisconnectCommand(double timeStamp) {
-    super(timeStamp);
-  }
+    public DisconnectCommand(double timeStamp) {
+        super(timeStamp);
+    }
 
 
-  @Override
-  public void convertData(byte[] byteBuffer) {
-  }
+    @Override
+    public void convertData(byte[] byteBuffer) {
+    }
 
 
-  @NonNull
-  @Override
-  public String toString() {
-    return "DisconnectionPacket";
-  }
+    @NonNull
+    @Override
+    public String toString() {
+        return "DisconnectionPacket";
+    }
 
 
-  @Override
-  public int getDataCount() {
-    return 0;
-  }
+    @Override
+    public int getDataCount() {
+        return 0;
+    }
 }
