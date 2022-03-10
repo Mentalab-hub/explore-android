@@ -2,7 +2,6 @@ package com.mentalab.packets;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.utils.constants.Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public abstract class Packet {
       double value;
 
       value =
-          ByteBuffer.wrap(new byte[] {bytes[index], bytes[index + 1]})
+          ByteBuffer.wrap(new byte[]{bytes[index], bytes[index + 1]})
               .order(ByteOrder.LITTLE_ENDIAN)
               .getShort();
       if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
@@ -55,14 +54,20 @@ public abstract class Packet {
    */
   public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
 
-  /** String representation of attributes */
+  /**
+   * String representation of attributes
+   */
   @NonNull
   public abstract String toString();
 
-  /** Number of element in each packet */
+  /**
+   * Number of element in each packet
+   */
   public abstract int getDataCount();
 
-  /** Get data values from packet structure */
+  /**
+   * Get data values from packet structure
+   */
   public ArrayList<Float> getData() {
     return null;
   }

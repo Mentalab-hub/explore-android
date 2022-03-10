@@ -9,12 +9,12 @@ import com.mentalab.utils.constants.Topic;
  */
 abstract class UtilPacket extends Packet implements Publishable {
 
-    public UtilPacket(double timeStamp) {
-        super(timeStamp);
-    }
+  public UtilPacket(double timeStamp) {
+    super(timeStamp);
+  }
 
-    @Override
-    public Topic getTopic() {
-        return Topic.COMMAND;
-    }
+  @Override
+  public Topic getTopic() {
+    return Topic.COMMAND;
+  }
 }

@@ -29,6 +29,19 @@ public class ExploreDevice extends BluetoothManager {
     this.deviceName = deviceName;
   }
 
+  // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
+  private static int generateChannelsArg(List<InputDataSwitch> switches) {
+    StringBuilder binaryArgument =
+        new StringBuilder(
+            "11111111"); // When 8 channels are active, we will be sending binary 11111111 = 255
+    for (InputDataSwitch aSwitch : switches) {
+      if (!aSwitch.isOn()) {
+        binaryArgument.setCharAt(aSwitch.getID(), '0');
+      }
+    }
+    return Integer.parseInt(binaryArgument.toString(), 2);
+  }
+
   public BluetoothDevice getBluetoothDevice() {
     return btDevice;
   }
@@ -45,19 +58,6 @@ public class ExploreDevice extends BluetoothManager {
     c.setArg(generateChannelsArg(switches));
 
     return submitCommand(c);
-  }
-
-  // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
-  private static int generateChannelsArg(List<InputDataSwitch> switches) {
-    StringBuilder binaryArgument =
-        new StringBuilder(
-            "11111111"); // When 8 channels are active, we will be sending binary 11111111 = 255
-    for (InputDataSwitch aSwitch : switches) {
-      if (!aSwitch.isOn()) {
-        binaryArgument.setCharAt(aSwitch.getID(), '0');
-      }
-    }
-    return Integer.parseInt(binaryArgument.toString(), 2);
   }
 
   public Future<Boolean> setActiveModules(InputDataSwitch s) throws InvalidCommandException {

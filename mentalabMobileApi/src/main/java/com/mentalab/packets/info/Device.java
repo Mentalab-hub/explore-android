@@ -1,8 +1,6 @@
 package com.mentalab.packets.info;
 
 import androidx.annotation.NonNull;
-import com.mentalab.utils.constants.Topic;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -13,53 +11,53 @@ import java.util.Arrays;
  */
 public class Device extends InfoPacket {
 
-    int adsMask;
-    int samplingRate;
+  int adsMask;
+  int samplingRate;
 
-    public Device(double timeStamp) {
-        super(timeStamp);
-        super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate");
-    }
-
-
-    @Override
-    public void convertData(byte[] byteBuffer) {
-        int samplingRateMultiplier =
-                ByteBuffer.wrap(new byte[]{byteBuffer[2], 0, 0, 0})
-                        .order(ByteOrder.LITTLE_ENDIAN)
-                        .getInt();
-        this.samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
-        this.adsMask = byteBuffer[3] & 0xFF;
-
-        super.convertedSamples =
-                new ArrayList<>(
-                        Arrays.asList((float) adsMask, (float) samplingRate));
-    }
+  public Device(double timeStamp) {
+    super(timeStamp);
+    super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate");
+  }
 
 
-    @Override
-    public ArrayList<Float> getData() {
-        return super.convertedSamples;
-    }
+  @Override
+  public void convertData(byte[] byteBuffer) {
+    int samplingRateMultiplier =
+        ByteBuffer.wrap(new byte[]{byteBuffer[2], 0, 0, 0})
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .getInt();
+    this.samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
+    this.adsMask = byteBuffer[3] & 0xFF;
+
+    super.convertedSamples =
+        new ArrayList<>(
+            Arrays.asList((float) adsMask, (float) samplingRate));
+  }
 
 
-    @NonNull
-    @Override
-    public String toString() {
-        return "DeviceInfoPacket";
-    }
+  @Override
+  public ArrayList<Float> getData() {
+    return super.convertedSamples;
+  }
 
 
-    @Override
-    public int getDataCount() {
-        return 2;
-    }
+  @NonNull
+  @Override
+  public String toString() {
+    return "DeviceInfoPacket";
+  }
 
-    public int getChannelMask(){
-        return adsMask;
-    }
 
-    public int getSamplingRate(){
-        return samplingRate;
-    }
+  @Override
+  public int getDataCount() {
+    return 2;
+  }
+
+  public int getChannelMask() {
+    return adsMask;
+  }
+
+  public int getSamplingRate() {
+    return samplingRate;
+  }
 }

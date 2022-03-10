@@ -16,7 +16,7 @@ public class CommandAcknowledgeSubscriber extends Subscriber {
 
   @Override
   public void accept(Packet p) {
-    Log.d(Utils.TAG, "CommandAcknowledgeSubscriber"+ p.toString());
+    Log.d(Utils.TAG, "CommandAcknowledgeSubscriber" + p.toString());
     if (p instanceof CommandStatus) {
       result = ((CommandStatus) p).getResult();
     } else {

@@ -3,18 +3,23 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 
+import com.mentalab.utils.Utils;
+import com.mentalab.utils.constants.SamplingRate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,7 +31,11 @@ public class MainActivity extends AppCompatActivity {
 
     try {
       Set<BluetoothDevice> deviceList = MentalabCommands.scan();
-      MentalabCommands.connect(deviceList.iterator().next());
+      ExploreDevice device = MentalabCommands.connect(deviceList.iterator().next());
+      MentalabCommands.decodeRawData(device);
+      boolean result = device.setSamplingRate(SamplingRate.SR_250).get();
+      Log.d(Utils.TAG, "Result is " + result);
+
 
       // Map<String, Boolean> configMap = Map.of(DeviceConfigSwitches.Channels[7], false,
       // MentalabConstants.DeviceConfigSwitches.Channels[6], false);
@@ -44,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
     } catch (CommandFailedException e) {
       e.printStackTrace();
     } catch (IOException e) {
+      e.printStackTrace();
+    } catch (InvalidCommandException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
       e.printStackTrace();
     }
   }
