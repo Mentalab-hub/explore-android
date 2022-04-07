@@ -32,7 +32,9 @@ public class BluetoothManager {
   public static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
     final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
     if (btAdapter == null) {
-      throw new NoBluetoothException("Bluetooth service not available", null);
+      throw new NoBluetoothException("Bluetooth service not available. Exiting.");
+    }  else if (!btAdapter.isEnabled()) {
+      throw new NoBluetoothException("Bluetooth is not enabled. Exiting.");
     }
     return btAdapter;
   }
