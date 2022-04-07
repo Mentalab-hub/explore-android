@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Environment extends InfoPacket {
+public class EnvironmentPacket extends InfoPacket {
 
   float temperature, light, battery; // TODO: Why are these here?
 
-  public Environment(double timeStamp) {
+  public EnvironmentPacket(double timeStamp) {
     super(timeStamp);
     super.attributes =
         Arrays.asList("Temperature ", "Light ", "Battery "); // TODO: Could this be a Bean Object??

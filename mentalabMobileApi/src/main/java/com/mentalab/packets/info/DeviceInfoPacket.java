@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-public class Device extends InfoPacket {
+public class DeviceInfoPacket extends InfoPacket {
 
   int adsMask;
   int samplingRate;
 
-  public Device(double timeStamp) {
+  public DeviceInfoPacket(double timeStamp) {
     super(timeStamp);
     super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate");
   }

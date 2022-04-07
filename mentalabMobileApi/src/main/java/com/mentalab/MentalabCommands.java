@@ -8,9 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.io.BluetoothManager;
@@ -69,22 +67,34 @@ public final class MentalabCommands {
    * @throws NoBluetoothException
    */
   public static ExploreDevice connect(String deviceName)
-      throws NoBluetoothException, NoConnectionException, IOException, InvalidDataException {
-    if (!deviceName.startsWith("Explore_")) {
-      throw new NoConnectionException(
-          "Device names must begin with 'Explore_'. Provided device name: "
-              + deviceName
-              + ". Exiting.");
-    }
+      throws NoBluetoothException, NoConnectionException, IOException {
+    deviceName = checkName(deviceName);
+
     final ExploreDevice device = getExploreDevice(deviceName);
     connectedDevice = BluetoothManager.connectToDevice(device);
+
     Log.i(TAG, "Connected to: " + deviceName);
+    decodeRawData(connectedDevice);
     return connectedDevice;
   }
 
+  private static String checkName(String deviceName) throws NoConnectionException {
+    if (deviceName.length() == 4) {
+      Log.i(TAG, "Appending device name with 'Explore_'.");
+      deviceName = "Explore_" + deviceName;
+    }
+
+    if (!deviceName.startsWith("Explore_")) {
+      throw new NoConnectionException(
+          "Device names must begin with 'Explore_'. Provided device name: '"
+              + deviceName
+              + "'. Exiting.");
+    }
+    return deviceName;
+  }
+
   public static ExploreDevice connect(BluetoothDevice device)
-      throws NoConnectionException, NoBluetoothException, CommandFailedException, IOException,
-          InvalidDataException {
+      throws NoConnectionException, NoBluetoothException, IOException {
     return connect(device.getName());
   }
 
@@ -95,6 +105,10 @@ public final class MentalabCommands {
     }
 
     BluetoothDevice device = null;
+    if (bondedExploreDevices.size() < 1) {
+      throw new NoConnectionException("Not bonded to any explore devices. Exiting.");
+    }
+
     for (BluetoothDevice d : bondedExploreDevices) {
       if (d.getName().equals(deviceName)) {
         device = d;
@@ -102,7 +116,7 @@ public final class MentalabCommands {
     }
 
     if (device == null) {
-      throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable.");
+      throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable. Exiting.");
     }
     return new ExploreDevice(device, deviceName);
   }
@@ -278,11 +292,11 @@ public final class MentalabCommands {
     return androidFileGenerator.generateFiles(directory, filename);
   }
 
-  public void clearDeviceList() {
+  public static void clearDeviceList() {
     bondedExploreDevices.clear();
   }
 
-  public void close() throws IOException {
+  public static void close() throws IOException {
     clearDeviceList();
     connectedDevice = null;
     BluetoothManager.closeSocket();
