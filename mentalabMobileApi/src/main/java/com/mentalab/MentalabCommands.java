@@ -15,8 +15,9 @@ import com.mentalab.io.BluetoothManager;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.RecordTask;
 import com.mentalab.utils.FileGenerator;
+import com.mentalab.utils.InputSwitch;
 import com.mentalab.utils.Utils;
-import com.mentalab.utils.constants.InputDataSwitch;
+import com.mentalab.utils.constants.Protocol;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
@@ -68,29 +69,13 @@ public final class MentalabCommands {
    */
   public static ExploreDevice connect(String deviceName)
       throws NoBluetoothException, NoConnectionException, IOException {
-    deviceName = checkName(deviceName);
+    deviceName = Utils.checkName(deviceName);
 
     final ExploreDevice device = getExploreDevice(deviceName);
     connectedDevice = BluetoothManager.connectToDevice(device);
 
     Log.i(TAG, "Connected to: " + deviceName);
-    decodeRawData(connectedDevice);
     return connectedDevice;
-  }
-
-  private static String checkName(String deviceName) throws NoConnectionException {
-    if (deviceName.length() == 4) {
-      Log.i(TAG, "Appending device name with 'Explore_'.");
-      deviceName = "Explore_" + deviceName;
-    }
-
-    if (!deviceName.startsWith("Explore_")) {
-      throw new NoConnectionException(
-          "Device names must begin with 'Explore_'. Provided device name: '"
-              + deviceName
-              + "'. Exiting.");
-    }
-    return deviceName;
   }
 
   public static ExploreDevice connect(BluetoothDevice device)
@@ -98,7 +83,7 @@ public final class MentalabCommands {
     return connect(device.getName());
   }
 
-  private static ExploreDevice getExploreDevice(String deviceName)
+  public static ExploreDevice getExploreDevice(String deviceName)
       throws NoConnectionException, NoBluetoothException {
     if (bondedExploreDevices.isEmpty()) {
       scan();
@@ -122,21 +107,6 @@ public final class MentalabCommands {
   }
 
   /**
-   * Returns the device data stream.
-   *
-   * @return InputStream of raw bytes
-   * @throws IOException
-   * @throws NoBluetoothException If Bluetooth connection is lost during communication
-   */
-  public static InputStream getRawData()
-      throws NoBluetoothException, IOException, NoConnectionException {
-    if (connectedDevice == null) {
-      throw new NoConnectionException("Not connected to a device. Exiting.");
-    }
-    return connectedDevice.getInputStream();
-  }
-
-  /**
    * Returns an OutputStream with which to write data to the device.
    *
    * @return InputStream of raw bytes
@@ -151,13 +121,28 @@ public final class MentalabCommands {
     return connectedDevice.getOutputStream();
   }
 
-  public static void decodeRawData(ExploreDevice exploreDevice)
+  public static void decodeInputStream()
       throws NoConnectionException, IOException, NoBluetoothException {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
     }
     final InputStream rawData = getRawData();
-    MentalabCodec.startDecode(rawData, exploreDevice);
+    MentalabCodec.startDecode(rawData);
+  }
+
+  /**
+   * Returns the device data stream.
+   *
+   * @return InputStream of raw bytes
+   * @throws IOException
+   * @throws NoBluetoothException If Bluetooth connection is lost during communication
+   */
+  private static InputStream getRawData()
+          throws NoBluetoothException, IOException, NoConnectionException {
+    if (connectedDevice == null) {
+      throw new NoConnectionException("Not connected to a device. Exiting.");
+    }
+    return connectedDevice.getInputStream();
   }
 
   /**
@@ -173,7 +158,7 @@ public final class MentalabCommands {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
     }
-    return connectedDevice.setSamplingRate(sr);
+    return connectedDevice.postSamplingRate(sr);
   }
 
   /** Formats internal memory of device. */
@@ -209,16 +194,16 @@ public final class MentalabCommands {
    * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
-  public static Future<Boolean> setChannels(List<InputDataSwitch> channels)
+  public static Future<Boolean> setChannels(List<InputSwitch> channels)
       throws InvalidCommandException, NoConnectionException {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
     }
-    if (channels.stream().anyMatch(s -> s.isInGroup(InputDataSwitch.Group.Module))) {
+    if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(Protocol.Type.Module))) {
       throw new InvalidCommandException(
           "Attempting to turn off channels with a module switch. Exiting.");
     }
-    return connectedDevice.setActiveChannels(channels);
+    return connectedDevice.postActiveChannels(channels);
   }
 
   /**
@@ -227,9 +212,9 @@ public final class MentalabCommands {
    * @param channel Switch The channel you would like to turn on (true) or off (false).
    * @throws InvalidCommandException If the provided Switch is not of type Channel.
    */
-  public static Future<Boolean> setChannel(InputDataSwitch channel)
+  public static Future<Boolean> setChannel(InputSwitch channel)
       throws InvalidCommandException, NoConnectionException {
-    final List<InputDataSwitch> channelToList = new ArrayList<>();
+    final List<InputSwitch> channelToList = new ArrayList<>();
     channelToList.add(channel);
     return setChannels(channelToList);
   }
@@ -242,16 +227,16 @@ public final class MentalabCommands {
    *
    * @param module The module to be turned on or off ORN, ENVIRONMENT, EXG
    */
-  public static Future<Boolean> setModule(InputDataSwitch module)
+  public static Future<Boolean> setModule(InputSwitch module)
       throws InvalidCommandException, NoConnectionException {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
     }
-    if (module.isInGroup(InputDataSwitch.Group.Channel)) {
+    if (module.getProtocol().isOfType(Protocol.Type.Channel)) {
       throw new InvalidCommandException(
           "Attempting to turn off channels with a module switch. Exiting.");
     }
-    return connectedDevice.setActiveModules(module);
+    return connectedDevice.postActiveModules(module);
   }
 
   /** Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer) */

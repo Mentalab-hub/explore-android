@@ -13,11 +13,17 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.utils.InputSwitch;
+import com.mentalab.utils.constants.Protocol;
+import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
           @Override
           public void run() throws NoConnectionException, IOException, NoBluetoothException {
             ExploreDevice expl = MentalabCommands.connect(exploreDeviceID);
+            MentalabCommands.decodeInputStream();
             setConnectedDevice(expl);
           }
 
@@ -60,8 +67,30 @@ public class MainActivity extends AppCompatActivity {
         });
 
     try {
-      connectedDevice.formatDeviceMemory();
-    } catch (InvalidCommandException e) {
+      final Future<Boolean> formattedMemory = connectedDevice.formatDeviceMemory();
+      if (!formattedMemory.get()) {
+        createToastMsg(
+                MainActivity.this,
+                "Something went wrong when formatting the memory. Please try again.");
+        throw new CommandFailedException("Failed to format memory");
+      }
+
+      final Future<Boolean> samplingRateSet = connectedDevice.postSamplingRate(SamplingRate.SR_500);
+      if (!samplingRateSet.get()) {
+        createToastMsg(
+                MainActivity.this,
+                "Something went wrong setting the sampling rate. Please try again.");
+        throw new CommandFailedException("Failed to set the sampling rate");
+      }
+
+      final Future<Boolean> modulesSet = connectedDevice.postActiveModules(new InputSwitch(Protocol.ENVIRONMENT, false));
+      if (!modulesSet.get()) {
+        createToastMsg(
+                MainActivity.this,
+                "Something went wrong when trying to turn of a module. Please try again.");
+        throw new CommandFailedException("Failed to set the module");
+      }
+    } catch (InvalidCommandException | InterruptedException | ExecutionException | CommandFailedException e) {
       e.printStackTrace();
     }
   }

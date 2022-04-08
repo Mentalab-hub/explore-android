@@ -38,7 +38,6 @@ public class Orientation extends PublishablePacket {
       }
     }
     super.data = new ArrayList<>(values);
-    Log.d(Utils.TAG, "Converted samples in the packets are: " + super.data);
   }
 
   @NonNull

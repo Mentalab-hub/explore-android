@@ -18,7 +18,7 @@ public class CommandReceived extends UtilPacket {
   @NonNull
   @Override
   public String toString() {
-    return "Command received packet";
+    return "Command received.";
   }
 
   @Override

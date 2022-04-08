@@ -17,7 +17,7 @@ class DisconnectCommand extends Packet {
   @NonNull
   @Override
   public String toString() {
-    return "DisconnectionPacket";
+    return "Disconnected.";
   }
 
   @Override

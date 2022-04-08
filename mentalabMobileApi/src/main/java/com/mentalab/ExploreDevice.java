@@ -9,7 +9,7 @@ import com.mentalab.io.BluetoothManager;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.LslStreamerTask;
-import com.mentalab.utils.constants.InputDataSwitch;
+import com.mentalab.utils.InputSwitch;
 import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
@@ -32,12 +32,12 @@ public class ExploreDevice extends BluetoothManager {
   }
 
   // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
-  private static int generateChannelsArg(List<InputDataSwitch> switches) {
+  private static int generateChannelsArg(List<InputSwitch> switches) {
     StringBuilder binaryArgument = new StringBuilder("11111111");
     // When 8 channels are active, we will be sending binary 11111111 = 255
-    for (InputDataSwitch aSwitch : switches) {
+    for (InputSwitch aSwitch : switches) {
       if (!aSwitch.isOn()) {
-        binaryArgument.setCharAt(aSwitch.getID(), '0');
+        binaryArgument.setCharAt(aSwitch.getProtocol().getID(), '0');
       }
     }
     return Integer.parseInt(binaryArgument.toString(), 2);
@@ -53,7 +53,7 @@ public class ExploreDevice extends BluetoothManager {
    * @param switches List of channel switches, indicating which channels should be on and off
    * @throws InvalidCommandException
    */
-  public Future<Boolean> postActiveChannels(List<InputDataSwitch> switches)
+  public Future<Boolean> postActiveChannels(List<InputSwitch> switches)
       throws InvalidCommandException {
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(switches));
@@ -61,9 +61,9 @@ public class ExploreDevice extends BluetoothManager {
     return submitCommand(c);
   }
 
-  public Future<Boolean> postActiveModules(InputDataSwitch s) throws InvalidCommandException {
+  public Future<Boolean> postActiveModules(InputSwitch s) throws InvalidCommandException {
     final Command c = s.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
-    c.setArg(s.getID());
+    c.setArg(s.getProtocol().getID());
 
     return submitCommand(c);
   }
