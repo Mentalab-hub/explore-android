@@ -38,7 +38,7 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
     ContentServer.getInstance()
         .registerSubscriber(sub); // register subscriber before sending command
 
-    this.device.sendBytes(command);
+    this.device.postBytes(command);
     Log.d(Utils.TAG, "Command sent. Awaiting acknowledgement.");
 
     return sub.getAcknowledgement(); // blocking for 3s

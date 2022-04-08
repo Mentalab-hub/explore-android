@@ -13,6 +13,7 @@ import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class LslStreamerTask implements Callable<Boolean> {
@@ -138,7 +139,7 @@ public class LslStreamerTask implements Callable<Boolean> {
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
-    ArrayList<Float> packetVoltageValues = packet.getData();
+    List<Float> packetVoltageValues = packet.getData();
     float[] floatArray = new float[packetVoltageValues.size()];
     Object[] array = packetVoltageValues.toArray();
     for (int index = 0; index < packetVoltageValues.size(); index++) {

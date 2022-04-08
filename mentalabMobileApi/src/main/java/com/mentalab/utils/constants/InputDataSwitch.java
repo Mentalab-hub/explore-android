@@ -3,9 +3,11 @@ package com.mentalab.utils.constants;
 // Fantastic solution to hierarchical enums:
 // https://stackoverflow.com/questions/19680418/how-to-use-enum-with-grouping-and-subgrouping-hierarchy-nesting
 public enum InputDataSwitch {
+
   ENVIRONMENT(Group.Module, true, 0),
   ORN(Group.Module, true, 1),
   EXG(Group.Module, true, 2),
+
   CHANNEL_0(Group.Channel, true, 0),
   CHANNEL_1(Group.Channel, true, 1),
   CHANNEL_2(Group.Channel, true, 2),
@@ -39,6 +41,6 @@ public enum InputDataSwitch {
 
   public enum Group {
     Module,
-    Channel;
+    Channel
   }
 }

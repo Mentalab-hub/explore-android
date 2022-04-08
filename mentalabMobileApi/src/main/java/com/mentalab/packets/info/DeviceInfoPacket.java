@@ -1,38 +1,54 @@
 package com.mentalab.packets.info;
 
 import androidx.annotation.NonNull;
+import com.mentalab.MentalabCommands;
+import com.mentalab.utils.constants.SamplingRate;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+
+import static com.mentalab.packets.Attributes.ADS_MASK;
+import static com.mentalab.packets.Attributes.SR;
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 public class DeviceInfoPacket extends InfoPacket {
 
-  int adsMask;
-  int samplingRate;
+  private SamplingRate samplingRate;
+  private int adsMask;
 
   public DeviceInfoPacket(double timeStamp) {
     super(timeStamp);
-    super.attributes = Arrays.asList("Ads_Mask", "Sampling_Rate");
+    super.attributes = EnumSet.of(ADS_MASK, SR);
   }
 
   @Override
   public void convertData(byte[] byteBuffer) {
-    int samplingRateMultiplier =
+    final int samplingRateMultiplier =
         ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
             .order(ByteOrder.LITTLE_ENDIAN)
             .getInt();
-    this.samplingRate = (int) (16000 / (Math.pow(2, samplingRateMultiplier)));
+
+    final double sr = 16000 / (Math.pow(2, samplingRateMultiplier));
+    if (sr < 300) {
+      this.samplingRate = SamplingRate.SR_250;
+    } else if (sr < 600) {
+      this.samplingRate = SamplingRate.SR_500;
+    } else {
+      this.samplingRate = SamplingRate.SR_1000;
+    }
+
     this.adsMask = byteBuffer[3] & 0xFF;
 
-    super.convertedSamples = new ArrayList<>(Arrays.asList((float) adsMask, (float) samplingRate));
+    super.data = new ArrayList<>(Arrays.asList((float) adsMask, (float) sr));
   }
 
   @Override
-  public ArrayList<Float> getData() {
-    return super.convertedSamples;
+  public List<Float> getData() {
+    return super.data;
   }
 
   @NonNull
@@ -47,10 +63,10 @@ public class DeviceInfoPacket extends InfoPacket {
   }
 
   public int getChannelMask() {
-    return adsMask;
+    return this.adsMask;
   }
 
-  public int getSamplingRate() {
+  public SamplingRate getSamplingRate() {
     return samplingRate;
   }
 }

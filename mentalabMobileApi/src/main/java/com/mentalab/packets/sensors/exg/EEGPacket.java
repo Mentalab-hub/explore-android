@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.Publishable;
+import com.mentalab.packets.PublishablePacket;
 import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class EEGPacket extends Packet implements Publishable {
+public abstract class EEGPacket extends PublishablePacket {
 
   private static final int BUFFER_LENGTH = 3; // EEG packets are 24 bits = 3 bytes
   private final int channelNumber;
@@ -75,7 +76,7 @@ public abstract class EEGPacket extends Packet implements Publishable {
     } catch (InvalidDataException | IOException e) {
       e.printStackTrace(); // TODO: React appropriately
     }
-    super.convertedSamples =
+    super.data =
         new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
   }
 
@@ -85,7 +86,7 @@ public abstract class EEGPacket extends Packet implements Publishable {
     StringBuilder data = new StringBuilder("ExG ");
     data.append(channelNumber);
     data.append(" channel: [");
-    for (float sample : super.convertedSamples) {
+    for (float sample : super.data) {
       data.append(sample).append(" ,");
     }
     data.append("]");
@@ -102,7 +103,7 @@ public abstract class EEGPacket extends Packet implements Publishable {
     return Topic.EXG;
   }
 
-  public ArrayList<Float> getData() {
-    return super.convertedSamples;
+  public List<Float> getData() {
+    return super.data;
   }
 }

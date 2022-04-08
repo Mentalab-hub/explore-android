@@ -22,9 +22,9 @@ public class ExploreDevice extends BluetoothManager {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
-  private int activeChannelMask;
-  private int activeSamplingRate;
-  private int numberOfChannels;
+
+  private int channelCount;
+  private SamplingRate samplingRate;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
@@ -33,9 +33,8 @@ public class ExploreDevice extends BluetoothManager {
 
   // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
   private static int generateChannelsArg(List<InputDataSwitch> switches) {
-    StringBuilder binaryArgument =
-        new StringBuilder(
-            "11111111"); // When 8 channels are active, we will be sending binary 11111111 = 255
+    StringBuilder binaryArgument = new StringBuilder("11111111");
+    // When 8 channels are active, we will be sending binary 11111111 = 255
     for (InputDataSwitch aSwitch : switches) {
       if (!aSwitch.isOn()) {
         binaryArgument.setCharAt(aSwitch.getID(), '0');
@@ -54,7 +53,7 @@ public class ExploreDevice extends BluetoothManager {
    * @param switches List of channel switches, indicating which channels should be on and off
    * @throws InvalidCommandException
    */
-  public Future<Boolean> setActiveChannels(List<InputDataSwitch> switches)
+  public Future<Boolean> postActiveChannels(List<InputDataSwitch> switches)
       throws InvalidCommandException {
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(switches));
@@ -62,14 +61,14 @@ public class ExploreDevice extends BluetoothManager {
     return submitCommand(c);
   }
 
-  public Future<Boolean> setActiveModules(InputDataSwitch s) throws InvalidCommandException {
+  public Future<Boolean> postActiveModules(InputDataSwitch s) throws InvalidCommandException {
     final Command c = s.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
     c.setArg(s.getID());
 
     return submitCommand(c);
   }
 
-  public Future<Boolean> setSamplingRate(SamplingRate sr) throws InvalidCommandException {
+  public Future<Boolean> postSamplingRate(SamplingRate sr) throws InvalidCommandException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getValue());
 
@@ -98,7 +97,7 @@ public class ExploreDevice extends BluetoothManager {
     return mmSocket.getOutputStream();
   }
 
-  public void sendBytes(byte[] bytes) throws NoBluetoothException, IOException {
+  public void postBytes(byte[] bytes) throws NoBluetoothException, IOException {
     final OutputStream outputStream = getOutputStream();
     outputStream.write(bytes);
     outputStream.flush();
@@ -127,19 +126,20 @@ public class ExploreDevice extends BluetoothManager {
     return deviceName;
   }
 
-  void setActiveSamplingRate(int samplingRate) {
-    activeSamplingRate = samplingRate;
+  // todo: set these in first round of info packet and then if message sent
+  public void setChannelCount(int channelCount) {
+    this.channelCount = channelCount;
   }
 
-  void setCurrentChannelMask(int channelMask) {
-    activeChannelMask = channelMask;
+  public int getChannelCount() {
+    return channelCount;
   }
 
-  void setNumberOfChannels(int channelCount) {
-    numberOfChannels = channelCount;
+  public void setSamplingRate(SamplingRate sr) {
+    this.samplingRate = sr;
   }
 
-  public int getNoChannels() {
-    return numberOfChannels;
+  public SamplingRate getSamplingRate() {
+    return this.samplingRate;
   }
 }

@@ -1,23 +1,22 @@
 package com.mentalab.packets.info;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+
+import static com.mentalab.packets.Attributes.BATTERY;
+import static com.mentalab.packets.Attributes.TEMP;
 
 public class EnvironmentPacket extends InfoPacket {
 
-  float temperature, light, battery; // TODO: Why are these here?
-
   public EnvironmentPacket(double timeStamp) {
     super(timeStamp);
-    super.attributes =
-        Arrays.asList("Temperature ", "Light ", "Battery "); // TODO: Could this be a Bean Object??
+    super.attributes = EnumSet.range(TEMP, BATTERY);
   }
 
   @Override
@@ -44,15 +43,15 @@ public class EnvironmentPacket extends InfoPacket {
                 * (1.8 / 2457));
 
     listValues.add(getBatteryPercentage(batteryLevelRaw));
-    super.convertedSamples = new ArrayList<>(listValues);
+    super.data = new ArrayList<>(listValues);
   }
 
   @NonNull
   @Override
   public String toString() {
     final StringBuilder data = new StringBuilder("Environment packets: [");
-    for (int i = 0; i < super.convertedSamples.size(); i++) {
-      final float sample = super.convertedSamples.get(i);
+    for (int i = 0; i < super.data.size(); i++) {
+      final float sample = super.data.get(i);
       if (i % 9 < 3) {
         data.append(" Temperature: ").append(sample);
       } else if (i % 9 < 6) {
