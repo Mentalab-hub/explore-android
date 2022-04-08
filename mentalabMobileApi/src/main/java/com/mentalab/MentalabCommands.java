@@ -5,9 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-
 import androidx.annotation.RequiresApi;
-
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
@@ -24,9 +22,7 @@ import com.mentalab.utils.constants.Topic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -194,7 +190,7 @@ public final class MentalabCommands {
    * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
-  public static Future<Boolean> setChannels(List<InputSwitch> channels)
+  public static Future<Boolean> setChannels(Set<InputSwitch> channels)
       throws InvalidCommandException, NoConnectionException {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
@@ -214,7 +210,7 @@ public final class MentalabCommands {
    */
   public static Future<Boolean> setChannel(InputSwitch channel)
       throws InvalidCommandException, NoConnectionException {
-    final List<InputSwitch> channelToList = new ArrayList<>();
+    final Set<InputSwitch> channelToList = new HashSet<>();
     channelToList.add(channel);
     return setChannels(channelToList);
   }

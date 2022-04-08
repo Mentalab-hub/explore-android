@@ -1,10 +1,8 @@
 package com.mentalab.packets.sensors;
 
-import android.util.Log;
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.PublishablePacket;
-import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
 
 import java.util.ArrayList;
@@ -15,7 +13,7 @@ import static com.mentalab.packets.Attributes.*;
 
 public class Orientation extends PublishablePacket {
 
-  final ArrayList<Float> values = new ArrayList<>();
+  final List<Float> values = new ArrayList<>();
 
   public Orientation(double timeStamp) {
     super(timeStamp);

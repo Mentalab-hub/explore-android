@@ -21,13 +21,13 @@ public class EnvironmentPacket extends InfoPacket {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    final List<Float> listValues = new ArrayList<>();
-    listValues.add(
+    final List<Float> vals = new ArrayList<>();
+    vals.add(
         (float)
             ByteBuffer.wrap(new byte[] {byteBuffer[0], 0, 0, 0})
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .getInt());
-    listValues.add(
+    vals.add(
         (float)
                 (ByteBuffer.wrap(new byte[] {byteBuffer[1], byteBuffer[2], 0, 0})
                     .order(ByteOrder.LITTLE_ENDIAN)
@@ -42,8 +42,8 @@ public class EnvironmentPacket extends InfoPacket {
                     / 6.8)
                 * (1.8 / 2457));
 
-    listValues.add(getBatteryPercentage(batteryLevelRaw));
-    super.data = new ArrayList<>(listValues);
+    vals.add(getBatteryPercentage(batteryLevelRaw));
+    super.data = new ArrayList<>(vals);
   }
 
   @NonNull

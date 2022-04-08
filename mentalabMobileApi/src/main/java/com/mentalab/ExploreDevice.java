@@ -15,7 +15,7 @@ import com.mentalab.utils.constants.SamplingRate;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public class ExploreDevice extends BluetoothManager {
@@ -32,7 +32,7 @@ public class ExploreDevice extends BluetoothManager {
   }
 
   // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
-  private static int generateChannelsArg(List<InputSwitch> switches) {
+  private static int generateChannelsArg(Set<InputSwitch> switches) {
     StringBuilder binaryArgument = new StringBuilder("11111111");
     // When 8 channels are active, we will be sending binary 11111111 = 255
     for (InputSwitch aSwitch : switches) {
@@ -53,7 +53,7 @@ public class ExploreDevice extends BluetoothManager {
    * @param switches List of channel switches, indicating which channels should be on and off
    * @throws InvalidCommandException
    */
-  public Future<Boolean> postActiveChannels(List<InputSwitch> switches)
+  public Future<Boolean> postActiveChannels(Set<InputSwitch> switches)
       throws InvalidCommandException {
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(switches));
