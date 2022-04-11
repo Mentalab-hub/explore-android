@@ -18,12 +18,13 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.utils.InputSwitch;
-import com.mentalab.utils.constants.Protocol;
+import com.mentalab.utils.constants.InputProtocol;
 import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,72 +38,86 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    String exploreDeviceID = "1C32";
-
-    Operator.doTry(
-        new Operation() {
-          @Override
-          public void run() throws NoConnectionException, IOException, NoBluetoothException {
-            ExploreDevice expl = MentalabCommands.connect(exploreDeviceID);
-            MentalabCommands.decodeInputStream();
-            setConnectedDevice(expl);
-          }
-
-          @Override
-          public void handleException(Exception cause) {
-            if (cause instanceof NoBluetoothException) {
-              askToTurnOnBT(this);
-            } else if (cause instanceof NoConnectionException) {
-              createToastMsg(
-                  MainActivity.this,
-                  "Unable to connect to: " + exploreDeviceID + ". Please try again.");
-            } else if (cause instanceof InvalidCommandException) {
-              closeWithPrompt(
-                  MainActivity.this,
-                  "Something's gone wrong.",
-                  "Very sorry - but there appears to have been a mistake when we tried to send that command."
-                      + " Please try restarting. If the problem persists please contact us at: contact@mentalab.com");
-            }
-          }
-        });
+    final String exploreDeviceID = "1C32";
+    try {
+      connect(exploreDeviceID);
+    } catch (NoBluetoothException e) {
+      askToTurnOnBT(exploreDeviceID);
+      return;
+    } catch (IOException | NoConnectionException e) {
+      askToTurnOnDevice(exploreDeviceID);
+      return;
+    }
 
     try {
       final Future<Boolean> formattedMemory = connectedDevice.formatDeviceMemory();
       if (!formattedMemory.get()) {
         createToastMsg(
-                MainActivity.this,
-                "Something went wrong when formatting the memory. Please try again.");
+            MainActivity.this,
+            "Something went wrong when formatting the memory. Please try again.");
         throw new CommandFailedException("Failed to format memory");
       }
 
       final Future<Boolean> samplingRateSet = connectedDevice.postSamplingRate(SamplingRate.SR_500);
       if (!samplingRateSet.get()) {
         createToastMsg(
-                MainActivity.this,
-                "Something went wrong setting the sampling rate. Please try again.");
+            MainActivity.this, "Something went wrong setting the sampling rate. Please try again.");
         throw new CommandFailedException("Failed to set the sampling rate");
       }
 
-      final Future<Boolean> modulesSet = connectedDevice.postActiveModules(new InputSwitch(Protocol.ENVIRONMENT, false));
+      final Future<Boolean> modulesSet =
+          connectedDevice.postActiveModules(new InputSwitch(InputProtocol.ENVIRONMENT, false));
       if (!modulesSet.get()) {
         createToastMsg(
-                MainActivity.this,
-                "Something went wrong when trying to turn of a module. Please try again.");
+            MainActivity.this,
+            "Something went wrong when trying to turn of a module. Please try again.");
         throw new CommandFailedException("Failed to set the module");
       }
-    } catch (InvalidCommandException | InterruptedException | ExecutionException | CommandFailedException e) {
+
+      Set<InputSwitch> channelSwitches = new HashSet<>();
+      channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_0, false));
+      channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_3, false));
+      channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_4, true));
+      final Future<Boolean> channelsSet =
+              connectedDevice.postActiveChannels(channelSwitches);
+      if (!channelsSet.get()) {
+        createToastMsg(
+                MainActivity.this,
+                "Something went wrong when trying to turn of channels. Please try again.");
+        throw new CommandFailedException("Failed to set the module");
+      }
+    } catch (InvalidCommandException
+        | InterruptedException
+        | ExecutionException
+        | CommandFailedException e) {
       e.printStackTrace();
     }
   }
 
-  private void askToTurnOnBT(Operation operation) {
-    ActivityResultLauncher<Intent> a =
+  private void connect(String exploreDeviceID) throws NoConnectionException, IOException, NoBluetoothException {
+    final ExploreDevice device = MentalabCommands.connect(exploreDeviceID);
+    setConnectedDevice(device);
+    MentalabCommands.decodeInputStream();
+  }
+
+  private void connectToDevice(String exploreDeviceID) {
+    try {
+      connect(exploreDeviceID);
+    } catch (NoBluetoothException e) {
+      askToTurnOnBT(exploreDeviceID);
+    } catch (IOException | NoConnectionException e) {
+      askToTurnOnDevice(exploreDeviceID);
+    }
+  }
+
+  private void askToTurnOnBT(String exploreDeviceID) {
+    ActivityResultLauncher<Intent> activityLauncher =
         registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
               if (result.getResultCode() == Activity.RESULT_OK) {
                 Log.i(TAG, "Bluetooth activated.");
-                Operator.doTry(operation);
+                connectToDevice(exploreDeviceID); // try again
               } else {
                 closeWithPrompt(
                     MainActivity.this,
@@ -110,8 +125,18 @@ public class MainActivity extends AppCompatActivity {
                     "Explore Desktop cannot proceed without Bluetooth. Closing down.");
               }
             });
-    Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-    a.launch(intent);
+    activityLauncher.launch(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+  }
+
+  private void askToTurnOnDevice(String exploreDeviceID) {
+    new AlertDialog.Builder(MainActivity.this)
+            .setIcon(android.R.drawable.ic_notification_clear_all)
+            .setTitle("Connection error")
+            .setMessage("Unable to connect to: " + exploreDeviceID + ". " +
+                    "It is possible your device is switched off. If so, please switch it on and then click 'Reconnect'.")
+            .setNegativeButton("Close", (dialog, which) -> finishAffinity())
+            .setPositiveButton("Reconnect", (dialog, which) -> connectToDevice(exploreDeviceID))
+            .show();
   }
 
   private void closeWithPrompt(Context context, String title, String msg) {
@@ -131,15 +156,5 @@ public class MainActivity extends AppCompatActivity {
 
   private void setConnectedDevice(ExploreDevice device) {
     this.connectedDevice = device;
-  }
-
-  public static class Operator {
-    public static void doTry(Operation operation) {
-      try {
-        operation.run();
-      } catch (Exception e) {
-        operation.handleException(e);
-      }
-    }
   }
 }
