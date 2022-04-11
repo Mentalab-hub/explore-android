@@ -1,8 +1,7 @@
 package com.mentalab;
 
-import com.mentalab.commandtranslators.Command;
-import com.mentalab.commandtranslators.CommandTranslator;
-import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.commandtranslators.CommandTranslator;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;

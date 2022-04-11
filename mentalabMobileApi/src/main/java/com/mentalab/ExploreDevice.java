@@ -1,15 +1,14 @@
 package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
-
-import com.mentalab.commandtranslators.Command;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.BluetoothManager;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
-import com.mentalab.service.LslStreamerTask;
+import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.utils.InputSwitch;
+import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
@@ -18,29 +17,19 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import static com.mentalab.utils.Utils.generateChannelsArg;
+
 public class ExploreDevice extends BluetoothManager {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  private int channelCount;
-  private SamplingRate samplingRate;
+  private int channelCount = 8;
+  private SamplingRate samplingRate = SamplingRate.SR_250;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
     this.deviceName = deviceName;
-  }
-
-  // todo: 1) should be #channels-charsAt, 2) the number of channels matters, 3) do we do binary?
-  private static int generateChannelsArg(Set<InputSwitch> switches) {
-    StringBuilder binaryArgument = new StringBuilder("11111111");
-    // When 8 channels are active, we will be sending binary 11111111 = 255
-    for (InputSwitch aSwitch : switches) {
-      if (!aSwitch.isOn()) {
-        binaryArgument.setCharAt(aSwitch.getProtocol().getID(), '0');
-      }
-    }
-    return Integer.parseInt(binaryArgument.toString(), 2);
   }
 
   public BluetoothDevice getBluetoothDevice() {
@@ -56,7 +45,7 @@ public class ExploreDevice extends BluetoothManager {
   public Future<Boolean> postActiveChannels(Set<InputSwitch> switches)
       throws InvalidCommandException {
     final Command c = Command.CMD_CHANNEL_SET;
-    c.setArg(generateChannelsArg(switches));
+    c.setArg(generateChannelsArg(switches, channelCount));
 
     return submitCommand(c);
   }

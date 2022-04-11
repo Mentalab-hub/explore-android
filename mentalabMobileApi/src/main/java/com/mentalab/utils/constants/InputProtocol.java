@@ -2,7 +2,7 @@ package com.mentalab.utils.constants;
 
 // Fantastic solution to hierarchical enums:
 // https://stackoverflow.com/questions/19680418/how-to-use-enum-with-grouping-and-subgrouping-hierarchy-nesting
-public enum Protocol {
+public enum InputProtocol {
 
   ENVIRONMENT(Type.Module, 0),
   ORN(Type.Module, 1),
@@ -20,7 +20,7 @@ public enum Protocol {
   private final Type type;
   private final int id;
 
-  Protocol(Type t, int id) {
+  InputProtocol(Type t, int id) {
     this.type = t;
     this.id = id;
   }

@@ -1,30 +1,22 @@
 package com.mentalab.utils;
 
-import com.mentalab.utils.constants.Protocol;
+import com.mentalab.utils.constants.InputProtocol;
 
 public class InputSwitch {
 
-  private final Protocol protocol;
-  private boolean on;
+  private final InputProtocol inputProtocol;
+  private final boolean on;
 
-  public InputSwitch(Protocol p, boolean turnOn) {
-    this.protocol = p;
+  public InputSwitch(InputProtocol p, boolean turnOn) {
+    this.inputProtocol = p;
     this.on = turnOn;
-  }
-
-  public void turnOn() {
-    this.on = true;
-  }
-
-  public void turnOff() {
-    this.on = false;
   }
 
   public boolean isOn() {
     return on;
   }
 
-  public Protocol getProtocol() {
-    return protocol;
+  public InputProtocol getProtocol() {
+    return inputProtocol;
   }
 }

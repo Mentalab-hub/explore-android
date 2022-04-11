@@ -15,7 +15,7 @@ import com.mentalab.service.RecordTask;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.InputSwitch;
 import com.mentalab.utils.Utils;
-import com.mentalab.utils.constants.Protocol;
+import com.mentalab.utils.constants.InputProtocol;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
@@ -195,7 +195,7 @@ public final class MentalabCommands {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
     }
-    if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(Protocol.Type.Module))) {
+    if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(InputProtocol.Type.Module))) {
       throw new InvalidCommandException(
           "Attempting to turn off channels with a module switch. Exiting.");
     }
@@ -228,7 +228,7 @@ public final class MentalabCommands {
     if (connectedDevice == null) {
       throw new NoConnectionException("Not connected to a device. Exiting.");
     }
-    if (module.getProtocol().isOfType(Protocol.Type.Channel)) {
+    if (module.getProtocol().isOfType(InputProtocol.Type.Channel)) {
       throw new InvalidCommandException(
           "Attempting to turn off channels with a module switch. Exiting.");
     }

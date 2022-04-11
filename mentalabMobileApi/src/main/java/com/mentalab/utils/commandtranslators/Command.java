@@ -1,4 +1,4 @@
-package com.mentalab.commandtranslators;
+package com.mentalab.utils.commandtranslators;
 
 public enum Command {
   CMD_SAMPLING_RATE_SET(0xA1) {
