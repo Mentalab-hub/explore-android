@@ -94,7 +94,18 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  private void connect(String exploreDeviceID) throws NoConnectionException, IOException, NoBluetoothException {
+  @Override
+  protected void onStop() {
+    super.onStop();
+    try {
+      MentalabCommands.close();
+    } catch (IOException e) {
+      closeWithPrompt(MainActivity.this, "Trouble closing", "Explore Android had trouble closing.");
+    }
+  }
+
+  private void connect(String exploreDeviceID)
+      throws NoConnectionException, IOException, NoBluetoothException {
     final ExploreDevice device = MentalabCommands.connect(exploreDeviceID);
     setConnectedDevice(device);
     MentalabCommands.decodeInputStream();
@@ -122,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 closeWithPrompt(
                     MainActivity.this,
                     "Cannot Proceed",
-                    "Explore Desktop cannot proceed without Bluetooth. Closing down.");
+                    "Explore Android cannot proceed without Bluetooth. Closing down.");
               }
             });
     activityLauncher.launch(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
