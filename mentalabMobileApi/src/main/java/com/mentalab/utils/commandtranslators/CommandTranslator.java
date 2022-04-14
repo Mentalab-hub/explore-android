@@ -1,4 +1,4 @@
-package com.mentalab.commandtranslators;
+package com.mentalab.utils.commandtranslators;
 
 import android.util.Log;
 

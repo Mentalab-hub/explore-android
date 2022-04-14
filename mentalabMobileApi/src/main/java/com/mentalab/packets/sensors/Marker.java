@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Attributes;
 import com.mentalab.packets.PublishablePacket;
-import com.mentalab.packets.info.InfoPacket;
 import com.mentalab.utils.constants.Topic;
 
 import java.nio.ByteBuffer;
@@ -13,6 +12,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 
 public class Marker extends PublishablePacket {
 
@@ -42,7 +42,7 @@ public class Marker extends PublishablePacket {
   }
 
   @Override
-  public ArrayList<Float> getData() {
+  public List<Float> getData() {
     return new ArrayList<>(markerCode);
   }
 

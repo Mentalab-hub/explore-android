@@ -1,8 +1,8 @@
 package com.mentalab;
 
-import com.mentalab.commandtranslators.Command;
-import com.mentalab.commandtranslators.CommandTranslator;
-import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.io.ContentServer;
+import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.commandtranslators.CommandTranslator;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
@@ -67,7 +67,7 @@ public final class MentalabCodec {
   private static class ParseRawDataTask implements Callable<Void> {
 
     private InputStream btInputStream;
-    private byte[] buffer = new byte[1024];
+    private byte[] buffer;
 
     public void setInputStream(InputStream inputStream) {
       btInputStream = inputStream;
@@ -91,7 +91,7 @@ public final class MentalabCodec {
             parsePayloadData(pID, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
 
         if (packet instanceof Publishable) {
-          ((Publishable) packet).publish();
+          ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
         }
       }
       return null;
