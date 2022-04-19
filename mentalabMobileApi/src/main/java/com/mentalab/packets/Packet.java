@@ -8,13 +8,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Packet {
 
   private final double timeStamp;
 
-  public List<String> attributes;
-  public ArrayList<Float> convertedSamples;
+  public Set<Attributes> attributes;
+  public List<Float> data = new ArrayList<>();
 
   protected Packet(double timeStamp) {
     this.timeStamp = timeStamp;
@@ -60,11 +61,13 @@ public abstract class Packet {
   @NonNull
   public abstract String toString();
 
-  /** Number of element in each packet */
-  public abstract int getDataCount();
+  /** Number of elements in each packet */
+  public int getDataCount() {
+    return this.data.size();
+  }
 
   /** Get data values from packet structure */
-  public ArrayList<Float> getData() {
-    return null;
+  public List<Float> getData() {
+    return this.data;
   }
 }

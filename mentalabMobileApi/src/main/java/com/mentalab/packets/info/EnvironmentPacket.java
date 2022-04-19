@@ -1,34 +1,33 @@
 package com.mentalab.packets.info;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+
+import static com.mentalab.packets.Attributes.BATTERY;
+import static com.mentalab.packets.Attributes.TEMP;
 
 public class EnvironmentPacket extends InfoPacket {
 
-  float temperature, light, battery; // TODO: Why are these here?
-
   public EnvironmentPacket(double timeStamp) {
     super(timeStamp);
-    super.attributes =
-        Arrays.asList("Temperature ", "Light ", "Battery "); // TODO: Could this be a Bean Object??
+    super.attributes = EnumSet.range(TEMP, BATTERY);
   }
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    final List<Float> listValues = new ArrayList<>();
-    listValues.add(
+    final List<Float> vals = new ArrayList<>();
+    vals.add(
         (float)
             ByteBuffer.wrap(new byte[] {byteBuffer[0], 0, 0, 0})
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .getInt());
-    listValues.add(
+    vals.add(
         (float)
                 (ByteBuffer.wrap(new byte[] {byteBuffer[1], byteBuffer[2], 0, 0})
                     .order(ByteOrder.LITTLE_ENDIAN)
@@ -43,16 +42,16 @@ public class EnvironmentPacket extends InfoPacket {
                     / 6.8)
                 * (1.8 / 2457));
 
-    listValues.add(getBatteryPercentage(batteryLevelRaw));
-    super.convertedSamples = new ArrayList<>(listValues);
+    vals.add(getBatteryPercentage(batteryLevelRaw));
+    super.data = new ArrayList<>(vals);
   }
 
   @NonNull
   @Override
   public String toString() {
     final StringBuilder data = new StringBuilder("Environment packets: [");
-    for (int i = 0; i < super.convertedSamples.size(); i++) {
-      final float sample = super.convertedSamples.get(i);
+    for (int i = 0; i < super.data.size(); i++) {
+      final float sample = super.data.get(i);
       if (i % 9 < 3) {
         data.append(" Temperature: ").append(sample);
       } else if (i % 9 < 6) {

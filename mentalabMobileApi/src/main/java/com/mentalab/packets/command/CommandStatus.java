@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 
 public class CommandStatus extends UtilPacket {
 
-  boolean commandStatus;
+  private boolean commandStatus;
 
   public CommandStatus(double timeStamp) {
     super(timeStamp);

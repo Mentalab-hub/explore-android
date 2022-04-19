@@ -1,17 +1,12 @@
 package com.mentalab;
 
-import android.util.Log;
-import com.mentalab.commandtranslators.Command;
-import com.mentalab.commandtranslators.CommandTranslator;
-import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.ContentServer;
+import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.commandtranslators.CommandTranslator;
+import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
-import com.mentalab.packets.info.DeviceInfoPacket;
-import com.mentalab.packets.sensors.exg.EEGPacket;
-import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +20,6 @@ public final class MentalabCodec {
 
   private static final ExecutorService DECODE_EXECUTOR = Executors.newSingleThreadExecutor();
   private static final ParseRawDataTask DECODER_TASK = new ParseRawDataTask();
-  private static ExploreDevice exploreDevice;
 
   private MentalabCodec() { // Static class
   }
@@ -35,9 +29,8 @@ public final class MentalabCodec {
    *
    * @param rawData InputStream of device bytes
    */
-  public static void startDecode(InputStream rawData, ExploreDevice device) {
+  public static void startDecode(InputStream rawData) {
     DECODER_TASK.setInputStream(rawData);
-    exploreDevice = device;
     DECODE_EXECUTOR.submit(DECODER_TASK);
   }
 
@@ -45,7 +38,6 @@ public final class MentalabCodec {
    * Encodes a command
    *
    * @return byte[] encoded commands that can be sent to the device
-   * @throws InvalidCommandException when the command is not recognized
    */
   static byte[] encodeCommand(Command command) {
     final CommandTranslator translator = command.createCommandTranslator();
@@ -75,17 +67,17 @@ public final class MentalabCodec {
   private static class ParseRawDataTask implements Callable<Void> {
 
     private InputStream btInputStream;
-    private byte[] buffer = new byte[1024];
+    private byte[] buffer;
 
     public void setInputStream(InputStream inputStream) {
-      btInputStream = inputStream; // todo: do we need to stop call while this happens?
+      btInputStream = inputStream;
     }
 
     public Void call() throws IOException, InvalidDataException {
-      while (!Thread.currentThread().isInterrupted()) { // otherwise end of stream
+      while (!Thread.currentThread().isInterrupted()) {
         buffer = new byte[1024];
         int pID = readStreamToInt(1);
-        int count = readStreamToInt(1);
+        readStreamToInt(1); // count
         int payload = readStreamToInt(2);
         double timeStamp = readStreamToInt(4);
         timeStamp = timeStamp / 10_000; // convert to seconds
@@ -97,18 +89,9 @@ public final class MentalabCodec {
         // parsing payload data
         final Packet packet =
             parsePayloadData(pID, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
-        Log.d(Utils.TAG, "Packet received: " + packet.toString());
-        if (packet instanceof DeviceInfoPacket) {
-          exploreDevice.setActiveSamplingRate(((DeviceInfoPacket) packet).getSamplingRate());
-          exploreDevice.setCurrentChannelMask(((DeviceInfoPacket) packet).getChannelMask());
-        } else if (packet instanceof Publishable) {
-          ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
-        }
 
-        // sets max channel numbers, will be changed when channel number attribute is added in
-        // device info from FW
-        if (packet instanceof EEGPacket && exploreDevice.getNoChannels() == 0) {
-          exploreDevice.setNumberOfChannels(packet.getDataCount());
+        if (packet instanceof Publishable) {
+          ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
         }
       }
       return null;
