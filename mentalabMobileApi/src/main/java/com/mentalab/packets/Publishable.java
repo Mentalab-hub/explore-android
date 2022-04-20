@@ -5,6 +5,4 @@ import com.mentalab.utils.constants.Topic;
 public interface Publishable {
 
   Topic getTopic();
-
-  void publish();
 }
