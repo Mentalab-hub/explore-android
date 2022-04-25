@@ -46,16 +46,18 @@ public final class MentalabCodec {
 
   private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
       throws InvalidDataException {
-    for (PacketId packetId : PacketId.values()) {
-      if (packetId.getNumVal() != pId) {
-        continue;
-      }
-
-      final Packet packet = packetId.createInstance(timeStamp);
-      if (packet != null) {
-        packet.convertData(byteBuffer);
-        return packet;
-      }
+    final PacketId p =
+        Arrays.stream(PacketId.values())
+            .filter(packetId -> packetId.getNumVal() == pId)
+            .findFirst()
+            .orElse(null);
+    if (p == null) {
+      return null;
+    }
+    final Packet packet = p.createInstance(timeStamp);
+    if (packet != null) {
+      packet.convertData(byteBuffer);
+      return packet;
     }
     return null;
   }
@@ -76,9 +78,9 @@ public final class MentalabCodec {
     public Void call() throws IOException, InvalidDataException {
       while (!Thread.currentThread().isInterrupted()) {
         buffer = new byte[1024];
-        int pID = readStreamToInt(1);
-        readStreamToInt(1); // count
-        int payload = readStreamToInt(2);
+        final int pID = readStreamToInt(1);
+        readStreamToInt(1); // count, ignore
+        final int payload = readStreamToInt(2);
         double timeStamp = readStreamToInt(4);
         timeStamp = timeStamp / 10_000; // convert to seconds
 

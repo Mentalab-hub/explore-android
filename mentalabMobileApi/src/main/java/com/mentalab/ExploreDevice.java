@@ -17,8 +17,6 @@ import java.io.OutputStream;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import static com.mentalab.utils.Utils.generateChannelsArg;
-
 public class ExploreDevice extends BluetoothManager {
 
   private final BluetoothDevice btDevice;
@@ -46,21 +44,18 @@ public class ExploreDevice extends BluetoothManager {
       throws InvalidCommandException {
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(switches, channelCount));
-
     return submitCommand(c);
   }
 
   public Future<Boolean> postActiveModules(InputSwitch s) throws InvalidCommandException {
     final Command c = s.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
     c.setArg(s.getProtocol().getID());
-
     return submitCommand(c);
   }
 
   public Future<Boolean> postSamplingRate(SamplingRate sr) throws InvalidCommandException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getValue());
-
     return submitCommand(c);
   }
 
@@ -105,6 +100,24 @@ public class ExploreDevice extends BluetoothManager {
       throw new InvalidCommandException("Failed to encode command. Exiting.");
     }
     return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
+  }
+
+  // todo: consider current state
+  private static int generateChannelsArg(Set<InputSwitch> switches, int channelCount) {
+    int binaryArg;
+    if (channelCount < 8) {
+      binaryArg = 0b1111;
+    } else {
+      binaryArg = 0b11111111;
+    }
+
+    for (InputSwitch aSwitch : switches) {
+      if (!aSwitch.isOn()) {
+        final int channelID = aSwitch.getProtocol().getID();
+        binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
+      }
+    }
+    return binaryArg;
   }
 
   public Future<Boolean> pushToLSL() {

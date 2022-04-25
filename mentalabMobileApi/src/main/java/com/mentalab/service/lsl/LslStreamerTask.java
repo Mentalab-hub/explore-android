@@ -41,7 +41,7 @@ public class LslStreamerTask implements Callable<Boolean> {
               "ORN",
               dataCountOrientation,
               nominalSamplingRateOrientation,
-              ChannelFormat.float32,
+              ChannelFormat.FLOAT_32,
               connectedDevice.getDeviceName() + "_ORN");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
@@ -54,7 +54,7 @@ public class LslStreamerTask implements Callable<Boolean> {
               "Markers",
               1,
               0,
-              ChannelFormat.int32,
+              ChannelFormat.INT_32,
               connectedDevice.getDeviceName() + "_Markers");
 
       if (lslStreamInfoMarker == null) {
@@ -79,7 +79,7 @@ public class LslStreamerTask implements Callable<Boolean> {
                             "ExG",
                             packet.getDataCount(),
                             250,
-                            ChannelFormat.float32,
+                            ChannelFormat.FLOAT_32,
                             connectedDevice + "_ExG");
                     if (lslStreamInfoExg != null) {
                       try {
@@ -111,7 +111,7 @@ public class LslStreamerTask implements Callable<Boolean> {
               "ExG",
               packet.getDataCount(),
               250,
-              ChannelFormat.float32,
+              ChannelFormat.FLOAT_32,
               connectedDevice + "_ExG");
       if (lslStreamInfoExg != null) {
         try {

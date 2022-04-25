@@ -13,7 +13,6 @@ public enum PacketId {
   ORIENTATION(13) {
     @Override
     public Packet createInstance(double timeStamp) {
-
       return new Orientation(timeStamp);
     }
   },
@@ -102,7 +101,7 @@ public enum PacketId {
     }
   };
 
-  private int value;
+  private final int value;
 
   PacketId(int value) {
     this.value = value;
