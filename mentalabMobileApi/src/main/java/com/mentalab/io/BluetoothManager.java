@@ -8,8 +8,10 @@ import android.util.Log;
 import com.mentalab.ExploreDevice;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.utils.Utils;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,6 +29,20 @@ public class BluetoothManager {
       throw new NoBluetoothException("No Bluetooth devices available.");
     }
     return bondedDevices;
+  }
+
+  public static Set<BluetoothDevice> getBondedExploreDevices() throws NoBluetoothException {
+    final Set<BluetoothDevice> bondedDevices = BluetoothManager.getBondedDevices();
+    final Set<BluetoothDevice> bondedExploreDevices = new HashSet<>();
+
+    for (BluetoothDevice bt : bondedDevices) {
+      final String b = bt.getName();
+      if (b.startsWith("Explore_")) {
+        bondedExploreDevices.add(bt);
+        Log.i(Utils.TAG, "Explore device available: " + b);
+      }
+    }
+    return bondedExploreDevices;
   }
 
   public static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {

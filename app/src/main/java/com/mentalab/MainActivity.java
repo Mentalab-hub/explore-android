@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         throw new CommandFailedException("Failed to format memory");
       }
 
-      final Future<Boolean> samplingRateSet = connectedDevice.postSamplingRate(SamplingRate.SR_500);
+      final Future<Boolean> samplingRateSet = connectedDevice.setSamplingRate(SamplingRate.SR_500);
       if (!samplingRateSet.get()) {
         createToastMsg(
             MainActivity.this, "Something went wrong setting the sampling rate. Please try again.");
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
       }
 
       final Future<Boolean> modulesSet =
-          connectedDevice.postActiveModules(new InputSwitch(InputProtocol.ENVIRONMENT, false));
+          connectedDevice.setModule(new InputSwitch(InputProtocol.ENVIRONMENT, false));
       if (!modulesSet.get()) {
         createToastMsg(
             MainActivity.this,
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_3, false));
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_4, true));
       final Future<Boolean> channelsSet =
-              connectedDevice.postActiveChannels(channelSwitches);
+              connectedDevice.setChannels(channelSwitches);
       if (!channelsSet.get()) {
         createToastMsg(
                 MainActivity.this,
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
       throws NoConnectionException, IOException, NoBluetoothException {
     final ExploreDevice device = MentalabCommands.connect(exploreDeviceID);
     setConnectedDevice(device);
-    MentalabCommands.decodeInputStream();
+    MentalabCodec.startDecode(connectedDevice.getInputStream());
   }
 
   private void connectToDevice(String exploreDeviceID) {
