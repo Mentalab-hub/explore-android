@@ -29,7 +29,7 @@ public final class MentalabCodec {
    *
    * @param rawData InputStream of device bytes
    */
-  public static void startDecode(InputStream rawData) {
+  public static void decodeInputStream(InputStream rawData) {
     DECODER_TASK.setInputStream(rawData);
     DECODE_EXECUTOR.submit(DECODER_TASK);
   }

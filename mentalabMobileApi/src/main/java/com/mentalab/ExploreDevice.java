@@ -3,8 +3,6 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.NoConnectionException;
-import com.mentalab.io.BluetoothManager;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
@@ -20,7 +18,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-public class ExploreDevice extends BluetoothManager {
+/**
+ * A wrapper around BluetoothDevice, which is a final class so cannot be extended.
+ */
+public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
@@ -33,7 +34,7 @@ public class ExploreDevice extends BluetoothManager {
     this.deviceName = deviceName;
   }
 
-  public BluetoothDevice getBluetoothDevice() {
+  BluetoothDevice getBluetoothDevice() {
     return btDevice;
   }
 
@@ -52,10 +53,6 @@ public class ExploreDevice extends BluetoothManager {
    */
   public Future<Boolean> setChannels(Set<InputSwitch> channels)
       throws InvalidCommandException {
-    if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(InputProtocol.Type.Module))) {
-      throw new InvalidCommandException(
-          "Attempting to turn off channels with a module switch. Exiting.");
-    }
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(channels, channelCount));
     return submitCommand(c);
@@ -106,7 +103,7 @@ public class ExploreDevice extends BluetoothManager {
   }
 
   /** Formats internal memory of device. */
-  public Future<Boolean> formatDeviceMemory() throws InvalidCommandException {
+  public Future<Boolean> formatMemory() throws InvalidCommandException {
     return submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
@@ -126,28 +123,11 @@ public class ExploreDevice extends BluetoothManager {
    * @throws NoBluetoothException If Bluetooth connection is lost during communication
    */
   public InputStream getInputStream() throws NoBluetoothException, IOException {
-    if (mmSocket == null) {
-      throw new NoBluetoothException("No Bluetooth socket available.");
-    }
-    return mmSocket.getInputStream();
-  }
-
-  /**
-   * Returns an OutputStream with which to write data to the device.
-   *
-   * @return InputStream of raw bytes
-   * @throws NoConnectionException when Bluetooth connection is lost during communication
-   * @throws NoBluetoothException
-   */
-  public OutputStream getOutputStream() throws NoBluetoothException, IOException {
-    if (mmSocket == null) {
-      throw new NoBluetoothException("No Bluetooth socket available.");
-    }
-    return mmSocket.getOutputStream();
+    return BluetoothManager.getInputStream();
   }
 
   public void postBytes(byte[] bytes) throws NoBluetoothException, IOException {
-    final OutputStream outputStream = getOutputStream();
+    final OutputStream outputStream = BluetoothManager.getOutputStream();
     outputStream.write(bytes);
     outputStream.flush();
   }

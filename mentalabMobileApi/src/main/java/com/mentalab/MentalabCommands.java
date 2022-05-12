@@ -8,7 +8,6 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-import com.mentalab.io.BluetoothManager;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.RecordTask;
 import com.mentalab.utils.FileGenerator;

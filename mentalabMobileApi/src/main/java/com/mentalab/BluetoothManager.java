@@ -1,16 +1,17 @@
-package com.mentalab.io;
+package com.mentalab;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.mentalab.ExploreDevice;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -20,9 +21,9 @@ import static com.mentalab.utils.Utils.TAG;
 public class BluetoothManager {
 
   private static final String UUID_BLUETOOTH_SPP = "00001101-0000-1000-8000-00805f9b34fb";
-  protected static BluetoothSocket mmSocket = null;
+  private static BluetoothSocket mmSocket = null;
 
-  public static Set<BluetoothDevice> getBondedDevices() throws NoBluetoothException {
+  private static Set<BluetoothDevice> getBondedDevices() throws NoBluetoothException {
     Log.i(TAG, "Searching for nearby devices...");
     final Set<BluetoothDevice> bondedDevices = getBluetoothAdapter().getBondedDevices();
     if (bondedDevices == null) {
@@ -45,7 +46,7 @@ public class BluetoothManager {
     return bondedExploreDevices;
   }
 
-  public static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
+  private static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
     final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
     if (btAdapter == null) {
       throw new NoBluetoothException("Bluetooth service not available. Exiting.");
@@ -70,7 +71,7 @@ public class BluetoothManager {
 
   public static ExploreDevice connectToDevice(ExploreDevice device)
       throws NoConnectionException, IOException {
-    BluetoothManager.establishRFCommWithDevice(device.getBluetoothDevice());
+    establishRFCommWithDevice(device.getBluetoothDevice());
     try {
       mmSocket.connect();
     } catch (IOException e) {
@@ -88,10 +89,17 @@ public class BluetoothManager {
     mmSocket = null;
   }
 
-  public static BluetoothSocket getBTSocket() throws NoBluetoothException {
+  static InputStream getInputStream() throws NoBluetoothException, IOException {
+    if (BluetoothManager.mmSocket == null) {
+      throw new NoBluetoothException("No Bluetooth socket available.");
+    }
+    return mmSocket.getInputStream();
+  }
+
+  static OutputStream getOutputStream() throws NoBluetoothException, IOException {
     if (mmSocket == null) {
       throw new NoBluetoothException("No Bluetooth socket available.");
     }
-    return mmSocket;
+    return mmSocket.getOutputStream();
   }
 }
