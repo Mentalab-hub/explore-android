@@ -30,19 +30,19 @@ public abstract class CommandTranslator {
     timestampBuffer.order(ByteOrder.LITTLE_ENDIAN);
     timestampBuffer.putInt(hostTimestamp);
     byte[] byteArray = timestampBuffer.array();
-    int index;
-    for (index = 0; index < 4; index++) {
-      convertedData[index + 4] = byteArray[index];
+    int i;
+    for (i = 0; i < 4; i++) {
+      convertedData[i + 4] = byteArray[i];
     }
 
-    index = index + 4;
+    i = i + 4;
 
-    convertedData[index++] = (byte) opcode;
+    convertedData[i++] = (byte) opcode;
 
-    convertedData[index++] = (byte) arg;
-    Log.d("DEBUG_SR", "Index is: " + index);
+    convertedData[i++] = (byte) arg;
+    Log.d("DEBUG_SR", "Index is: " + i);
     for (int fletcherArrayIndex = 0; fletcherArrayIndex < 4; fletcherArrayIndex++) {
-      convertedData[fletcherArrayIndex + index] = (byte) FLETCHER_BYTES[fletcherArrayIndex];
+      convertedData[fletcherArrayIndex + i] = (byte) FLETCHER_BYTES[fletcherArrayIndex];
     }
 
     return convertedData;

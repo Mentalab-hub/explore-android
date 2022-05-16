@@ -160,9 +160,9 @@ public class ExploreDevice {
       binaryArg = 0b11111111;
     }
 
-    for (InputSwitch aSwitch : switches) {
-      if (!aSwitch.isOn()) {
-        final int channelID = aSwitch.getProtocol().getID();
+    for (InputSwitch s : switches) {
+      if (!s.isOn()) {
+        final int channelID = s.getProtocol().getID();
         binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
       }
     }
