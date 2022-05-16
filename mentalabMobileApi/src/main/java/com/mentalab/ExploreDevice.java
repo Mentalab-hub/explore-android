@@ -53,6 +53,10 @@ public class ExploreDevice {
    */
   public Future<Boolean> setChannels(Set<InputSwitch> channels)
       throws InvalidCommandException {
+    if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(InputProtocol.Type.Module))) {
+      throw new InvalidCommandException(
+              "Attempting to turn off channels with a module switch. Exiting.");
+    }
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(channels, channelCount));
     return submitCommand(c);
