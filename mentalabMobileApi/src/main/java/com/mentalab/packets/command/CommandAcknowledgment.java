@@ -18,7 +18,7 @@ public class CommandAcknowledgment extends UtilPacket {
   @NonNull
   @Override
   public String toString() {
-    return "AckPacket";
+    return "Command acknowledged.";
   }
 
   @Override

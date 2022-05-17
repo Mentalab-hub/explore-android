@@ -1,4 +1,4 @@
-package com.mentalab.service;
+package com.mentalab.service.lsl;
 
 import android.util.Log;
 
@@ -7,12 +7,10 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
-import com.mentalab.service.LslLoader.ChannelFormat;
-import com.mentalab.service.LslLoader.StreamInfo;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 public class LslStreamerTask implements Callable<Boolean> {
@@ -20,15 +18,15 @@ public class LslStreamerTask implements Callable<Boolean> {
   private static final int nominalSamplingRateOrientation = 20;
   private static final int dataCountOrientation = 9;
 
-  static LslLoader.StreamOutlet lslStreamOutletExg;
-  static LslLoader.StreamOutlet lslStreamOutletOrn;
-  static LslLoader.StreamOutlet lslStreamOutletMarker;
+  static StreamOutlet lslStreamOutletExg;
+  static StreamOutlet lslStreamOutletOrn;
+  static StreamOutlet lslStreamOutletMarker;
 
   private final ExploreDevice connectedDevice;
 
-  private LslLoader.StreamInfo lslStreamInfoExg;
-  private LslLoader.StreamInfo lslStreamInfoOrn;
-  private LslLoader.StreamInfo lslStreamInfoMarker;
+  private StreamInfo lslStreamInfoExg;
+  private StreamInfo lslStreamInfoOrn;
+  private StreamInfo lslStreamInfoMarker;
 
   public LslStreamerTask(ExploreDevice device) {
     this.connectedDevice = device;
@@ -43,12 +41,12 @@ public class LslStreamerTask implements Callable<Boolean> {
               "ORN",
               dataCountOrientation,
               nominalSamplingRateOrientation,
-              ChannelFormat.float32,
+              ChannelFormat.FLOAT_32,
               connectedDevice.getDeviceName() + "_ORN");
       if (lslStreamInfoOrn == null) {
         throw new IOException("Stream Info is Null!!");
       }
-      lslStreamOutletOrn = new LslLoader.StreamOutlet(lslStreamInfoOrn);
+      lslStreamOutletOrn = new StreamOutlet(lslStreamInfoOrn);
 
       lslStreamInfoMarker =
           new StreamInfo(
@@ -56,13 +54,13 @@ public class LslStreamerTask implements Callable<Boolean> {
               "Markers",
               1,
               0,
-              ChannelFormat.int32,
+              ChannelFormat.INT_32,
               connectedDevice.getDeviceName() + "_Markers");
 
       if (lslStreamInfoMarker == null) {
         throw new IOException("Stream Info is Null!!");
       }
-      lslStreamOutletMarker = new LslLoader.StreamOutlet(lslStreamInfoMarker);
+      lslStreamOutletMarker = new StreamOutlet(lslStreamInfoMarker);
       Log.d(Utils.TAG, "Subscribing!!");
       ContentServer.getInstance()
           .registerSubscriber(
@@ -81,11 +79,11 @@ public class LslStreamerTask implements Callable<Boolean> {
                             "ExG",
                             packet.getDataCount(),
                             250,
-                            LslLoader.ChannelFormat.float32,
+                            ChannelFormat.FLOAT_32,
                             connectedDevice + "_ExG");
                     if (lslStreamInfoExg != null) {
                       try {
-                        lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
+                        lslStreamOutletExg = new StreamOutlet(lslStreamInfoExg);
                       } catch (IOException exception) {
                         exception.printStackTrace();
                       }
@@ -113,11 +111,11 @@ public class LslStreamerTask implements Callable<Boolean> {
               "ExG",
               packet.getDataCount(),
               250,
-              LslLoader.ChannelFormat.float32,
+              ChannelFormat.FLOAT_32,
               connectedDevice + "_ExG");
       if (lslStreamInfoExg != null) {
         try {
-          lslStreamOutletExg = new LslLoader.StreamOutlet(lslStreamInfoExg);
+          lslStreamOutletExg = new StreamOutlet(lslStreamInfoExg);
         } catch (IOException exception) {
           exception.printStackTrace();
         }
@@ -138,7 +136,7 @@ public class LslStreamerTask implements Callable<Boolean> {
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
-    ArrayList<Float> packetVoltageValues = packet.getData();
+    List<Float> packetVoltageValues = packet.getData();
     float[] floatArray = new float[packetVoltageValues.size()];
     Object[] array = packetVoltageValues.toArray();
     for (int index = 0; index < packetVoltageValues.size(); index++) {

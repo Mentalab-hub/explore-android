@@ -2,8 +2,8 @@ package com.mentalab.packets;
 
 import com.mentalab.packets.command.CommandReceived;
 import com.mentalab.packets.command.CommandStatus;
-import com.mentalab.packets.info.Device;
-import com.mentalab.packets.info.Environment;
+import com.mentalab.packets.info.DeviceInfoPacket;
+import com.mentalab.packets.info.EnvironmentPacket;
 import com.mentalab.packets.sensors.Marker;
 import com.mentalab.packets.sensors.Orientation;
 import com.mentalab.packets.sensors.exg.Eeg94;
@@ -13,14 +13,13 @@ public enum PacketId {
   ORIENTATION(13) {
     @Override
     public Packet createInstance(double timeStamp) {
-
       return new Orientation(timeStamp);
     }
   },
   ENVIRONMENT(19) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Environment(timeStamp);
+      return new EnvironmentPacket(timeStamp);
     }
   },
   TIMESTAMP(27) {
@@ -38,7 +37,7 @@ public enum PacketId {
   INFO(99) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Device(timeStamp);
+      return new DeviceInfoPacket(timeStamp);
     }
   },
   EEG94(144) {
@@ -102,7 +101,7 @@ public enum PacketId {
     }
   };
 
-  private int value;
+  private final int value;
 
   PacketId(int value) {
     this.value = value;

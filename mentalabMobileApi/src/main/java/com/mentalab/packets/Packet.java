@@ -8,13 +8,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public abstract class Packet {
 
   private final double timeStamp;
 
-  public List<String> attributes;
-  public ArrayList<Float> convertedSamples;
+  public Set<Attributes> attributes;
+  public List<Float> data = new ArrayList<>();
 
   protected Packet(double timeStamp) {
     this.timeStamp = timeStamp;
@@ -28,19 +29,19 @@ public abstract class Packet {
 
     int arraySize = bytes.length / numOfbytesPerNumber;
     double[] values = new double[arraySize];
-    for (int index = 0; index < bytes.length; index += numOfbytesPerNumber) {
-      int signBit = bytes[index + numOfbytesPerNumber - 1] >> 7;
+    for (int i = 0; i < bytes.length; i += numOfbytesPerNumber) {
+      int signBit = bytes[i + numOfbytesPerNumber - 1] >> 7;
       double value;
 
       value =
-          ByteBuffer.wrap(new byte[] {bytes[index], bytes[index + 1]})
+          ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
               .order(ByteOrder.LITTLE_ENDIAN)
               .getShort();
       if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
         value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
       }
 
-      values[index / numOfbytesPerNumber] = value;
+      values[i / numOfbytesPerNumber] = value;
     }
     return values;
   }
@@ -60,11 +61,13 @@ public abstract class Packet {
   @NonNull
   public abstract String toString();
 
-  /** Number of element in each packet */
-  public abstract int getDataCount();
+  /** Number of elements in each packet */
+  public int getDataCount() {
+    return this.data.size();
+  }
 
   /** Get data values from packet structure */
-  public ArrayList<Float> getData() {
-    return null;
+  public List<Float> getData() {
+    return this.data;
   }
 }

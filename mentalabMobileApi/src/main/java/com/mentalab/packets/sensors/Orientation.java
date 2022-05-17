@@ -1,27 +1,23 @@
 package com.mentalab.packets.sensors;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.packets.Publishable;
-import com.mentalab.packets.info.InfoPacket;
+import com.mentalab.packets.PublishablePacket;
 import com.mentalab.utils.constants.Topic;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 
-/** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-public class Orientation extends InfoPacket implements Publishable {
+import static com.mentalab.packets.Attributes.*;
 
-  final ArrayList<Float> listValues = new ArrayList<>();
+public class Orientation extends PublishablePacket {
+
+  final List<Float> values = new ArrayList<>();
 
   public Orientation(double timeStamp) {
     super(timeStamp);
-    super.attributes =
-        Arrays.asList(
-            "Acc_X", "Acc_Y", "Acc_Z", "Mag_X", "Mag_Y", "Mag_Z", "Gyro_X", "Gyro_Y", "Gyro_Z");
+    super.attributes = EnumSet.range(ACCX, GYROZ);
   }
 
   @Override
@@ -30,27 +26,24 @@ public class Orientation extends InfoPacket implements Publishable {
 
     for (int i = 0; i < convertedRawValues.length; i++) {
       if (i < 3) {
-        listValues.add((float) (convertedRawValues[i] * 0.061));
+        values.add((float) (convertedRawValues[i] * 0.061));
       } else if (i < 6) {
-        listValues.add((float) (convertedRawValues[i] * 8.750));
+        values.add((float) (convertedRawValues[i] * 8.750));
+      } else if (i == 6) {
+        values.add((float) (convertedRawValues[i] * 1.52 * -1));
       } else {
-        if (i == 6) {
-          listValues.add((float) (convertedRawValues[i] * 1.52 * -1));
-        } else {
-          listValues.add((float) (convertedRawValues[i] * 1.52));
-        }
+        values.add((float) (convertedRawValues[i] * 1.52));
       }
     }
-    super.convertedSamples = new ArrayList<>(listValues);
-    Log.d("Explore", "Converted samples in the packets are: " + super.convertedSamples);
+    super.data = new ArrayList<>(values);
   }
 
   @NonNull
   @Override
   public String toString() {
     StringBuilder data = new StringBuilder("Orientation packets: [");
-    for (int i = 0; i < convertedSamples.size(); i++) {
-      final float sample = super.convertedSamples.get(i);
+    for (int i = 0; i < this.data.size(); i++) {
+      final float sample = super.data.get(i);
       if (i % 9 < 3) {
         data.append(" accelerometer: ").append(sample);
       } else if (i % 9 < 6) {
@@ -70,8 +63,8 @@ public class Orientation extends InfoPacket implements Publishable {
   }
 
   @Override
-  public ArrayList<Float> getData() {
-    return super.convertedSamples;
+  public List<Float> getData() {
+    return super.data;
   }
 
   @Override
