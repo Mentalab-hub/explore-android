@@ -20,5 +20,6 @@ public class ExploreExecutor {
 
   public static void shutDown() {
     TASK_EXECUTOR.shutdown();
+    SIMULTANEOUS_TASK_EXECUTOR.shutdown();
   }
 }

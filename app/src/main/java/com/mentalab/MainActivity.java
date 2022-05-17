@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     try {
-      final Future<Boolean> formattedMemory = connectedDevice.formatDeviceMemory();
+      final Future<Boolean> formattedMemory = connectedDevice.formatMemory();
       if (!formattedMemory.get()) {
         createToastMsg(
             MainActivity.this,
@@ -58,16 +58,16 @@ public class MainActivity extends AppCompatActivity {
         throw new CommandFailedException("Failed to format memory");
       }
 
-      final Future<Boolean> samplingRateSet = connectedDevice.postSamplingRate(SamplingRate.SR_500);
-      if (!samplingRateSet.get()) {
+      final Future<Boolean> samplingRateCmd = connectedDevice.setSamplingRate(SamplingRate.SR_500);
+      if (!samplingRateCmd.get()) {
         createToastMsg(
             MainActivity.this, "Something went wrong setting the sampling rate. Please try again.");
         throw new CommandFailedException("Failed to set the sampling rate");
       }
 
-      final Future<Boolean> modulesSet =
-          connectedDevice.postActiveModules(new InputSwitch(InputProtocol.ENVIRONMENT, false));
-      if (!modulesSet.get()) {
+      final Future<Boolean> modulesCmd =
+          connectedDevice.setModule(new InputSwitch(InputProtocol.ENVIRONMENT, false));
+      if (!modulesCmd.get()) {
         createToastMsg(
             MainActivity.this,
             "Something went wrong when trying to turn of a module. Please try again.");
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_3, false));
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_4, true));
       final Future<Boolean> channelsSet =
-              connectedDevice.postActiveChannels(channelSwitches);
+              connectedDevice.setChannels(channelSwitches);
       if (!channelsSet.get()) {
         createToastMsg(
                 MainActivity.this,
@@ -106,9 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
   private void connect(String exploreDeviceID)
       throws NoConnectionException, IOException, NoBluetoothException {
-    final ExploreDevice device = MentalabCommands.connect(exploreDeviceID);
-    setConnectedDevice(device);
-    MentalabCommands.decodeInputStream();
+    this.connectedDevice = MentalabCommands.connect(exploreDeviceID);
+    MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
   }
 
   private void connectToDevice(String exploreDeviceID) {

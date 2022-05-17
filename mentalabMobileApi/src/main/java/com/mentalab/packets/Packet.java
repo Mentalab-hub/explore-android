@@ -29,19 +29,19 @@ public abstract class Packet {
 
     int arraySize = bytes.length / numOfbytesPerNumber;
     double[] values = new double[arraySize];
-    for (int index = 0; index < bytes.length; index += numOfbytesPerNumber) {
-      int signBit = bytes[index + numOfbytesPerNumber - 1] >> 7;
+    for (int i = 0; i < bytes.length; i += numOfbytesPerNumber) {
+      int signBit = bytes[i + numOfbytesPerNumber - 1] >> 7;
       double value;
 
       value =
-          ByteBuffer.wrap(new byte[] {bytes[index], bytes[index + 1]})
+          ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
               .order(ByteOrder.LITTLE_ENDIAN)
               .getShort();
       if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
         value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
       }
 
-      values[index / numOfbytesPerNumber] = value;
+      values[i / numOfbytesPerNumber] = value;
     }
     return values;
   }
