@@ -1,6 +1,9 @@
 package com.mentalab;
 
+import android.util.Log;
+
 import com.mentalab.io.ContentServer;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
 import com.mentalab.exception.InvalidDataException;
@@ -93,6 +96,7 @@ public final class MentalabCodec {
             parsePayloadData(pID, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
 
         if (packet instanceof Publishable) {
+          Log.d(Utils.TAG, packet.toString());
           ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
         }
       }

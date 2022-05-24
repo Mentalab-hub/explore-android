@@ -26,8 +26,8 @@ public class ExploreDevice {
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  private int channelCount = 8;
-  private SamplingRate samplingRate = SamplingRate.SR_250;
+  private int channelCount = 4;
+  SamplingRate samplingRate = SamplingRate.SR_250;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;

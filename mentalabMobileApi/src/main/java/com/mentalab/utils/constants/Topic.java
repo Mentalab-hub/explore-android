@@ -4,5 +4,6 @@ public enum Topic {
   EXG,
   COMMAND,
   ORN,
-  MARKER
+  MARKER,
+  DEVICE_INFO
 }
