@@ -38,9 +38,10 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    final String exploreDeviceID = "1C32";
+    final String exploreDeviceID = "CA26";
     try {
       connect(exploreDeviceID);
+      MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
     } catch (NoBluetoothException e) {
       askToTurnOnBT(exploreDeviceID);
       return;
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
       return;
     }
 
-    try {
+    /*try {
       final Future<Boolean> formattedMemory = connectedDevice.formatMemory();
       if (!formattedMemory.get()) {
         createToastMsg(
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         | ExecutionException
         | CommandFailedException e) {
       e.printStackTrace();
-    }
+    }*/
   }
 
   @Override
@@ -107,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
   private void connect(String exploreDeviceID)
       throws NoConnectionException, IOException, NoBluetoothException {
     this.connectedDevice = MentalabCommands.connect(exploreDeviceID);
-    MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
   }
 
   private void connectToDevice(String exploreDeviceID) {
