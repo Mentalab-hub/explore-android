@@ -1,13 +1,11 @@
 package com.mentalab.io;
 
 import android.util.Log;
-
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.command.CommandReceived;
 import com.mentalab.packets.command.CommandStatus;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 

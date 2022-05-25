@@ -9,12 +9,10 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
@@ -22,7 +20,6 @@ import com.mentalab.exception.NoConnectionException;
 import com.mentalab.utils.InputSwitch;
 import com.mentalab.utils.constants.InputProtocol;
 import com.mentalab.utils.constants.SamplingRate;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;

@@ -1,9 +1,9 @@
 package com.mentalab.packets.sensors.exg;
 
-import java.util.EnumSet;
-
 import static com.mentalab.packets.Attributes.CH1;
 import static com.mentalab.packets.Attributes.CH8;
+
+import java.util.EnumSet;
 
 public class Eeg98 extends EEGPacket {
 

@@ -2,10 +2,8 @@ package com.mentalab.service;
 
 import android.content.Context;
 import android.net.Uri;
-
 import com.mentalab.utils.constants.FileType;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.Map;
 import java.util.concurrent.Callable;
 

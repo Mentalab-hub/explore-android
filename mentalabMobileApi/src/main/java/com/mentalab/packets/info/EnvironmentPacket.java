@@ -1,17 +1,15 @@
 package com.mentalab.packets.info;
 
+import static com.mentalab.packets.Attributes.BATTERY;
+import static com.mentalab.packets.Attributes.TEMP;
+
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-
-import static com.mentalab.packets.Attributes.BATTERY;
-import static com.mentalab.packets.Attributes.TEMP;
 
 public class EnvironmentPacket extends InfoPacket {
 

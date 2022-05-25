@@ -1,7 +1,6 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
 
 public class CommandReceived extends UtilPacket {

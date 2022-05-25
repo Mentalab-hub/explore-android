@@ -2,7 +2,6 @@ package com.mentalab.io;
 
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

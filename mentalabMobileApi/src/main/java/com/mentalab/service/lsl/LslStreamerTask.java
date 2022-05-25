@@ -1,14 +1,12 @@
 package com.mentalab.service.lsl;
 
 import android.util.Log;
-
 import com.mentalab.ExploreDevice;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.Utils;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;

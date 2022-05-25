@@ -1,17 +1,15 @@
 package com.mentalab.packets.sensors;
 
-import androidx.annotation.NonNull;
+import static com.mentalab.packets.Attributes.ACCX;
+import static com.mentalab.packets.Attributes.GYROZ;
 
+import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.PublishablePacket;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-
-import static com.mentalab.packets.Attributes.ACCX;
-import static com.mentalab.packets.Attributes.GYROZ;
 
 public class Orientation extends PublishablePacket {
 

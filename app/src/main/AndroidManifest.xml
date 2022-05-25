@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mentalab">
+  package="com.mentalab">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+  <application
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    android:label="@string/app_name"
+    android:roundIcon="@mipmap/ic_launcher_round"
+    android:supportsRtl="true"
+    android:theme="@style/Theme.MobileApiDemo">
+    <activity android:name=".MainActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
 
-    <!-- Request legacy Bluetooth permissions on older devices. -->
-    <uses-permission
-        android:name="android.permission.BLUETOOTH"
-        android:maxSdkVersion="30" />
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_ADMIN"
-        android:maxSdkVersion="30" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+  </application>
+  <uses-feature
+    android:name="android.hardware.bluetooth"
+    android:required="true" />
 
-    <!-- Include "neverForLocation" only if you can strongly assert that
-            your app never derives physical location from Bluetooth scan results. -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+  <!-- Request legacy Bluetooth permissions on older devices. -->
+  <uses-permission
+    android:maxSdkVersion="30"
+    android:name="android.permission.BLUETOOTH" />
+  <uses-permission
+    android:maxSdkVersion="30"
+    android:name="android.permission.BLUETOOTH_ADMIN" />
 
-    <!-- Needed only if your app communicates with already-paired Bluetooth
-         devices. -->
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+  <!-- Include "neverForLocation" only if you can strongly assert that
+          your app never derives physical location from Bluetooth scan results. -->
+  <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
-    <uses-feature
-        android:name="android.hardware.bluetooth"
-        android:required="true" />
+  <!-- Needed only if your app communicates with already-paired Bluetooth
+       devices. -->
+  <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.MobileApiDemo">
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
+  <uses-permission
+    android:maxSdkVersion="28"
+    android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

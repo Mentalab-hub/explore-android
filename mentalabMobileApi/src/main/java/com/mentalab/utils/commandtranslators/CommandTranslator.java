@@ -1,7 +1,6 @@
 package com.mentalab.utils.commandtranslators;
 
 import android.util.Log;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 

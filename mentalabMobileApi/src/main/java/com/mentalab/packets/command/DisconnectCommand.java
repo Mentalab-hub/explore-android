@@ -1,7 +1,6 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.packets.Packet;
 
 /** Disconnection packet is sent when the host machine is disconnected from the device */

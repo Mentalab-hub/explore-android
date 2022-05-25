@@ -7,7 +7,6 @@ import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;

@@ -1,7 +1,6 @@
 package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
-
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.DeviceConfigurationTask;
@@ -11,7 +10,6 @@ import com.mentalab.utils.InputSwitch;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.constants.InputProtocol;
 import com.mentalab.utils.constants.SamplingRate;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -1,13 +1,13 @@
 package com.mentalab;
 
+import static com.mentalab.utils.Utils.TAG;
+
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-
 import androidx.annotation.RequiresApi;
-
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.service.ExploreExecutor;
@@ -15,12 +15,9 @@ import com.mentalab.service.RecordTask;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-
-import static com.mentalab.utils.Utils.TAG;
 
 public final class MentalabCommands {
 
