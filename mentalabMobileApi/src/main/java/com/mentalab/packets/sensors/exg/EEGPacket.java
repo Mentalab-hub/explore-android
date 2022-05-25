@@ -3,8 +3,6 @@ package com.mentalab.packets.sensors.exg;
 import androidx.annotation.NonNull;
 
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.packets.Packet;
-import com.mentalab.packets.Publishable;
 import com.mentalab.packets.PublishablePacket;
 import com.mentalab.utils.constants.Topic;
 
@@ -76,8 +74,7 @@ public abstract class EEGPacket extends PublishablePacket {
     } catch (InvalidDataException | IOException e) {
       e.printStackTrace(); // TODO: React appropriately
     }
-    super.data =
-        new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
+    super.data = new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
   }
 
   @NonNull

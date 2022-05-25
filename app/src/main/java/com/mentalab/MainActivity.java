@@ -9,10 +9,12 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
@@ -24,7 +26,8 @@ import com.mentalab.utils.constants.SamplingRate;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,12 +81,11 @@ public class MainActivity extends AppCompatActivity {
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_0, false));
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_3, false));
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_4, true));
-      final Future<Boolean> channelsSet =
-              connectedDevice.setChannels(channelSwitches);
+      final Future<Boolean> channelsSet = connectedDevice.setChannels(channelSwitches);
       if (!channelsSet.get()) {
         createToastMsg(
-                MainActivity.this,
-                "Something went wrong when trying to turn of channels. Please try again.");
+            MainActivity.this,
+            "Something went wrong when trying to turn of channels. Please try again.");
         throw new CommandFailedException("Failed to set the module");
       }
     } catch (InvalidCommandException
@@ -140,13 +142,16 @@ public class MainActivity extends AppCompatActivity {
 
   private void askToTurnOnDevice(String exploreDeviceID) {
     new AlertDialog.Builder(MainActivity.this)
-            .setIcon(android.R.drawable.ic_notification_clear_all)
-            .setTitle("Connection error")
-            .setMessage("Unable to connect to: " + exploreDeviceID + ". " +
-                    "It is possible your device is switched off. If so, please switch it on and then click 'Reconnect'.")
-            .setNegativeButton("Close", (dialog, which) -> finishAffinity())
-            .setPositiveButton("Reconnect", (dialog, which) -> connectToDevice(exploreDeviceID))
-            .show();
+        .setIcon(android.R.drawable.ic_notification_clear_all)
+        .setTitle("Connection error")
+        .setMessage(
+            "Unable to connect to: "
+                + exploreDeviceID
+                + ". "
+                + "It is possible your device is switched off. If so, please switch it on and then click 'Reconnect'.")
+        .setNegativeButton("Close", (dialog, which) -> finishAffinity())
+        .setPositiveButton("Reconnect", (dialog, which) -> connectToDevice(exploreDeviceID))
+        .show();
   }
 
   private void closeWithPrompt(Context context, String title, String msg) {

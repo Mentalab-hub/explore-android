@@ -1,12 +1,12 @@
 package com.mentalab;
 
-import com.mentalab.io.ContentServer;
-import com.mentalab.utils.commandtranslators.Command;
-import com.mentalab.utils.commandtranslators.CommandTranslator;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
+import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.commandtranslators.CommandTranslator;
 
 import java.io.IOException;
 import java.io.InputStream;

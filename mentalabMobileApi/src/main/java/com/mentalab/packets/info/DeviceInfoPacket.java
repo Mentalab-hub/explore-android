@@ -1,7 +1,7 @@
 package com.mentalab.packets.info;
 
 import androidx.annotation.NonNull;
-import com.mentalab.MentalabCommands;
+
 import com.mentalab.utils.constants.SamplingRate;
 
 import java.nio.ByteBuffer;

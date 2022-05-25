@@ -1,6 +1,7 @@
 package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
+
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.DeviceConfigurationTask;
@@ -18,9 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-/**
- * A wrapper around BluetoothDevice, which is a final class so cannot be extended.
- */
+/** A wrapper around BluetoothDevice, which is a final class so cannot be extended. */
 public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
@@ -32,6 +31,24 @@ public class ExploreDevice {
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
     this.deviceName = deviceName;
+  }
+
+  // todo: consider current state
+  private static int generateChannelsArg(Set<InputSwitch> switches, int channelCount) {
+    int binaryArg;
+    if (channelCount < 8) {
+      binaryArg = 0b1111;
+    } else {
+      binaryArg = 0b11111111;
+    }
+
+    for (InputSwitch s : switches) {
+      if (!s.isOn()) {
+        final int channelID = s.getProtocol().getID();
+        binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
+      }
+    }
+    return binaryArg;
   }
 
   BluetoothDevice getBluetoothDevice() {
@@ -51,11 +68,10 @@ public class ExploreDevice {
    * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
-  public Future<Boolean> setChannels(Set<InputSwitch> channels)
-      throws InvalidCommandException {
+  public Future<Boolean> setChannels(Set<InputSwitch> channels) throws InvalidCommandException {
     if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(InputProtocol.Type.Module))) {
       throw new InvalidCommandException(
-              "Attempting to turn off channels with a module switch. Exiting.");
+          "Attempting to turn off channels with a module switch. Exiting.");
     }
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelsArg(channels, channelCount));
@@ -151,24 +167,6 @@ public class ExploreDevice {
     return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
   }
 
-  // todo: consider current state
-  private static int generateChannelsArg(Set<InputSwitch> switches, int channelCount) {
-    int binaryArg;
-    if (channelCount < 8) {
-      binaryArg = 0b1111;
-    } else {
-      binaryArg = 0b11111111;
-    }
-
-    for (InputSwitch s : switches) {
-      if (!s.isOn()) {
-        final int channelID = s.getProtocol().getID();
-        binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
-      }
-    }
-    return binaryArg;
-  }
-
   /** Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer) */
   public Future<Boolean> pushToLSL() {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
@@ -178,13 +176,13 @@ public class ExploreDevice {
     return deviceName;
   }
 
+  public int getChannelCount() {
+    return channelCount;
+  }
+
   // todo: set these in first round of info packet and then if message sent
   public void setChannelCount(int channelCount) {
     this.channelCount = channelCount;
-  }
-
-  public int getChannelCount() {
-    return channelCount;
   }
 
   /*
