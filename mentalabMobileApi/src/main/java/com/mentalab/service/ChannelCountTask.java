@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
 public class ChannelCountTask implements Callable<Boolean> {
+
   private ExploreDevice device;
 
   public ChannelCountTask(ExploreDevice device) {

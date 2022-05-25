@@ -24,7 +24,7 @@ public class Marker extends PublishablePacket {
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
     this.markerCode =
-        ByteBuffer.wrap(new byte[] {byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
+        ByteBuffer.wrap(new byte[]{byteBuffer[0], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
     super.data = new ArrayList<>(Collections.singletonList((float) markerCode));
   }
 

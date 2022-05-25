@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class DeviceInfoSubscriber extends Subscriber {
+
   private final CountDownLatch latch = new CountDownLatch(1);
   DeviceInfoPacket deviceInfoPacket;
   private volatile Boolean result;

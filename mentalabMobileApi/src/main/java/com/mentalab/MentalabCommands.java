@@ -115,13 +115,13 @@ public final class MentalabCommands {
    * Record data to CSV. Requires appropriate permissions from Android.
    *
    * @param recordSubscriber - The subscriber which subscribes to parsed data and holds information
-   *     about where to record.
+   *                         about where to record.
    * @throws IOException - Can occur both in the generation of files and in the execution of the
-   *     subscriber.
+   *                     subscriber.
    * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android
-   *     permissions docs</a>.
-   *     <p>Currently, a lot of functionality missing including: blocking on record, setting a
-   *     duration for recording, masking channels and overwriting previous files.
+   * permissions docs</a>.
+   * <p>Currently, a lot of functionality missing including: blocking on record, setting a
+   * duration for recording, masking channels and overwriting previous files.
    */
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public static void record(RecordTask recordSubscriber) throws IOException {

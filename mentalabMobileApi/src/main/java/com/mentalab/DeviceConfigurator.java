@@ -3,6 +3,7 @@ package com.mentalab;
 import com.mentalab.packets.info.DeviceInfoPacket;
 
 public class DeviceConfigurator {
+
   private ExploreDevice device;
 
   public DeviceConfigurator(ExploreDevice exploreDevice, DeviceInfoPacket deviceInfoPacket) {
