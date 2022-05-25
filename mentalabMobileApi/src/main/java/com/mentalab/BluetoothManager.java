@@ -31,7 +31,7 @@ public class BluetoothManager {
   }
 
   public static Set<BluetoothDevice> getBondedExploreDevices() throws NoBluetoothException {
-    final Set<BluetoothDevice> bondedDevices = BluetoothManager.getBondedDevices();
+    final Set<BluetoothDevice> bondedDevices = getBondedDevices();
     final Set<BluetoothDevice> bondedExploreDevices = new HashSet<>();
 
     for (BluetoothDevice bt : bondedDevices) {
