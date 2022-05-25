@@ -11,7 +11,7 @@ public class Eeg94 extends EEGPacket {
 
   public Eeg94(double timeStamp) {
     super(timeStamp, CHANNEL_NUMBER);
-    // TODO refactor to switches with new queue design for next release
+
     super.attributes = EnumSet.range(CH1, CH4);
   }
 }

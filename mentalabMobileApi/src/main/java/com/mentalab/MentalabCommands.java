@@ -52,8 +52,10 @@ public final class MentalabCommands {
    * @throws NoBluetoothException
    */
   public static void startDataAcquisition() throws IOException, NoBluetoothException {
-    Future<Boolean> isChannelCountCompleted = ExploreExecutor.submitTask(new ChannelCountTask(connectedDevice));
-    Future<Boolean> isInfoUpdated = ExploreExecutor.submitTask(new DeviceInfoUpdaterTask(connectedDevice));
+    Future<Boolean> isChannelCountCompleted =
+        ExploreExecutor.submitTask(new ChannelCountTask(connectedDevice));
+    Future<Boolean> isInfoUpdated =
+        ExploreExecutor.submitTask(new DeviceInfoUpdaterTask(connectedDevice));
     try {
       MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
     } catch (NoBluetoothException | IOException exception) {
@@ -62,8 +64,7 @@ public final class MentalabCommands {
     try {
       isChannelCountCompleted.get(1000, TimeUnit.MILLISECONDS);
       isInfoUpdated.get(1000, TimeUnit.MILLISECONDS);
-    }
-    catch (TimeoutException | InterruptedException |  ExecutionException exception) {
+    } catch (TimeoutException | InterruptedException | ExecutionException exception) {
       // catch exception  and shutdown all processes
       Log.d(Utils.DEBUG_DEV, "Quitting!!");
       ExploreExecutor.shutDown();

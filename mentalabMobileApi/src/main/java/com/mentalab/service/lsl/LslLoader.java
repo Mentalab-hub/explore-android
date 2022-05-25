@@ -13,5 +13,4 @@ public class LslLoader {
 
     instance = Native.load("lsl", lslLibLoader.class);
   }
-
 }

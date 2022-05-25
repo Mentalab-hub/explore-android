@@ -6,7 +6,6 @@ public class CommandFailedException extends MentalabException {
     super(errorMessage, err);
   }
 
-
   public CommandFailedException(String errorMessage) {
     super(errorMessage);
   }

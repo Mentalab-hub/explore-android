@@ -7,7 +7,6 @@ import com.mentalab.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
-import com.mentalab.service.ChannelCountTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;

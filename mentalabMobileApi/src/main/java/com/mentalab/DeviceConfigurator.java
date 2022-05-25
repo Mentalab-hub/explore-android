@@ -1,7 +1,6 @@
 package com.mentalab;
 
 import com.mentalab.packets.info.DeviceInfoPacket;
-import com.mentalab.utils.constants.SamplingRate;
 
 public class DeviceConfigurator {
   private ExploreDevice device;

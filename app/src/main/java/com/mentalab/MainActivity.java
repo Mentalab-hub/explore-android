@@ -9,22 +9,16 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import com.mentalab.exception.CommandFailedException;
-import com.mentalab.exception.InvalidCommandException;
+
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-import com.mentalab.utils.InputSwitch;
-import com.mentalab.utils.constants.InputProtocol;
-import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     final String exploreDeviceID = "CA26";
     try {
       connect(exploreDeviceID);
-      MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
+      MentalabCommands.startDataAcquisition();
     } catch (NoBluetoothException e) {
       askToTurnOnBT(exploreDeviceID);
       return;
@@ -95,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     }*/
   }
 
-  @Override
+  /*  @Override
   protected void onStop() {
     super.onStop();
     try {
@@ -103,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     } catch (IOException e) {
       closeWithPrompt(MainActivity.this, "Trouble closing", "Explore Android had trouble closing.");
     }
-  }
+  }*/
 
   private void connect(String exploreDeviceID)
       throws NoConnectionException, IOException, NoBluetoothException {
@@ -140,13 +134,16 @@ public class MainActivity extends AppCompatActivity {
 
   private void askToTurnOnDevice(String exploreDeviceID) {
     new AlertDialog.Builder(MainActivity.this)
-            .setIcon(android.R.drawable.ic_notification_clear_all)
-            .setTitle("Connection error")
-            .setMessage("Unable to connect to: " + exploreDeviceID + ". " +
-                    "It is possible your device is switched off. If so, please switch it on and then click 'Reconnect'.")
-            .setNegativeButton("Close", (dialog, which) -> finishAffinity())
-            .setPositiveButton("Reconnect", (dialog, which) -> connectToDevice(exploreDeviceID))
-            .show();
+        .setIcon(android.R.drawable.ic_notification_clear_all)
+        .setTitle("Connection error")
+        .setMessage(
+            "Unable to connect to: "
+                + exploreDeviceID
+                + ". "
+                + "It is possible your device is switched off. If so, please switch it on and then click 'Reconnect'.")
+        .setNegativeButton("Close", (dialog, which) -> finishAffinity())
+        .setPositiveButton("Reconnect", (dialog, which) -> connectToDevice(exploreDeviceID))
+        .show();
   }
 
   private void closeWithPrompt(Context context, String title, String msg) {
