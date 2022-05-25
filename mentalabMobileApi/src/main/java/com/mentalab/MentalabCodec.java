@@ -2,14 +2,16 @@ package com.mentalab;
 
 import android.util.Log;
 
-import com.mentalab.io.ContentServer;
-import com.mentalab.utils.Utils;
-import com.mentalab.utils.commandtranslators.Command;
-import com.mentalab.utils.commandtranslators.CommandTranslator;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
+import com.mentalab.service.ChannelCountTask;
+import com.mentalab.service.ExploreExecutor;
+import com.mentalab.utils.Utils;
+import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.commandtranslators.CommandTranslator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +36,7 @@ public final class MentalabCodec {
    */
   public static void decodeInputStream(InputStream rawData) {
     DECODER_TASK.setInputStream(rawData);
-    DECODE_EXECUTOR.submit(DECODER_TASK);
+    ExploreExecutor.submitTask(DECODER_TASK);
   }
 
   /**
@@ -69,7 +71,7 @@ public final class MentalabCodec {
     DECODE_EXECUTOR.shutdownNow();
   }
 
-  private static class ParseRawDataTask implements Callable<Void> {
+  private static class ParseRawDataTask implements Callable<Boolean> {
 
     private InputStream btInputStream;
     private byte[] buffer;
@@ -78,7 +80,7 @@ public final class MentalabCodec {
       btInputStream = inputStream;
     }
 
-    public Void call() throws IOException, InvalidDataException {
+    public Boolean call() throws IOException, InvalidDataException {
       while (!Thread.currentThread().isInterrupted()) {
         buffer = new byte[1024];
         final int pID = readStreamToInt(1);
