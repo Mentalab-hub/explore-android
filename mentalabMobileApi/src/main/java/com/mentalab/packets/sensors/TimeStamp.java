@@ -1,7 +1,6 @@
 package com.mentalab.packets.sensors;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.packets.Packet;
 
 /** Packet sent from the device to sync clocks */

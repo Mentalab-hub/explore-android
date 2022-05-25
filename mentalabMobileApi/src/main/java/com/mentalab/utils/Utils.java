@@ -1,7 +1,6 @@
 package com.mentalab.utils;
 
 import android.util.Log;
-
 import com.mentalab.exception.NoConnectionException;
 
 public class Utils {

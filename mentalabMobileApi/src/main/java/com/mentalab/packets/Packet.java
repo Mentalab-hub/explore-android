@@ -1,9 +1,7 @@
 package com.mentalab.packets;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;

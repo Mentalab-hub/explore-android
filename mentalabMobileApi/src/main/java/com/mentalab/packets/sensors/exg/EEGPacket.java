@@ -1,11 +1,9 @@
 package com.mentalab.packets.sensors.exg;
 
 import androidx.annotation.NonNull;
-
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.PublishablePacket;
 import com.mentalab.utils.constants.Topic;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

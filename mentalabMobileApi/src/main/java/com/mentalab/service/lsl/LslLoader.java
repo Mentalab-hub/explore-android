@@ -1,7 +1,6 @@
 package com.mentalab.service.lsl;
 
 import android.util.Log;
-
 import com.sun.jna.Native;
 
 public class LslLoader {

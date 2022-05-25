@@ -9,15 +9,12 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {

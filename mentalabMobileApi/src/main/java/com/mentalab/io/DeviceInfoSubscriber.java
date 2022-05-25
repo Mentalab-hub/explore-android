@@ -4,7 +4,6 @@ import com.mentalab.DeviceConfigurator;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;

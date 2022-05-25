@@ -1,13 +1,11 @@
 package com.mentalab.service;
 
 import android.util.Log;
-
 import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
 import com.mentalab.io.ChannelCountSubscriber;
 import com.mentalab.io.ContentServer;
 import com.mentalab.utils.Utils;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 

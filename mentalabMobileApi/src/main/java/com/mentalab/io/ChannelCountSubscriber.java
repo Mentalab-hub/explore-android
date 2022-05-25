@@ -2,7 +2,6 @@ package com.mentalab.io;
 
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.sensors.exg.Eeg94;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;

@@ -1,7 +1,6 @@
 package com.mentalab;
 
 import com.mentalab.exception.InvalidDataException;
-
 import org.junit.Test;
 
 /**

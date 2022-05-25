@@ -1,7 +1,6 @@
 package com.mentalab.service.lsl;
 
 import com.sun.jna.Pointer;
-
 import java.io.IOException;
 
 public class StreamOutlet {

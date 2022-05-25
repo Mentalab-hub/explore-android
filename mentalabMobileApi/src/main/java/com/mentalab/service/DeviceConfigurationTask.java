@@ -1,13 +1,11 @@
 package com.mentalab.service;
 
 import android.util.Log;
-
 import com.mentalab.ExploreDevice;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.CommandAcknowledgeSubscriber;
 import com.mentalab.io.ContentServer;
 import com.mentalab.utils.Utils;
-
 import java.io.IOException;
 import java.util.concurrent.Callable;
 

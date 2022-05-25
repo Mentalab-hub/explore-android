@@ -1,22 +1,19 @@
 package com.mentalab.utils;
 
+import static android.provider.MediaStore.MediaColumns.DISPLAY_NAME;
+import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
-
 import androidx.annotation.RequiresApi;
-
 import com.mentalab.utils.constants.Topic;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
-
-import static android.provider.MediaStore.MediaColumns.DISPLAY_NAME;
-import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
 
 public class FileGenerator {
 
