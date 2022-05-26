@@ -9,6 +9,9 @@ public class DeviceConfigurator {
   public DeviceConfigurator(ExploreDevice exploreDevice, DeviceInfoPacket deviceInfoPacket) {
     exploreDevice.samplingRate = deviceInfoPacket.getSamplingRate();
     exploreDevice.channelMask = deviceInfoPacket.getChannelMask();
+    if (exploreDevice.channelCount == 0){
+      
+    }
   }
 
   public DeviceConfigurator(ExploreDevice exploreDevice) {

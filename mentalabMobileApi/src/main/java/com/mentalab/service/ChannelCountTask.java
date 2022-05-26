@@ -24,7 +24,7 @@ public class ChannelCountTask implements Callable<Boolean> {
    * @throws TimeoutException if unable to compute a result and timeout happens
    */
   @Override
-  public Boolean call() throws TimeoutException, InterruptedException {
+  public Boolean call() throws InterruptedException {
     final ChannelCountSubscriber subscriber = new ChannelCountSubscriber();
     ContentServer.getInstance().registerSubscriber(subscriber);
 
@@ -32,10 +32,12 @@ public class ChannelCountTask implements Callable<Boolean> {
       int channelCount = subscriber.getChannelCount();
       DeviceConfigurator configurator = new DeviceConfigurator(device);
       configurator.configureChannelCount(channelCount);
-    } catch (TimeoutException | InterruptedException exception) {
-      Log.d(Utils.TAG, "No device info packet is received");
+    } catch (InterruptedException exception) {
+      Log.d(Utils.TAG, "No device info packet received");
       throw exception;
     }
+
+    ContentServer.getInstance().deRegisterSubscriber(subscriber);
     return null;
   }
 }

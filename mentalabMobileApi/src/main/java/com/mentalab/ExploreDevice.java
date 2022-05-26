@@ -25,7 +25,7 @@ public class ExploreDevice {
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  int channelCount = 4;
+  int channelCount = 8;
   SamplingRate samplingRate = SamplingRate.SR_250;
   int channelMask = 255;
 
