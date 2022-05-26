@@ -22,9 +22,7 @@ public class StreamInfo {
     obj = handle;
   }
 
-  /**
-   * Destroy a previously created StreamInfo object.
-   */
+  /** Destroy a previously created StreamInfo object. */
   public void destroy() {
     LslLoader.instance.lsl_destroy_streaminfo(obj);
   }

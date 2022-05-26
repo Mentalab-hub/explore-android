@@ -14,9 +14,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-/**
- * Device related information packet to transmit firmware version, ADC mask and sampling rate
- */
+/** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 public class DeviceInfoPacket extends InfoPacket implements Publishable {
 
   private SamplingRate samplingRate;
@@ -30,7 +28,7 @@ public class DeviceInfoPacket extends InfoPacket implements Publishable {
   @Override
   public void convertData(byte[] byteBuffer) {
     final int samplingRateMultiplier =
-        ByteBuffer.wrap(new byte[]{byteBuffer[2], 0, 0, 0})
+        ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
             .order(ByteOrder.LITTLE_ENDIAN)
             .getInt();
 

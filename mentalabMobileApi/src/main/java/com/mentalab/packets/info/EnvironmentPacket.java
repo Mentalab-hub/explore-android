@@ -23,22 +23,22 @@ public class EnvironmentPacket extends InfoPacket {
     final List<Float> vals = new ArrayList<>();
     vals.add(
         (float)
-            ByteBuffer.wrap(new byte[]{byteBuffer[0], 0, 0, 0})
+            ByteBuffer.wrap(new byte[] {byteBuffer[0], 0, 0, 0})
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .getInt());
     vals.add(
         (float)
-            (ByteBuffer.wrap(new byte[]{byteBuffer[1], byteBuffer[2], 0, 0})
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .getInt())
+                (ByteBuffer.wrap(new byte[] {byteBuffer[1], byteBuffer[2], 0, 0})
+                    .order(ByteOrder.LITTLE_ENDIAN)
+                    .getInt())
             * (1000 / 4095));
     float batteryLevelRaw =
         (float)
-            ((ByteBuffer.wrap(new byte[]{byteBuffer[3], byteBuffer[4], 0, 0})
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .getInt()
-                * 16.8
-                / 6.8)
+            ((ByteBuffer.wrap(new byte[] {byteBuffer[3], byteBuffer[4], 0, 0})
+                        .order(ByteOrder.LITTLE_ENDIAN)
+                        .getInt()
+                    * 16.8
+                    / 6.8)
                 * (1.8 / 2457));
 
     vals.add(getBatteryPercentage(batteryLevelRaw));

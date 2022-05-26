@@ -37,12 +37,12 @@ public abstract class EEGPacket extends PublishablePacket {
       double value;
       if (signBit == 0) {
         value =
-            ByteBuffer.wrap(new byte[]{byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
+            ByteBuffer.wrap(new byte[] {byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .getInt();
       } else {
         int twosComplimentValue =
-            ByteBuffer.wrap(new byte[]{byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
+            ByteBuffer.wrap(new byte[] {byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .getInt();
         value = -1 * (Math.pow(2, 24) - twosComplimentValue);

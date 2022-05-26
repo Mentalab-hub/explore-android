@@ -13,8 +13,7 @@ public class CommandAcknowledgment extends UtilPacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
-  }
+  public void convertData(byte[] byteBuffer) {}
 
   @NonNull
   @Override

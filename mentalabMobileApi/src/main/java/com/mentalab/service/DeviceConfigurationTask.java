@@ -26,7 +26,7 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
    * until it does. The user can set a timeout using Future functions.
    *
    * @return boolean True when CommandAcknowledgement received, otherwise false
-   * @throws IOException          If the command cannot be written to the device OutputStream.
+   * @throws IOException If the command cannot be written to the device OutputStream.
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
    * @throws NoBluetoothException If no device is connected via BT.
    */

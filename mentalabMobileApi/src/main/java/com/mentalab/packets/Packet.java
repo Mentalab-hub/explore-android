@@ -32,7 +32,7 @@ public abstract class Packet {
       double value;
 
       value =
-          ByteBuffer.wrap(new byte[]{bytes[i], bytes[i + 1]})
+          ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
               .order(ByteOrder.LITTLE_ENDIAN)
               .getShort();
       if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
@@ -55,22 +55,16 @@ public abstract class Packet {
    */
   public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
 
-  /**
-   * String representation of attributes
-   */
+  /** String representation of attributes */
   @NonNull
   public abstract String toString();
 
-  /**
-   * Number of elements in each packet
-   */
+  /** Number of elements in each packet */
   public int getDataCount() {
     return this.data.size();
   }
 
-  /**
-   * Get data values from packet structure
-   */
+  /** Get data values from packet structure */
   public List<Float> getData() {
     return this.data;
   }
