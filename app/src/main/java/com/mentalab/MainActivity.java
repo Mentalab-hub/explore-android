@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
       return;
     }
 
+    // device config API demonstration
     /*try {
       final Future<Boolean> formattedMemory = connectedDevice.formatMemory();
       if (!formattedMemory.get()) {
@@ -85,16 +86,7 @@ public class MainActivity extends AppCompatActivity {
       e.printStackTrace();
     }*/
   }
-
-  /*  @Override
-  protected void onStop() {
-    super.onStop();
-    try {
-      MentalabCommands.close();
-    } catch (IOException e) {
-      closeWithPrompt(MainActivity.this, "Trouble closing", "Explore Android had trouble closing.");
-    }
-  }*/
+  
 
   private void connect(String exploreDeviceID)
       throws NoConnectionException, IOException, NoBluetoothException {
