@@ -17,9 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-/**
- * A wrapper around BluetoothDevice, which is a final class so cannot be extended.
- */
+/** A wrapper around BluetoothDevice, which is a final class so cannot be extended. */
 public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
@@ -123,9 +121,7 @@ public class ExploreDevice {
     return submitCommand(c);
   }
 
-  /**
-   * Formats internal memory of device.
-   */
+  /** Formats internal memory of device. */
   public Future<Boolean> formatMemory() throws InvalidCommandException {
     return submitCommand(Command.CMD_MEMORY_FORMAT);
   }
@@ -170,9 +166,7 @@ public class ExploreDevice {
     return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
   }
 
-  /**
-   * Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
-   */
+  /** Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer) */
   public Future<Boolean> pushToLSL() {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
   }

@@ -3,9 +3,7 @@ package com.mentalab.packets.command;
 import androidx.annotation.NonNull;
 import com.mentalab.packets.Packet;
 
-/**
- * Disconnection packet is sent when the host machine is disconnected from the device
- */
+/** Disconnection packet is sent when the host machine is disconnected from the device */
 class DisconnectCommand extends Packet {
 
   public DisconnectCommand(double timeStamp) {
@@ -13,8 +11,7 @@ class DisconnectCommand extends Packet {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
-  }
+  public void convertData(byte[] byteBuffer) {}
 
   @NonNull
   @Override

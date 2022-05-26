@@ -38,6 +38,6 @@ public class ChannelCountTask implements Callable<Boolean> {
     }
 
     ContentServer.getInstance().deRegisterSubscriber(subscriber);
-    return null;
+    return true;
   }
 }

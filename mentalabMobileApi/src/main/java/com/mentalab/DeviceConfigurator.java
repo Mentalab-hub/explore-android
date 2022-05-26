@@ -5,13 +5,11 @@ import com.mentalab.packets.info.DeviceInfoPacket;
 public class DeviceConfigurator {
 
   private ExploreDevice device;
+  private DeviceInfoPacket deviceInfoPacket;
 
-  public DeviceConfigurator(ExploreDevice exploreDevice, DeviceInfoPacket deviceInfoPacket) {
-    exploreDevice.samplingRate = deviceInfoPacket.getSamplingRate();
-    exploreDevice.channelMask = deviceInfoPacket.getChannelMask();
-    if (exploreDevice.channelCount == 0){
-      
-    }
+  public DeviceConfigurator(ExploreDevice exploreDevice, DeviceInfoPacket infoPacket) {
+    device = exploreDevice;
+    deviceInfoPacket = infoPacket;
   }
 
   public DeviceConfigurator(ExploreDevice exploreDevice) {
@@ -20,5 +18,10 @@ public class DeviceConfigurator {
 
   public void configureChannelCount(int channelCount) {
     device.channelCount = channelCount;
+  }
+
+  public void configureDeviceInfo() {
+    device.samplingRate = deviceInfoPacket.getSamplingRate();
+    device.channelMask = deviceInfoPacket.getChannelMask();
   }
 }

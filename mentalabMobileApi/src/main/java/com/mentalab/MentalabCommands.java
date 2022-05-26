@@ -10,6 +10,7 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.exception.OperationFailedException;
 import com.mentalab.service.ChannelCountTask;
 import com.mentalab.service.DeviceInfoUpdaterTask;
 import com.mentalab.service.ExploreExecutor;
@@ -48,7 +49,8 @@ public final class MentalabCommands {
    * @throws IOException
    * @throws NoBluetoothException
    */
-  public static void startDataAcquisition() throws IOException, NoBluetoothException {
+  public static void startDataAcquisition()
+      throws IOException, NoBluetoothException, OperationFailedException {
     Future<Boolean> isChannelCountCompleted =
         ExploreExecutor.submitTask(new ChannelCountTask(connectedDevice));
     Future<Boolean> isInfoUpdated =
@@ -63,7 +65,9 @@ public final class MentalabCommands {
       isInfoUpdated.get(1000, TimeUnit.MILLISECONDS);
     } catch (TimeoutException | InterruptedException | ExecutionException exception) {
       // catch exception  and shutdown all processes
+
       ExploreExecutor.shutDown();
+      throw new OperationFailedException("Device Info Packet not received. Exiting.");
     }
   }
 

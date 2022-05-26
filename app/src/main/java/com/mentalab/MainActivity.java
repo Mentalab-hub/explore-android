@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.exception.OperationFailedException;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     } catch (IOException | NoConnectionException e) {
       askToTurnOnDevice(exploreDeviceID);
       return;
+    } catch (OperationFailedException e) {
+      createToastMsg(MainActivity.this, "Failed to initialize data acquisition.");
     }
 
     // device config API demonstration
@@ -86,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
       e.printStackTrace();
     }*/
   }
-  
 
   private void connect(String exploreDeviceID)
       throws NoConnectionException, IOException, NoBluetoothException {

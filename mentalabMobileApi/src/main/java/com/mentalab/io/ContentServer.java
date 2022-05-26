@@ -12,8 +12,7 @@ public class ContentServer {
   private static ContentServer INSTANCE;
   private final Map<Topic, Set<Subscriber>> topicSubscribers = new HashMap<>();
 
-  private ContentServer() {
-  }
+  private ContentServer() {}
 
   public static ContentServer getInstance() {
     if (INSTANCE == null) {

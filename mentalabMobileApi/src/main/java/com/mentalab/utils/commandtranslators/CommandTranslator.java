@@ -6,7 +6,7 @@ import java.nio.ByteOrder;
 
 public abstract class CommandTranslator {
 
-  private static final int[] FLETCHER_BYTES = new int[]{0xAF, 0xBE, 0xAD, 0xDE};
+  private static final int[] FLETCHER_BYTES = new int[] {0xAF, 0xBE, 0xAD, 0xDE};
 
   int pId;
   int count = 0x00;
