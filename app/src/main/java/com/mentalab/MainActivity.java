@@ -13,10 +13,19 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.exception.OperationFailedException;
+import com.mentalab.utils.InputSwitch;
+import com.mentalab.utils.constants.InputProtocol;
+import com.mentalab.utils.constants.SamplingRate;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    final String exploreDeviceID = "CA26";
+    final String exploreDeviceID = "1C34";
     try {
       connect(exploreDeviceID);
       MentalabCommands.startDataAcquisition();
@@ -44,8 +53,7 @@ public class MainActivity extends AppCompatActivity {
       createToastMsg(MainActivity.this, "Failed to initialize data acquisition.");
     }
 
-    // device config API demonstration
-    /*try {
+    try {
       final Future<Boolean> formattedMemory = connectedDevice.formatMemory();
       if (!formattedMemory.get()) {
         createToastMsg(
@@ -74,12 +82,11 @@ public class MainActivity extends AppCompatActivity {
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_0, false));
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_3, false));
       channelSwitches.add(new InputSwitch(InputProtocol.CHANNEL_4, true));
-      final Future<Boolean> channelsSet =
-              connectedDevice.setChannels(channelSwitches);
+      final Future<Boolean> channelsSet = connectedDevice.setChannels(channelSwitches);
       if (!channelsSet.get()) {
         createToastMsg(
-                MainActivity.this,
-                "Something went wrong when trying to turn of channels. Please try again.");
+            MainActivity.this,
+            "Something went wrong when trying to turn of channels. Please try again.");
         throw new CommandFailedException("Failed to set the module");
       }
     } catch (InvalidCommandException
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         | ExecutionException
         | CommandFailedException e) {
       e.printStackTrace();
-    }*/
+    }
   }
 
   private void connect(String exploreDeviceID)
