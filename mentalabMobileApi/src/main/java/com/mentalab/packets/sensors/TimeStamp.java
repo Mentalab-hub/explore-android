@@ -3,7 +3,9 @@ package com.mentalab.packets.sensors;
 import androidx.annotation.NonNull;
 import com.mentalab.packets.Packet;
 
-/** Packet sent from the device to sync clocks */
+/**
+ * Packet sent from the device to sync clocks
+ */
 class TimeStamp extends Packet {
 
   public TimeStamp(double timeStamp) {
@@ -11,7 +13,8 @@ class TimeStamp extends Packet {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {}
+  public void convertData(byte[] byteBuffer) {
+  }
 
   @NonNull
   @Override
