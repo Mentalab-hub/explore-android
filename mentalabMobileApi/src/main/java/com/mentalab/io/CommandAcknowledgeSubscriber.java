@@ -15,7 +15,7 @@ public class CommandAcknowledgeSubscriber extends Subscriber {
   private volatile boolean result;
 
   public CommandAcknowledgeSubscriber() {
-    this.t = Topic.COMMAND;
+    super(Topic.COMMAND);
   }
 
   @Override

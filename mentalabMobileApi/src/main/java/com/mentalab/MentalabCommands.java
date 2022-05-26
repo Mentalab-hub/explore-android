@@ -8,8 +8,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
+import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.service.ChannelCountTask;
+import com.mentalab.service.DeviceInfoUpdaterTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.RecordTask;
 import com.mentalab.utils.FileGenerator;
@@ -18,6 +21,10 @@ import com.mentalab.utils.constants.Topic;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public final class MentalabCommands {
 
@@ -34,6 +41,34 @@ public final class MentalabCommands {
    */
   public static Set<BluetoothDevice> scan() throws NoBluetoothException {
     return BluetoothManager.getBondedExploreDevices();
+  }
+
+  /**
+   * Start data acquisition process from explore device
+   *
+   * @throws IOException
+   * @throws NoBluetoothException
+   */
+  public static void startDataAcquisition()
+      throws IOException, NoBluetoothException, InitializationFailureException {
+    Future<Boolean> isChannelCountCompleted =
+        ExploreExecutor.submitTask(new ChannelCountTask(connectedDevice));
+    Future<Boolean> isInfoUpdated =
+        ExploreExecutor.submitTask(new DeviceInfoUpdaterTask(connectedDevice));
+    try {
+      MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
+    } catch (NoBluetoothException | IOException exception) {
+      throw exception;
+    }
+    try {
+      isChannelCountCompleted.get(1000, TimeUnit.MILLISECONDS);
+      isInfoUpdated.get(1000, TimeUnit.MILLISECONDS);
+    } catch (TimeoutException | InterruptedException | ExecutionException exception) {
+      // catch exception  and shutdown all processes
+
+      ExploreExecutor.shutDown();
+      throw new InitializationFailureException("Device Info Packet not received. Exiting.");
+    }
   }
 
   /**

@@ -35,4 +35,8 @@ public class ContentServer {
   public synchronized void registerSubscriber(Subscriber sub) {
     this.topicSubscribers.computeIfAbsent(sub.getTopic(), k -> new HashSet<>()).add(sub);
   }
+
+  public synchronized void deRegisterSubscriber(Subscriber sub) {
+    this.topicSubscribers.get(sub.getTopic()).remove(sub);
+  }
 }

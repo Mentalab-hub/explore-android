@@ -23,8 +23,9 @@ public class ExploreDevice {
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  private int channelCount = 8;
-  private SamplingRate samplingRate = SamplingRate.SR_250;
+  int channelCount = 8;
+  SamplingRate samplingRate = SamplingRate.SR_250;
+  int channelMask = 255;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
@@ -182,12 +183,6 @@ public class ExploreDevice {
   public void setChannelCount(int channelCount) {
     this.channelCount = channelCount;
   }
-
-  /*
-  public void setSamplingRate(SamplingRate sr) {
-    this.samplingRate = sr;
-  }
-  */
 
   public SamplingRate getSamplingRate() {
     return this.samplingRate;

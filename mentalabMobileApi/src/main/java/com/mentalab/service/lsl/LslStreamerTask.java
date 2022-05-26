@@ -7,6 +7,7 @@ import com.mentalab.io.ContentServer;
 import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.Utils;
+import com.mentalab.utils.constants.Topic;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -62,7 +63,7 @@ public class LslStreamerTask implements Callable<Boolean> {
       Log.d(Utils.TAG, "Subscribing!!");
       ContentServer.getInstance()
           .registerSubscriber(
-              new Subscriber() {
+              new Subscriber(Topic.EXG) {
                 /**
                  * Performs this operation on the given argument.
                  *

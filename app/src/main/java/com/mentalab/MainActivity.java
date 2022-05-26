@@ -13,18 +13,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import com.mentalab.exception.CommandFailedException;
-import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-import com.mentalab.utils.InputSwitch;
-import com.mentalab.utils.constants.InputProtocol;
-import com.mentalab.utils.constants.SamplingRate;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,18 +30,22 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    final String exploreDeviceID = "1C32";
+    final String exploreDeviceID = "CA26";
     try {
       connect(exploreDeviceID);
+      MentalabCommands.startDataAcquisition();
     } catch (NoBluetoothException e) {
       askToTurnOnBT(exploreDeviceID);
       return;
     } catch (IOException | NoConnectionException e) {
       askToTurnOnDevice(exploreDeviceID);
       return;
+    } catch (InitializationFailureException e) {
+      createToastMsg(MainActivity.this, "Failed to initialize data acquisition.");
     }
+    Log.d("DEBUG_ÈX", "vvv" + connectedDevice.channelCount + connectedDevice.channelMask);
 
-    try {
+    /* try {
       final Future<Boolean> formattedMemory = connectedDevice.formatMemory();
       if (!formattedMemory.get()) {
         createToastMsg(
@@ -90,23 +86,12 @@ public class MainActivity extends AppCompatActivity {
         | ExecutionException
         | CommandFailedException e) {
       e.printStackTrace();
-    }
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    try {
-      MentalabCommands.close();
-    } catch (IOException e) {
-      closeWithPrompt(MainActivity.this, "Trouble closing", "Explore Android had trouble closing.");
-    }
+    }*/
   }
 
   private void connect(String exploreDeviceID)
       throws NoConnectionException, IOException, NoBluetoothException {
     this.connectedDevice = MentalabCommands.connect(exploreDeviceID);
-    MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
   }
 
   private void connectToDevice(String exploreDeviceID) {
