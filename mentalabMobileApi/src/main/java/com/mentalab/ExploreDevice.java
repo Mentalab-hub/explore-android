@@ -34,12 +34,7 @@ public class ExploreDevice {
 
   // todo: consider current state
   private static int generateChannelsArg(Set<InputSwitch> switches, int channelCount) {
-    int binaryArg;
-    if (channelCount < 8) {
-      binaryArg = 0b1111;
-    } else {
-      binaryArg = 0b11111111;
-    }
+    int binaryArg = (int) Math.pow(2, channelCount) - 1;
 
     for (InputSwitch s : switches) {
       if (!s.isOn()) {
