@@ -25,7 +25,7 @@ public class ExploreDevice {
 
   int channelCount = 8;
   SamplingRate samplingRate = SamplingRate.SR_250;
-  int channelMask = 255;
+  int channelMask = 0b11111111; // Initialization assuming the device has 8 channels
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
@@ -34,6 +34,8 @@ public class ExploreDevice {
 
   // todo: consider current state
   private static int generateChannelsArg(Set<InputSwitch> switches, int channelCount) {
+    // generates a decimal number equivalent to binary number assuming all channel bits as 1.
+    // For 4 channels 0b1111= 2^4 - 1 and so on
     int binaryArg = (int) Math.pow(2, channelCount) - 1;
 
     for (InputSwitch s : switches) {
