@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public final class MentalabCommands {
 
@@ -61,14 +59,16 @@ public final class MentalabCommands {
       throw exception;
     }
     try {
-      isChannelCountCompleted.get(1000, TimeUnit.MILLISECONDS);
-      isInfoUpdated.get(1000, TimeUnit.MILLISECONDS);
-    } catch (TimeoutException | InterruptedException | ExecutionException exception) {
+      if (!(isChannelCountCompleted.get() && isInfoUpdated.get())) {
+        throw new InitializationFailureException("Device Info not updated. Exiting.");
+      }
+    } catch (InterruptedException | ExecutionException | InitializationFailureException exception) {
       // catch exception  and shutdown all processes
 
       ExploreExecutor.shutDown();
       throw new InitializationFailureException("Device Info Packet not received. Exiting.");
     }
+    Log.d("Explore", "dd");
   }
 
   /**

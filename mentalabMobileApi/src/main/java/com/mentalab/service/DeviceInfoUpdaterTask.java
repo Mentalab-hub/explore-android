@@ -15,6 +15,7 @@ public class DeviceInfoUpdaterTask implements Callable<Boolean> {
 
   private final CountDownLatch latch = new CountDownLatch(1);
   private ExploreDevice device;
+  private volatile Boolean result = false;
 
   public DeviceInfoUpdaterTask(ExploreDevice device) {
     this.device = device;
@@ -36,11 +37,12 @@ public class DeviceInfoUpdaterTask implements Callable<Boolean> {
                 DeviceConfigurator configurator =
                     new DeviceConfigurator(device, (DeviceInfoPacket) packet);
                 configurator.configureDeviceInfo();
+                result = true;
                 latch.countDown();
               }
             });
 
-    latch.await(2000, TimeUnit.MILLISECONDS);
-    return true;
+    latch.await(1000, TimeUnit.MILLISECONDS);
+    return result;
   }
 }
