@@ -27,6 +27,7 @@ public class LslStreamerTask implements Callable<Boolean> {
   private StreamInfo lslStreamInfoOrn;
   private StreamInfo lslStreamInfoMarker;
 
+  // Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
   public LslStreamerTask(ExploreDevice device) {
     this.connectedDevice = device;
   }

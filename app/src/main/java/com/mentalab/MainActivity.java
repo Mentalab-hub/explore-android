@@ -33,17 +33,13 @@ public class MainActivity extends AppCompatActivity {
     final String exploreDeviceID = "CA26";
     try {
       connect(exploreDeviceID);
-      MentalabCommands.startDataAcquisition();
+      MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
+
     } catch (NoBluetoothException e) {
       askToTurnOnBT(exploreDeviceID);
-      return;
     } catch (IOException | NoConnectionException e) {
       askToTurnOnDevice(exploreDeviceID);
-      return;
-    } catch (InitializationFailureException e) {
-      createToastMsg(MainActivity.this, "Failed to initialize data acquisition.");
     }
-    Log.d("DEBUG_ÈX", "vvv" + connectedDevice.channelCount + connectedDevice.channelMask);
 
     /* try {
       final Future<Boolean> formattedMemory = connectedDevice.formatMemory();

@@ -6,6 +6,7 @@ import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.CommandAcknowledgeSubscriber;
 import com.mentalab.io.ContentServer;
 import com.mentalab.utils.Utils;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
@@ -32,13 +33,20 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws IOException, InterruptedException, NoBluetoothException {
-    final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
-    ContentServer.getInstance()
-        .registerSubscriber(sub); // register subscriber before sending command
+    final CommandAcknowledgeSubscriber sub = registerSubscriber();
+    return postCommandAndWaitForAcknowledgement(sub);
+  }
 
+  private CommandAcknowledgeSubscriber registerSubscriber() {
+    final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
+    ContentServer.getInstance().registerSubscriber(sub);
+    return sub;
+  }
+
+  private boolean postCommandAndWaitForAcknowledgement(CommandAcknowledgeSubscriber sub)
+      throws NoBluetoothException, IOException, InterruptedException {
     this.device.postBytes(command);
     Log.d(Utils.TAG, "Command sent. Awaiting acknowledgement.");
-
-    return sub.getAcknowledgement(); // blocking for 3s
+    return sub.awaitResultWithTimeout(3000);
   }
 }

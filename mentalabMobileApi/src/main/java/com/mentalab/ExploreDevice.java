@@ -3,13 +3,17 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.service.ConfigureChannelCountTask;
+import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.utils.InputSwitch;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.constants.InputProtocol;
 import com.mentalab.utils.constants.SamplingRate;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,28 +27,13 @@ public class ExploreDevice {
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  int channelCount = 8;
-  SamplingRate samplingRate = SamplingRate.SR_250;
-  int channelMask = 0b11111111; // Initialization assuming the device has 8 channels
+  private int channelCount = 8;
+  private SamplingRate samplingRate = SamplingRate.SR_250;
+  private int channelMask = 0b1111; // Initialization assumes the device has 4 channels
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
     this.deviceName = deviceName;
-  }
-
-  // todo: consider current state
-  private static int generateChannelsArg(Set<InputSwitch> switches, int channelCount) {
-    // generates a decimal number equivalent to binary number assuming all channel bits as 1.
-    // For 4 channels 0b1111= 2^4 - 1 and so on
-    int binaryArg = (int) Math.pow(2, channelCount) - 1;
-
-    for (InputSwitch s : switches) {
-      if (!s.isOn()) {
-        final int channelID = s.getProtocol().getID();
-        binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
-      }
-    }
-    return binaryArg;
   }
 
   BluetoothDevice getBluetoothDevice() {
@@ -61,17 +50,34 @@ public class ExploreDevice {
    * CommandFailedException is received from this method, none or only some switches may have been
    * set.
    *
-   * @param channels List of channels to set on (true) or off (false) channel0 ... channel7
+   * @param switches List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
-  public Future<Boolean> setChannels(Set<InputSwitch> channels) throws InvalidCommandException {
-    if (channels.stream().anyMatch(s -> s.getProtocol().isOfType(InputProtocol.Type.Module))) {
-      throw new InvalidCommandException(
-          "Attempting to turn off channels with a module switch. Exiting.");
-    }
-    final Command c = Command.CMD_CHANNEL_SET;
-    c.setArg(generateChannelsArg(channels, channelCount));
+  public Future<Boolean> setChannels(Set<InputSwitch> switches) throws InvalidCommandException {
+    Utils.checkSwitchTypes(switches, InputProtocol.Type.Channel);
+    final Command c = generateChannelCommand(switches);
     return submitCommand(c);
+  }
+
+  private Command generateChannelCommand(Set<InputSwitch> channelSwitches) {
+    final Command c = Command.CMD_CHANNEL_SET;
+    c.setArg(generateChannelCmdArg(channelSwitches));
+    return c;
+  }
+
+  private int generateChannelCmdArg(Set<InputSwitch> switches) {
+    for (InputSwitch s : switches) {
+      channelMask = bitShiftIfOffSwitch(channelMask, s);
+    }
+    return channelMask;
+  }
+
+  private static int bitShiftIfOffSwitch(int binaryArg, InputSwitch s) {
+    if (!s.isOn()) {
+      final int channelID = s.getProtocol().getID();
+      binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
+    }
+    return binaryArg;
   }
 
   /**
@@ -92,16 +98,18 @@ public class ExploreDevice {
    * <p>By default data from all modules is collected. Disable modules you do not need to save
    * bandwidth and power. Calling setModules with only some modules is supported.
    *
-   * @param module The module to be turned on or off ORN, ENVIRONMENT, EXG
+   * @param mSwitch The module to be turned on or off ORN, ENVIRONMENT, EXG
    */
-  public Future<Boolean> setModule(InputSwitch module) throws InvalidCommandException {
-    if (module.getProtocol().isOfType(InputProtocol.Type.Channel)) {
-      throw new InvalidCommandException(
-          "Attempting to turn off channels with a module switch. Exiting.");
-    }
+  public Future<Boolean> setModule(InputSwitch mSwitch) throws InvalidCommandException {
+    Utils.checkSwitchType(mSwitch, InputProtocol.Type.Module);
+    final Command c = generateModuleCommand(mSwitch);
+    return submitCommand(c);
+  }
+
+  private static Command generateModuleCommand(InputSwitch module) {
     final Command c = module.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
     c.setArg(module.getProtocol().getID());
-    return submitCommand(c);
+    return c;
   }
 
   /**
@@ -156,14 +164,18 @@ public class ExploreDevice {
    * @throws InvalidCommandException If the command cannot be encoded.
    */
   private Future<Boolean> submitCommand(Command c) throws InvalidCommandException {
+    final byte[] encodedBytes = encodeCommand(c);
+    return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
+  }
+
+  private static byte[] encodeCommand(Command c) throws InvalidCommandException {
     final byte[] encodedBytes = MentalabCodec.encodeCommand(c);
     if (encodedBytes == null) {
       throw new InvalidCommandException("Failed to encode command. Exiting.");
     }
-    return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
+    return encodedBytes;
   }
 
-  /** Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer) */
   public Future<Boolean> pushToLSL() {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
   }
@@ -176,12 +188,19 @@ public class ExploreDevice {
     return channelCount;
   }
 
-  // todo: set these in first round of info packet and then if message sent
-  public void setChannelCount(int channelCount) {
-    this.channelCount = channelCount;
-  }
-
   public SamplingRate getSamplingRate() {
     return this.samplingRate;
+  }
+
+  void setChannelCount(int count) {
+    this.channelCount = count;
+  }
+
+  void setSR(SamplingRate sr) {
+    this.samplingRate = sr;
+  }
+
+  void setChannelMask(int mask) {
+    this.channelMask = mask;
   }
 }
