@@ -30,7 +30,7 @@ public class ConfigureDeviceInfoTask implements Callable<Boolean> {
 
   private static DeviceInfoPacket obtainDeviceInfo() throws InterruptedException {
     final DeviceInfoSubscriber sub = registerSubscriber();
-    final DeviceInfoPacket deviceInfo = sub.awaitResultWithTimeout(1000);
+    final DeviceInfoPacket deviceInfo = sub.awaitResultWithTimeout(3000);
     ContentServer.getInstance().deRegisterSubscriber(sub);
     return deviceInfo;
   }

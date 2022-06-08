@@ -24,44 +24,9 @@ import java.util.concurrent.Future;
 
 public final class MentalabCommands {
 
-  private Future<Boolean> channelCountConfigured;
-  private Future<Boolean> deviceInfoConfigured;
-
   private static ExploreDevice connectedDevice;
 
   private MentalabCommands() { // Static class
-  }
-
-  /**
-   * Start data acquisition process from explore device
-   *
-   * @throws IOException
-   * @throws NoBluetoothException
-   */
-  public void acquire()
-      throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
-          InterruptedException {
-    submitDeviceConfigTasks();
-    acquireData();
-    checkDeviceConfigured();
-  }
-
-  private void submitDeviceConfigTasks() {
-    this.channelCountConfigured =
-        ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
-    this.deviceInfoConfigured =
-        ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
-  }
-
-  private void acquireData() throws NoBluetoothException, IOException {
-    MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
-  }
-
-  private void checkDeviceConfigured()
-      throws ExecutionException, InterruptedException, InitializationFailureException {
-    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
-      throw new InitializationFailureException("Device Info not updated. Exiting.");
-    }
   }
 
   /**
@@ -121,6 +86,29 @@ public final class MentalabCommands {
    */
   public static Set<BluetoothDevice> scan() throws NoBluetoothException {
     return BluetoothManager.getBondedExploreDevices();
+  }
+
+  /**
+   * Start data acquisition process from explore device
+   *
+   * @throws IOException
+   * @throws NoBluetoothException
+   */
+  public static void acquire()
+          throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
+          InterruptedException {
+    configureDevice();
+    MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
+  }
+
+  private static void configureDevice() throws ExecutionException, InterruptedException, InitializationFailureException {
+    final Future<Boolean> channelCountConfigured =
+            ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
+    final Future<Boolean> deviceInfoConfigured =
+            ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
+    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
+      throw new InitializationFailureException("Device Info not updated. Exiting.");
+    }
   }
 
   /**

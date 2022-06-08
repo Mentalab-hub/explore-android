@@ -3,20 +3,17 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.service.ConfigureChannelCountTask;
-import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
-import com.mentalab.utils.InputSwitch;
+import com.mentalab.utils.ConfigSwitch;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
-import com.mentalab.utils.constants.InputProtocol;
+import com.mentalab.utils.constants.ConfigProtocol;
 import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -53,26 +50,26 @@ public class ExploreDevice {
    * @param switches List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
-  public Future<Boolean> setChannels(Set<InputSwitch> switches) throws InvalidCommandException, IOException, NoBluetoothException {
-    Utils.checkSwitchTypes(switches, InputProtocol.Type.Channel);
+  public Future<Boolean> setChannels(Set<ConfigSwitch> switches) throws InvalidCommandException, IOException, NoBluetoothException {
+    Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
     return submitCommand(c);
   }
 
-  private Command generateChannelCommand(Set<InputSwitch> channelSwitches) {
+  private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
     final Command c = Command.CMD_CHANNEL_SET;
     c.setArg(generateChannelCmdArg(channelSwitches));
     return c;
   }
 
-  private int generateChannelCmdArg(Set<InputSwitch> switches) {
-    for (InputSwitch s : switches) {
+  private int generateChannelCmdArg(Set<ConfigSwitch> switches) {
+    for (ConfigSwitch s : switches) {
       channelMask = bitShiftIfOffSwitch(channelMask, s);
     }
     return channelMask;
   }
 
-  private static int bitShiftIfOffSwitch(int binaryArg, InputSwitch s) {
+  private static int bitShiftIfOffSwitch(int binaryArg, ConfigSwitch s) {
     if (!s.isOn()) {
       final int channelID = s.getProtocol().getID();
       binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
@@ -86,8 +83,8 @@ public class ExploreDevice {
    * @param channel Switch The channel you would like to turn on (true) or off (false).
    * @throws InvalidCommandException If the provided Switch is not of type Channel.
    */
-  public Future<Boolean> setChannel(InputSwitch channel) throws InvalidCommandException, IOException, NoBluetoothException {
-    final Set<InputSwitch> channelToList = new HashSet<>();
+  public Future<Boolean> setChannel(ConfigSwitch channel) throws InvalidCommandException, IOException, NoBluetoothException {
+    final Set<ConfigSwitch> channelToList = new HashSet<>();
     channelToList.add(channel);
     return setChannels(channelToList);
   }
@@ -100,13 +97,13 @@ public class ExploreDevice {
    *
    * @param mSwitch The module to be turned on or off ORN, ENVIRONMENT, EXG
    */
-  public Future<Boolean> setModule(InputSwitch mSwitch) throws InvalidCommandException, IOException, NoBluetoothException {
-    Utils.checkSwitchType(mSwitch, InputProtocol.Type.Module);
+  public Future<Boolean> setModule(ConfigSwitch mSwitch) throws InvalidCommandException, IOException, NoBluetoothException {
+    Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
     return submitCommand(c);
   }
 
-  private static Command generateModuleCommand(InputSwitch module) {
+  private static Command generateModuleCommand(ConfigSwitch module) {
     final Command c = module.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
     c.setArg(module.getProtocol().getID());
     return c;

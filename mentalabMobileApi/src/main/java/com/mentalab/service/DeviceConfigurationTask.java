@@ -57,8 +57,11 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
 
   private boolean awaitAcknowledgement(CommandAcknowledgeSubscriber sub)
       throws InterruptedException {
-    boolean result = sub.awaitResultWithTimeout(3000);
+    boolean acknowledged = sub.awaitResultWithTimeout(3000);
+    if (acknowledged) {
+      Log.d(Utils.TAG, "Command acknowledged.");
+    }
     ContentServer.getInstance().deRegisterSubscriber(sub);
-    return result;
+    return acknowledged;
   }
 }

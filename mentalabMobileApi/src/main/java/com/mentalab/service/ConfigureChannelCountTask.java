@@ -29,7 +29,7 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
 
   private static int obtainChannelCount() throws InterruptedException {
     final ChannelCountSubscriber sub = registerSubscriber();
-    final int channelCount = sub.awaitResultWithTimeout(1000);
+    final int channelCount = sub.awaitResultWithTimeout(3000);
     ContentServer.getInstance().deRegisterSubscriber(sub);
     return channelCount;
   }
