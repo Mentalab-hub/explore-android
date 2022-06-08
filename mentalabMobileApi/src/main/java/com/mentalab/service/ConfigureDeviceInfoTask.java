@@ -2,8 +2,8 @@ package com.mentalab.service;
 
 import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ContentServer;
-import com.mentalab.io.DeviceInfoSubscriber;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.DeviceInfoSubscriber;
 import com.mentalab.packets.info.DeviceInfoPacket;
 
 import java.util.concurrent.Callable;
@@ -24,19 +24,21 @@ public class ConfigureDeviceInfoTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws InterruptedException {
-    final DeviceInfoSubscriber sub = registerSubscriber();
-    return awaitDeviceInfoAndSet(sub);
+    final DeviceInfoPacket deviceInfo = obtainDeviceInfo();
+    return configureExploreDevice(deviceInfo);
   }
 
-  private DeviceInfoSubscriber registerSubscriber() {
+  private static DeviceInfoPacket obtainDeviceInfo() throws InterruptedException {
+    final DeviceInfoSubscriber sub = registerSubscriber();
+    final DeviceInfoPacket deviceInfo = sub.awaitResultWithTimeout(1000);
+    ContentServer.getInstance().deRegisterSubscriber(sub);
+    return deviceInfo;
+  }
+
+  private static DeviceInfoSubscriber registerSubscriber() {
     final DeviceInfoSubscriber sub = new DeviceInfoSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     return sub;
-  }
-
-  private Boolean awaitDeviceInfoAndSet(DeviceInfoSubscriber sub) throws InterruptedException {
-    final DeviceInfoPacket deviceInfo = sub.awaitResultWithTimeout(1000);
-    return configureExploreDevice(deviceInfo);
   }
 
   private Boolean configureExploreDevice(DeviceInfoPacket deviceInfo) {

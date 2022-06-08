@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-/** A wrapper around BluetoothDevice, which is a final class so cannot be extended. */
+/** A wrapper around BluetoothDevice */
 public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
@@ -29,7 +29,7 @@ public class ExploreDevice {
 
   private int channelCount = 8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
-  private int channelMask = 0b1111; // Initialization assumes the device has 4 channels
+  private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
@@ -53,7 +53,7 @@ public class ExploreDevice {
    * @param switches List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
-  public Future<Boolean> setChannels(Set<InputSwitch> switches) throws InvalidCommandException {
+  public Future<Boolean> setChannels(Set<InputSwitch> switches) throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, InputProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
     return submitCommand(c);
@@ -86,7 +86,7 @@ public class ExploreDevice {
    * @param channel Switch The channel you would like to turn on (true) or off (false).
    * @throws InvalidCommandException If the provided Switch is not of type Channel.
    */
-  public Future<Boolean> setChannel(InputSwitch channel) throws InvalidCommandException {
+  public Future<Boolean> setChannel(InputSwitch channel) throws InvalidCommandException, IOException, NoBluetoothException {
     final Set<InputSwitch> channelToList = new HashSet<>();
     channelToList.add(channel);
     return setChannels(channelToList);
@@ -100,7 +100,7 @@ public class ExploreDevice {
    *
    * @param mSwitch The module to be turned on or off ORN, ENVIRONMENT, EXG
    */
-  public Future<Boolean> setModule(InputSwitch mSwitch) throws InvalidCommandException {
+  public Future<Boolean> setModule(InputSwitch mSwitch) throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchType(mSwitch, InputProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
     return submitCommand(c);
@@ -120,14 +120,14 @@ public class ExploreDevice {
    *
    * @param sr SamplingRate Can be either 250, 500 or 1000 Hz. Default is 250Hz.
    */
-  public Future<Boolean> setSamplingRate(SamplingRate sr) throws InvalidCommandException {
+  public Future<Boolean> setSamplingRate(SamplingRate sr) throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getValue());
     return submitCommand(c);
   }
 
   /** Formats internal memory of device. */
-  public Future<Boolean> formatMemory() throws InvalidCommandException {
+  public Future<Boolean> formatMemory() throws InvalidCommandException, IOException, NoBluetoothException {
     return submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
@@ -135,7 +135,7 @@ public class ExploreDevice {
    * Formats internal memory of device. However, when the sampling rate has changed, this command
    * fails.
    */
-  public Future<Boolean> softReset() throws InvalidCommandException {
+  public Future<Boolean> softReset() throws InvalidCommandException, IOException, NoBluetoothException {
     return submitCommand(Command.CMD_SOFT_RESET);
   }
 
@@ -150,12 +150,6 @@ public class ExploreDevice {
     return BluetoothManager.getInputStream();
   }
 
-  public void postBytes(byte[] bytes) throws NoBluetoothException, IOException {
-    final OutputStream outputStream = BluetoothManager.getOutputStream();
-    outputStream.write(bytes);
-    outputStream.flush();
-  }
-
   /**
    * Asynchronously submits a command to this device using the DeviceConfigurationTask.
    *
@@ -163,9 +157,9 @@ public class ExploreDevice {
    * @return Future True if the command was successfully received. Otherwise false
    * @throws InvalidCommandException If the command cannot be encoded.
    */
-  private Future<Boolean> submitCommand(Command c) throws InvalidCommandException {
+  private Future<Boolean> submitCommand(Command c) throws InvalidCommandException, IOException, NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
-    return ExploreExecutor.submitTask(new DeviceConfigurationTask(this, encodedBytes));
+    return ExploreExecutor.submitTask(new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes));
   }
 
   private static byte[] encodeCommand(Command c) throws InvalidCommandException {

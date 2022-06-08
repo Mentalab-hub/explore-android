@@ -2,8 +2,8 @@ package com.mentalab.service;
 
 import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ChannelCountSubscriber;
-import com.mentalab.io.ContentServer;
+import com.mentalab.service.io.ChannelCountSubscriber;
+import com.mentalab.service.io.ContentServer;
 
 import java.util.concurrent.Callable;
 
@@ -23,19 +23,21 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws InterruptedException {
-    final ChannelCountSubscriber sub = registerSubscriber();
-    return awaitChannelCountAndSet(sub);
+    final int channelCount = obtainChannelCount();
+    return configureExploreDevice(channelCount);
   }
 
-  private ChannelCountSubscriber registerSubscriber() {
+  private static int obtainChannelCount() throws InterruptedException {
+    final ChannelCountSubscriber sub = registerSubscriber();
+    final int channelCount = sub.awaitResultWithTimeout(1000);
+    ContentServer.getInstance().deRegisterSubscriber(sub);
+    return channelCount;
+  }
+
+  private static ChannelCountSubscriber registerSubscriber() {
     final ChannelCountSubscriber sub = new ChannelCountSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     return sub;
-  }
-
-  private Boolean awaitChannelCountAndSet(ChannelCountSubscriber sub) throws InterruptedException {
-    final int channelCount = sub.awaitResultWithTimeout(1000);
-    return configureExploreDevice(channelCount);
   }
 
   private Boolean configureExploreDevice(int channelCount) {

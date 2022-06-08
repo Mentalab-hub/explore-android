@@ -38,26 +38,29 @@ public final class MentalabCommands {
    * @throws IOException
    * @throws NoBluetoothException
    */
-  public void startDataAcquisition() throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException, InterruptedException {
+  public void acquire()
+      throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
+          InterruptedException {
     submitDeviceConfigTasks();
     acquireData();
     checkDeviceConfigured();
   }
 
-  private void checkDeviceConfigured() throws ExecutionException, InterruptedException, InitializationFailureException {
-    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
-      throw new InitializationFailureException("Device Info not updated. Exiting.");
-    }
+  private void submitDeviceConfigTasks() {
+    this.channelCountConfigured =
+            ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
+    this.deviceInfoConfigured = ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
   }
 
   private void acquireData() throws NoBluetoothException, IOException {
     MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
   }
 
-  private void submitDeviceConfigTasks() {
-    channelCountConfigured =
-        ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
-    deviceInfoConfigured = ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
+  private void checkDeviceConfigured()
+          throws ExecutionException, InterruptedException, InitializationFailureException {
+    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
+      throw new InitializationFailureException("Device Info not updated. Exiting.");
+    }
   }
 
   /**
