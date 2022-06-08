@@ -48,8 +48,9 @@ public final class MentalabCommands {
 
   private void submitDeviceConfigTasks() {
     this.channelCountConfigured =
-            ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
-    this.deviceInfoConfigured = ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
+        ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
+    this.deviceInfoConfigured =
+        ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
   }
 
   private void acquireData() throws NoBluetoothException, IOException {
@@ -57,7 +58,7 @@ public final class MentalabCommands {
   }
 
   private void checkDeviceConfigured()
-          throws ExecutionException, InterruptedException, InitializationFailureException {
+      throws ExecutionException, InterruptedException, InitializationFailureException {
     if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
       throw new InitializationFailureException("Device Info not updated. Exiting.");
     }
@@ -85,21 +86,16 @@ public final class MentalabCommands {
 
   private static ExploreDevice getExploreDeviceFromName(String deviceName)
       throws NoConnectionException, NoBluetoothException {
-    final BluetoothDevice device = getBondedDeviceWithName(deviceName);
+    final BluetoothDevice device = getBondedExploreDeviceWithName(deviceName);
     if (device == null) {
       throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable. Exiting.");
     }
     return new ExploreDevice(device, deviceName);
   }
 
-  private static BluetoothDevice getBondedDeviceWithName(String deviceName)
+  private static BluetoothDevice getBondedExploreDeviceWithName(String deviceName)
       throws NoBluetoothException, NoConnectionException {
-    final Set<BluetoothDevice> bondedExploreDevices = getBondedBTDevices();
-    return getBondedBTDeviceWithName(deviceName, bondedExploreDevices);
-  }
-
-  private static BluetoothDevice getBondedBTDeviceWithName(
-      String deviceName, Set<BluetoothDevice> bondedExploreDevices) {
+    final Set<BluetoothDevice> bondedExploreDevices = getBondedExploreDevices();
     BluetoothDevice device = null;
     for (BluetoothDevice d : bondedExploreDevices) {
       if (d.getName().equals(deviceName)) {
@@ -109,8 +105,7 @@ public final class MentalabCommands {
     return device;
   }
 
-  private static Set<BluetoothDevice> getBondedBTDevices()
-      throws NoBluetoothException, NoConnectionException {
+  private static Set<BluetoothDevice> getBondedExploreDevices() throws NoBluetoothException, NoConnectionException {
     final Set<BluetoothDevice> bondedExploreDevices = scan();
     if (bondedExploreDevices.size() < 1) {
       throw new NoConnectionException("Not bonded to any Explore devices. Exiting.");

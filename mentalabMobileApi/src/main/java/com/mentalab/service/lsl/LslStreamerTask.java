@@ -62,14 +62,17 @@ public class LslStreamerTask implements Callable<Boolean> {
       }
       lslStreamOutletMarker = new StreamOutlet(lslStreamInfoMarker);
       Log.d(Utils.TAG, "Subscribing!!");
+/*
       ContentServer.getInstance()
           .registerSubscriber(
               new Subscriber(Topic.EXG) {
-                /**
+                */
+/**
                  * Performs this operation on the given argument.
                  *
                  * @param packet the input argument
-                 */
+                 *//*
+
                 @Override
                 public void accept(Packet packet) {
                   if (lslStreamInfoExg == null) {
@@ -93,6 +96,7 @@ public class LslStreamerTask implements Callable<Boolean> {
                   lslStreamOutletExg.push_chunk(convertArraylistToFloatArray(packet));
                 }
               });
+*/
 
       // ContentServer.getInstance().subscribe("Orn", this::packetCallbackOrn);
 

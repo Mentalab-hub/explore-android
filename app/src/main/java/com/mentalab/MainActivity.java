@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    final String exploreDeviceID = "CA26";
+    final String exploreDeviceID = "CA4A";
     try {
       connect(exploreDeviceID);
       MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
