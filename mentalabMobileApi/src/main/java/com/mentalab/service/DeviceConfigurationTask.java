@@ -3,14 +3,14 @@ package com.mentalab.service;
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.io.CommandAcknowledgeSubscriber;
-import com.mentalab.service.io.ContentServer;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
-public class DeviceConfigurationTask implements Callable<Boolean> {
+public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean>
+    implements Callable<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;
@@ -32,36 +32,19 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
    * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
-  public Boolean call() throws IOException, InterruptedException {
-    final CommandAcknowledgeSubscriber sub = sendCommand();
-    return awaitAcknowledgement(sub);
-  }
-
-  private CommandAcknowledgeSubscriber sendCommand() throws IOException {
-    final CommandAcknowledgeSubscriber sub = registerSubscriber();
-    postCmdToOutputStream(command, outputStream);
-    return sub;
-  }
-
-  private CommandAcknowledgeSubscriber registerSubscriber() {
-    final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
-    ContentServer.getInstance().registerSubscriber(sub);
-    return sub;
-  }
-
-  private static void postCmdToOutputStream(byte[] command, OutputStream outputStream) throws IOException {
-    outputStream.write(command);
-    outputStream.flush();
-    Log.d(Utils.TAG, "Command sent.");
-  }
-
-  private boolean awaitAcknowledgement(CommandAcknowledgeSubscriber sub)
-      throws InterruptedException {
-    boolean acknowledged = sub.awaitResultWithTimeout(3000);
+  public Boolean call() throws Exception {
+    final boolean acknowledged =
+        getResultOfSubscriberAfterTask(new CommandAcknowledgeSubscriber(), this::sendCommand);
     if (acknowledged) {
       Log.d(Utils.TAG, "Command acknowledged.");
     }
-    ContentServer.getInstance().deRegisterSubscriber(sub);
     return acknowledged;
+  }
+
+  private Void sendCommand() throws IOException {
+    outputStream.write(command);
+    outputStream.flush();
+    Log.d(Utils.TAG, "Command sent.");
+    return null;
   }
 }
