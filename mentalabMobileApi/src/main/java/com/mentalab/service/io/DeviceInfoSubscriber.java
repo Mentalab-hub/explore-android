@@ -15,5 +15,4 @@ public class DeviceInfoSubscriber extends CountDownSubscriber<DeviceInfoPacket> 
         result = (DeviceInfoPacket) packet;
         latch.countDown();
     }
-
 }
