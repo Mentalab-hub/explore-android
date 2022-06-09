@@ -1,21 +1,21 @@
 package com.mentalab.service;
 
 import android.util.Log;
-import com.mentalab.ExploreDevice;
-import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.io.CommandAcknowledgeSubscriber;
 import com.mentalab.io.ContentServer;
 import com.mentalab.utils.Utils;
+
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 public class DeviceConfigurationTask implements Callable<Boolean> {
 
   final byte[] command;
-  final ExploreDevice device;
+  final OutputStream outputStream;
 
-  public DeviceConfigurationTask(ExploreDevice device, byte[] encodedBytes) {
-    this.device = device;
+  public DeviceConfigurationTask(OutputStream outputStream, byte[] encodedBytes) {
+    this.outputStream = outputStream;
     this.command = encodedBytes;
   }
 
@@ -28,17 +28,18 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
    * @return boolean True when CommandAcknowledgement received, otherwise false
    * @throws IOException If the command cannot be written to the device OutputStream.
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
-   * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
-  public Boolean call() throws IOException, InterruptedException, NoBluetoothException {
+  public Boolean call() throws IOException, InterruptedException {
     final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
-    ContentServer.getInstance()
-        .registerSubscriber(sub); // register subscriber before sending command
-
-    this.device.postBytes(command);
-    Log.d(Utils.TAG, "Command sent. Awaiting acknowledgement.");
-
+    ContentServer.getInstance().registerSubscriber(sub);
+    sendCommand();
     return sub.getAcknowledgement(); // blocking for 3s
+  }
+
+  private void sendCommand() throws IOException {
+    outputStream.write(command);
+    outputStream.flush();
+    Log.d(Utils.TAG, "Command sent.");
   }
 }

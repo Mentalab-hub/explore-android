@@ -34,7 +34,7 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
           public void accept(Packet packet) {
             int channelCount = packet.getDataCount();
             DeviceConfigurator configurator = new DeviceConfigurator(device);
-            configurator.configureChannelCount(channelCount);
+            configurator.setDeviceChannelCount(channelCount);
             result = true;
           }
         };
