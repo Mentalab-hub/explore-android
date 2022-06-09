@@ -6,7 +6,7 @@ import com.mentalab.service.io.ChannelCountSubscriber;
 
 import java.util.concurrent.Callable;
 
-public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> implements Callable<Boolean> {
+public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> {
 
   private final ExploreDevice device;
 

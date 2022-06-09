@@ -9,8 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
-public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean>
-    implements Callable<Boolean> {
+public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;

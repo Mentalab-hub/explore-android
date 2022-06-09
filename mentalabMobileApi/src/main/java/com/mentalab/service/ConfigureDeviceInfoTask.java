@@ -7,8 +7,7 @@ import com.mentalab.service.io.DeviceInfoSubscriber;
 
 import java.util.concurrent.Callable;
 
-public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPacket>
-    implements Callable<Boolean> {
+public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPacket> {
 
   private final ExploreDevice device;
 

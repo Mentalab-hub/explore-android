@@ -5,7 +5,7 @@ import com.mentalab.service.io.CountDownSubscriber;
 
 import java.util.concurrent.Callable;
 
-public abstract class RegisterSubscriberTask<T> {
+public abstract class RegisterSubscriberTask<T> implements Callable<Boolean> {
 
   T getResultOf(CountDownSubscriber<T> sub) throws InterruptedException {
     ContentServer.getInstance().registerSubscriber(sub);
