@@ -31,17 +31,24 @@ public class BluetoothManager {
   }
 
   public static Set<BluetoothDevice> getBondedExploreDevices() throws NoBluetoothException {
-    final Set<BluetoothDevice> bondedDevices = getBondedDevices();
-    final Set<BluetoothDevice> bondedExploreDevices = new HashSet<>();
+    final Set<BluetoothDevice> bondedDevices = BluetoothManager.getBondedDevices();
+    return getAllExploreDevices(bondedDevices);
+  }
 
+  private static Set<BluetoothDevice> getAllExploreDevices(Set<BluetoothDevice> bondedDevices) {
+    final Set<BluetoothDevice> bondedExploreDevices = new HashSet<>();
     for (BluetoothDevice bt : bondedDevices) {
-      final String b = bt.getName();
-      if (b.startsWith("Explore_")) {
-        bondedExploreDevices.add(bt);
-        Log.i(Utils.TAG, "Explore device available: " + b);
-      }
+      final String name = bt.getName();
+      addDeviceIfCorrectName(bondedExploreDevices, bt, name);
     }
     return bondedExploreDevices;
+  }
+
+  private static void addDeviceIfCorrectName(Set<BluetoothDevice> bondedExploreDevices, BluetoothDevice bt, String name) {
+    if (name.startsWith("Explore_")) {
+      bondedExploreDevices.add(bt);
+      Log.i(Utils.TAG, "Explore device available: " + name);
+    }
   }
 
   private static BluetoothAdapter getBluetoothAdapter() throws NoBluetoothException {
@@ -55,11 +62,10 @@ public class BluetoothManager {
   }
 
   private static void establishRFCommWithDevice(BluetoothDevice device)
-      throws NoConnectionException, IOException {
+          throws NoConnectionException, IOException {
     closeSocket();
     try {
-      final UUID uuid = UUID.fromString(UUID_BLUETOOTH_SPP);
-      mmSocket = device.createRfcommSocketToServiceRecord(uuid);
+      mmSocket = device.createRfcommSocketToServiceRecord(UUID.fromString(UUID_BLUETOOTH_SPP));
     } catch (Exception e) {
       closeSocket();
       throw new NoConnectionException("Connection to device failed.", e);
@@ -68,7 +74,7 @@ public class BluetoothManager {
   }
 
   public static ExploreDevice connectToDevice(ExploreDevice device)
-      throws NoConnectionException, IOException {
+          throws NoConnectionException, IOException {
     establishRFCommWithDevice(device.getBluetoothDevice());
     try {
       mmSocket.connect();
