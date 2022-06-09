@@ -5,18 +5,19 @@ import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
+import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.utils.constants.Topic;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ChannelCountTask implements Callable<Boolean> {
+public class ConfigureDeviceInfoTask implements Callable<Boolean> {
 
-  private ExploreDevice device;
   private final CountDownLatch latch = new CountDownLatch(1);
+  private final ExploreDevice device;
   private volatile Boolean result = false;
 
-  public ChannelCountTask(ExploreDevice device) {
+  public ConfigureDeviceInfoTask(ExploreDevice device) {
     this.device = device;
   }
 
@@ -28,19 +29,20 @@ public class ChannelCountTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws InterruptedException {
-    Subscriber channelCountSubscriber =
-        new Subscriber(Topic.EXG) {
-          @Override
-          public void accept(Packet packet) {
-            int channelCount = packet.getDataCount();
-            DeviceConfigurator configurator = new DeviceConfigurator(device);
-            configurator.setDeviceChannelCount(channelCount);
-            result = true;
-          }
-        };
-    ContentServer.getInstance().registerSubscriber(channelCountSubscriber);
+    ContentServer.getInstance()
+        .registerSubscriber(
+            new Subscriber(Topic.DEVICE_INFO) {
+              @Override
+              public void accept(Packet packet) {
+                DeviceConfigurator configurator =
+                    new DeviceConfigurator(device);
+                configurator.setDeviceInfo((DeviceInfoPacket) packet);
+                result = true;
+                latch.countDown();
+              }
+            });
+
     latch.await(1000, TimeUnit.MILLISECONDS);
-    ContentServer.getInstance().deRegisterSubscriber(channelCountSubscriber);
     return result;
   }
 }
