@@ -37,20 +37,20 @@ public final class MentalabCommands {
    * @throws NoBluetoothException
    */
   public static ExploreDevice connect(String deviceName)
-          throws NoBluetoothException, NoConnectionException, IOException {
+      throws NoBluetoothException, NoConnectionException, IOException {
     deviceName = Utils.checkName(deviceName);
     connectToExploreDevice(deviceName);
     return connectedDevice;
   }
 
   private static void connectToExploreDevice(String deviceName)
-          throws NoConnectionException, NoBluetoothException, IOException {
+      throws NoConnectionException, NoBluetoothException, IOException {
     final ExploreDevice device = getExploreDeviceFromName(deviceName);
     connectedDevice = BluetoothManager.connectToDevice(device);
   }
 
   private static ExploreDevice getExploreDeviceFromName(String deviceName)
-          throws NoConnectionException, NoBluetoothException {
+      throws NoConnectionException, NoBluetoothException {
     final BluetoothDevice device = getBondedExploreDeviceWithName(deviceName);
     if (device == null) {
       throw new NoConnectionException("Bluetooth device: " + deviceName + " unavailable. Exiting.");
@@ -59,7 +59,7 @@ public final class MentalabCommands {
   }
 
   private static BluetoothDevice getBondedExploreDeviceWithName(String deviceName)
-          throws NoBluetoothException, NoConnectionException {
+      throws NoBluetoothException, NoConnectionException {
     final Set<BluetoothDevice> bondedExploreDevices = getBondedExploreDevices();
     BluetoothDevice device = null;
     for (BluetoothDevice d : bondedExploreDevices) {
@@ -71,7 +71,7 @@ public final class MentalabCommands {
   }
 
   private static Set<BluetoothDevice> getBondedExploreDevices()
-          throws NoBluetoothException, NoConnectionException {
+      throws NoBluetoothException, NoConnectionException {
     final Set<BluetoothDevice> bondedExploreDevices = scan();
     if (bondedExploreDevices.size() < 1) {
       throw new NoConnectionException("Not bonded to any Explore devices. Exiting.");
@@ -96,12 +96,12 @@ public final class MentalabCommands {
    * @throws NoBluetoothException
    */
   public static void acquire()
-          throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
+      throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
           InterruptedException {
     final Future<Boolean> channelCountConfigured =
-            ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
+        ExploreExecutor.submitTask(new ConfigureChannelCountTask(connectedDevice));
     final Future<Boolean> deviceInfoConfigured =
-            ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
+        ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(connectedDevice));
     MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
     if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
       throw new InitializationFailureException("Device Info not updated. Exiting.");

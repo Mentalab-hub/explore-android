@@ -20,9 +20,9 @@ public class Utils {
   private static void checkNameStartsWithExplore(String deviceName) throws NoConnectionException {
     if (!deviceName.startsWith("Explore_")) {
       throw new NoConnectionException(
-              "Device names must begin with 'Explore_'. Provided device name: '"
-                      + deviceName
-                      + "'. Exiting.");
+          "Device names must begin with 'Explore_'. Provided device name: '"
+              + deviceName
+              + "'. Exiting.");
     }
   }
 
@@ -35,14 +35,14 @@ public class Utils {
   }
 
   public static void checkSwitchTypes(Set<ConfigSwitch> switches, ConfigProtocol.Type type)
-          throws InvalidCommandException {
+      throws InvalidCommandException {
     if (!switches.stream().allMatch(s -> s.getProtocol().isOfType(type))) {
       throw new InvalidCommandException(invalidSwitchString(type));
     }
   }
 
   public static void checkSwitchType(ConfigSwitch switchI, ConfigProtocol.Type type)
-          throws InvalidCommandException {
+      throws InvalidCommandException {
     if (!switchI.getProtocol().isOfType(type)) {
       throw new InvalidCommandException(invalidSwitchString(type));
     }
@@ -50,7 +50,7 @@ public class Utils {
 
   private static String invalidSwitchString(ConfigProtocol.Type falseType) {
     return "Attempting to send a command using an invalid switch of type: "
-            + falseType
-            + ". Exiting.";
+        + falseType
+        + ". Exiting.";
   }
 }

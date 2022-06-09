@@ -2,7 +2,6 @@ package com.mentalab.service;
 
 import android.content.Context;
 import android.net.Uri;
-import com.mentalab.utils.constants.FileType;
 import com.mentalab.utils.constants.Topic;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -15,7 +14,6 @@ public class RecordTask implements Callable<Boolean> {
 
   private boolean overwrite;
   private boolean blocking;
-  private FileType fileType;
   private int adcMask = 0;
   private float samplingRate = Integer.MAX_VALUE;
   private Double duration;
@@ -77,7 +75,6 @@ public class RecordTask implements Callable<Boolean> {
 
     private boolean overwrite = false;
     private boolean blocking = false;
-    private FileType fileType = FileType.CSV;
     private Double duration = null;
 
     public Builder(Uri destination, String filename, Context context) {
@@ -98,12 +95,6 @@ public class RecordTask implements Callable<Boolean> {
       return this;
     }
 
-    private Builder setFileType(
-        FileType fileType) { // Todo: Private until we support other file types
-      this.fileType = fileType;
-      return this;
-    }
-
     private Builder setDuration(
         double duration) { // Todo: Private until we have duration functionality
       this.duration = duration;
@@ -114,7 +105,6 @@ public class RecordTask implements Callable<Boolean> {
       RecordTask subscriber = new RecordTask(directory, filename, context);
       subscriber.overwrite = this.overwrite;
       subscriber.blocking = this.blocking;
-      subscriber.fileType = this.fileType;
       subscriber.duration = this.duration;
 
       return subscriber;
