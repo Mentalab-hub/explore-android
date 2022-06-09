@@ -48,6 +48,9 @@ public final class MentalabCodec {
     final PacketID p =
         Arrays.stream(PacketID.values())
             .filter(packetId -> packetId.getNumVal() == pId)
+    final PacketID p =
+        Arrays.stream(PacketID.values())
+            .filter(packetID -> packetID.getNumVal() == pId)
             .findFirst()
             .orElse(null);
     if (p == null) {
