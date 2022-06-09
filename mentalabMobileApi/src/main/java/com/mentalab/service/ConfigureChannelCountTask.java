@@ -5,19 +5,18 @@ import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.utils.constants.Topic;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class DeviceInfoUpdaterTask implements Callable<Boolean> {
+public class ConfigureChannelCountTask implements Callable<Boolean> {
 
-  private final CountDownLatch latch = new CountDownLatch(1);
   private ExploreDevice device;
+  private final CountDownLatch latch = new CountDownLatch(1);
   private volatile Boolean result = false;
 
-  public DeviceInfoUpdaterTask(ExploreDevice device) {
+  public ConfigureChannelCountTask(ExploreDevice device) {
     this.device = device;
   }
 
@@ -29,20 +28,19 @@ public class DeviceInfoUpdaterTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws InterruptedException {
-    ContentServer.getInstance()
-        .registerSubscriber(
-            new Subscriber(Topic.DEVICE_INFO) {
-              @Override
-              public void accept(Packet packet) {
-                DeviceConfigurator configurator =
-                    new DeviceConfigurator(device, (DeviceInfoPacket) packet);
-                configurator.configureDeviceInfo();
-                result = true;
-                latch.countDown();
-              }
-            });
-
+    Subscriber channelCountSubscriber =
+        new Subscriber(Topic.EXG) {
+          @Override
+          public void accept(Packet packet) {
+            int channelCount = packet.getDataCount();
+            DeviceConfigurator configurator = new DeviceConfigurator(device);
+            configurator.configureChannelCount(channelCount);
+            result = true;
+          }
+        };
+    ContentServer.getInstance().registerSubscriber(channelCountSubscriber);
     latch.await(1000, TimeUnit.MILLISECONDS);
+    ContentServer.getInstance().deRegisterSubscriber(channelCountSubscriber);
     return result;
   }
 }
