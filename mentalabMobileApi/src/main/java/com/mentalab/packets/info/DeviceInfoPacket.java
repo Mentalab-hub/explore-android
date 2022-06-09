@@ -4,7 +4,9 @@ import static com.mentalab.packets.Attributes.ADS_MASK;
 import static com.mentalab.packets.Attributes.SR;
 
 import androidx.annotation.NonNull;
+import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.SamplingRate;
+import com.mentalab.utils.constants.Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -13,7 +15,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-public class DeviceInfoPacket extends InfoPacket {
+public class DeviceInfoPacket extends InfoPacket implements Publishable {
 
   private SamplingRate samplingRate;
   private int adsMask;
@@ -66,5 +68,10 @@ public class DeviceInfoPacket extends InfoPacket {
 
   public SamplingRate getSamplingRate() {
     return samplingRate;
+  }
+
+  @Override
+  public Topic getTopic() {
+    return Topic.DEVICE_INFO;
   }
 }

@@ -8,6 +8,10 @@ public abstract class Subscriber implements Consumer<Packet> {
 
   Topic t;
 
+  public Subscriber(Topic t) {
+    this.t = t;
+  }
+
   public Topic getTopic() {
     return t;
   }
