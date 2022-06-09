@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 public class DeviceInfoUpdaterTask implements Callable<Boolean> {
 
   private final CountDownLatch latch = new CountDownLatch(1);
-  private ExploreDevice device;
+  private final ExploreDevice device;
   private volatile Boolean result = false;
 
   public DeviceInfoUpdaterTask(ExploreDevice device) {
@@ -35,8 +35,8 @@ public class DeviceInfoUpdaterTask implements Callable<Boolean> {
               @Override
               public void accept(Packet packet) {
                 DeviceConfigurator configurator =
-                    new DeviceConfigurator(device, (DeviceInfoPacket) packet);
-                configurator.configureDeviceInfo();
+                    new DeviceConfigurator(device);
+                configurator.setDeviceInfo((DeviceInfoPacket) packet);
                 result = true;
                 latch.countDown();
               }
