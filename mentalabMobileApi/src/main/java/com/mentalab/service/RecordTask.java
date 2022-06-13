@@ -2,112 +2,44 @@ package com.mentalab.service;
 
 import android.content.Context;
 import android.net.Uri;
+import com.mentalab.ExploreDevice;
+import com.mentalab.io.ContentServer;
+import com.mentalab.io.RecordSubscriber;
+import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
+
+import java.io.*;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class RecordTask implements Callable<Boolean> {
 
-  private final Uri directory;
-  private final String filename;
-  private final Context context;
+  private final Map<Topic, Uri> generatedFiles;
+  private final Context c;
+  private final SamplingRate sr;
 
-  private boolean overwrite;
-  private boolean blocking;
-  private int adcMask = 0;
-  private float samplingRate = Integer.MAX_VALUE;
-  private Double duration;
-  private Map<Topic, Uri> generatedFiles;
-
-  private RecordTask(Uri directory, String filename, Context context) {
-    this.directory = directory; // todo: validate
-    if (filename.contains(".")) {
-      this.filename = filename.split("\\.")[0]; // todo: validate
-    } else {
-      this.filename = filename;
-    }
-
-    this.context = context;
-  }
-
-  public Context getContext() {
-    return context;
-  }
-
-  public Uri getDirectory() {
-    return directory;
-  }
-
-  public boolean getOverwrite() {
-    return overwrite;
-  }
-
-  public String getFilename() {
-    return filename;
+  public RecordTask(Map<Topic, Uri> generatedFiles, Context ctx, SamplingRate s) {
+    this.generatedFiles = generatedFiles;
+    this.c = ctx;
+    this.sr = s;
   }
 
   @Override
-  public Boolean call() {
-    // ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.EXG, context, ));
-    // ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.ORN, context, ));
-    // ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.MARKER, context,
-    // ));
-    return true; // todo: check success
+  public Boolean call() throws IOException {
+    record(Topic.EXG);
+    record(Topic.ORN);
+    record(Topic.MARKER);
+    return true;
   }
 
-  public void setGeneratedFiles(Map<Topic, Uri> generatedFies) {
-    // this.generatedFies = generatedFies;
+  private void record(Topic t) throws IOException {
+    try (final BufferedWriter writer = getWriter(t)) {
+      ContentServer.getInstance().registerSubscriber(new RecordSubscriber(t, writer, sr));
+    }
   }
 
-  private void setAdcMask(int adcMask) { // Todo: Private until we have Adc mask functionality
-    this.adcMask = adcMask;
-  }
-
-  public void setSamplingRate(float samplingRate) {
-    this.samplingRate = samplingRate;
-  }
-
-  public static class Builder {
-
-    private final Uri directory;
-    private final String filename;
-    private final Context context;
-
-    private boolean overwrite = false;
-    private boolean blocking = false;
-    private Double duration = null;
-
-    public Builder(Uri destination, String filename, Context context) {
-      this.directory = destination;
-      this.filename = filename;
-      this.context = context;
-    }
-
-    private Builder setOverwrite(
-        boolean overwrite) { // Todo: Private until we have delete functionality
-      this.overwrite = overwrite;
-      return this;
-    }
-
-    private Builder setBlocking(
-        boolean blocking) { // Todo: Private until we have blocking functionality
-      this.blocking = blocking;
-      return this;
-    }
-
-    private Builder setDuration(
-        double duration) { // Todo: Private until we have duration functionality
-      this.duration = duration;
-      return this;
-    }
-
-    public RecordTask build() {
-      RecordTask subscriber = new RecordTask(directory, filename, context);
-      subscriber.overwrite = this.overwrite;
-      subscriber.blocking = this.blocking;
-      subscriber.duration = this.duration;
-
-      return subscriber;
-    }
+  private BufferedWriter getWriter(Topic t) throws FileNotFoundException {
+    final OutputStream out = c.getContentResolver().openOutputStream(generatedFiles.get(t), "wa");
+    return new BufferedWriter(new OutputStreamWriter(out));
   }
 }

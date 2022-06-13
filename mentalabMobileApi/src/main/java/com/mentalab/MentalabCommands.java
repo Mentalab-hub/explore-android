@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.NoBluetoothException;
@@ -16,7 +17,9 @@ import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -111,8 +114,6 @@ public final class MentalabCommands {
   /**
    * Record data to CSV. Requires appropriate permissions from Android.
    *
-   * @param recordSubscriber - The subscriber which subscribes to parsed data and holds information
-   *     about where to record.
    * @throws IOException - Can occur both in the generation of files and in the execution of the
    *     subscriber.
    * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android
@@ -121,21 +122,21 @@ public final class MentalabCommands {
    *     duration for recording, masking channels and overwriting previous files.
    */
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public static void record(RecordTask recordSubscriber) throws IOException {
-    final Map<Topic, Uri> generatedFiles = generateFiles(recordSubscriber);
-    recordSubscriber.setGeneratedFiles(generatedFiles);
-    ExploreExecutor.submitTask(recordSubscriber);
+  public static void record(Context cxt, String filename) throws IOException {
+    final Map<Topic, Uri> generatedFiles = generateFiles(cxt, filename, connectedDevice.getChannelCount());
+    ExploreExecutor.submitTask(new RecordTask(generatedFiles, cxt, connectedDevice.getSamplingRate()));
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  private static Map<Topic, Uri> generateFiles(RecordTask recordSubscriber) throws IOException {
-    final Context context = recordSubscriber.getContext();
-    final boolean overwrite = recordSubscriber.getOverwrite();
-    final FileGenerator androidFileGenerator = new FileGenerator(context, overwrite);
+  public static void record(Context cxt) throws IOException {
+    final String filename = new Date().toString();
+    record(cxt, filename);
+  }
 
-    final Uri directory = recordSubscriber.getDirectory();
-    final String filename = recordSubscriber.getFilename();
-    return androidFileGenerator.generateFiles(directory, filename);
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  private static Map<Topic, Uri> generateFiles(Context c, String filename, int channelCount) throws IOException {
+    final FileGenerator androidFileGenerator = new FileGenerator(c);
+    return androidFileGenerator.generateFiles(filename, channelCount);
   }
 
   public static void shutdown() throws IOException {
