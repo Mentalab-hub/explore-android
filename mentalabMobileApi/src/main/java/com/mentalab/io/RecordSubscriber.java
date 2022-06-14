@@ -3,7 +3,6 @@ package com.mentalab.io;
 import android.util.Log;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.Utils;
-import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
 import java.io.BufferedWriter;
@@ -11,57 +10,51 @@ import java.io.IOException;
 
 public class RecordSubscriber extends Subscriber {
 
-  private final BufferedWriter wr;
-  private final SamplingRate sr;
+    protected final BufferedWriter wr;
 
-  public RecordSubscriber(Topic t, BufferedWriter w, SamplingRate s) {
-    super(t);
-    this.wr = w;
-    this.sr = s;
-  }
 
-  @Override
-  public void accept(Packet p) {
-    try {
-      writePacketToCSV(wr, p);
-    } catch (IOException e) {
-      Log.e(Utils.TAG, "Unable to write lines in CSV");
+    public RecordSubscriber(Topic t, BufferedWriter w) {
+        super(t);
+        this.wr = w;
     }
-  }
 
-  private void writePacketToCSV(BufferedWriter writer, Packet packet) throws IOException {
-    initialiseFirstLine(writer, packet);
-    writePacketContents(writer, packet);
-  }
-
-  private static void initialiseFirstLine(BufferedWriter writer, Packet packet) throws IOException {
-    writer.write(String.valueOf(packet.getTimeStamp()));
-    writer.write(",");
-    writer.write(packet.getData().get(0).toString());
-  }
-
-  private void writePacketContents(BufferedWriter writer, Packet packet) throws IOException {
-    for (int i = 1; i < packet.getData().size(); i++) {
-      writer.write(",");
-      writer.write(packet.getData().get(i).toString());
-
-      final int channelCount = packet.getDataCount();
-      if (newLine(channelCount, i)) {
-        int ts =  (int) (packet.getTimeStamp() + 1f / sr.getValue());
-        writeNewLine(writer, channelCount, ts, i);
-      }
+    @Override
+    public void accept(Packet packet) {
+        try {
+            writePacketToCSV(wr, packet);
+        } catch (IOException e) {
+            Log.e(Utils.TAG, e.getMessage());
+        }
     }
-  }
 
-  private static boolean newLine(int channelCount, int i) {
-    final int channelNo = i % channelCount + 1; // 1, 2, 3, 4,...
-    return channelNo == channelCount; // break line after 2, 4 or 8 entries
-  }
-
-  private void writeNewLine(BufferedWriter writer, int channelCount, int i, double ts) throws IOException {
-    writer.newLine();
-    if ((channelCount - i) > 2) {
-      writer.write(String.valueOf(ts));
+    protected void writePacketToCSV(BufferedWriter writer, Packet packet) throws IOException {
+        double currentTimestamp = packet.getTimeStamp();
+        initNewLine(writer, currentTimestamp);
+        for (int i = 0; i < packet.getData().size(); i++) {
+            writeToLine(writer, packet, i);
+            if (requireNewLine(packet, i)) {
+                initNewLine(writer, currentTimestamp);
+            }
+        }
     }
-  }
+
+    protected void writeToLine(BufferedWriter writer, Packet packet, int i) throws IOException {
+        writer.write(",");
+        writer.write(packet.getData().get(i).toString());
+    }
+
+    protected static boolean requireNewLine(Packet p, int i) {
+        if (i == p.getData().size() - 1) {
+            return false;
+        }
+        final int channelCount = p.getDataCount();
+        final int channelNo = i % channelCount + 1; // 1, 2, 3, 4,...
+        return channelNo == channelCount; // break line after 2, 4 or 8 entries
+    }
+
+    protected static void initNewLine(BufferedWriter writer, double ts) throws IOException {
+        writer.newLine();
+        writer.write(Utils.round(ts));
+        writer.flush();
+    }
 }

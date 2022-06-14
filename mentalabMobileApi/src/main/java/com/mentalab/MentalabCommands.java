@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.NoBluetoothException;
@@ -17,9 +16,7 @@ import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -123,20 +120,20 @@ public final class MentalabCommands {
    */
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public static void record(Context cxt, String filename) throws IOException {
-    final Map<Topic, Uri> generatedFiles = generateFiles(cxt, filename, connectedDevice.getChannelCount());
-    ExploreExecutor.submitTask(new RecordTask(generatedFiles, cxt, connectedDevice.getSamplingRate()));
+    final Map<Topic, Uri> topicToFile = generateFiles(cxt, filename);
+    ExploreExecutor.submitTask(new RecordTask(cxt, topicToFile, connectedDevice));
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public static void record(Context cxt) throws IOException {
-    final String filename = new Date().toString();
+    final String filename = String.valueOf(System.currentTimeMillis());
     record(cxt, filename);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  private static Map<Topic, Uri> generateFiles(Context c, String filename, int channelCount) throws IOException {
+  private static Map<Topic, Uri> generateFiles(Context c, String filename) throws IOException {
     final FileGenerator androidFileGenerator = new FileGenerator(c);
-    return androidFileGenerator.generateFiles(filename, channelCount);
+    return androidFileGenerator.generateFiles(filename);
   }
 
   public static void shutdown() throws IOException {

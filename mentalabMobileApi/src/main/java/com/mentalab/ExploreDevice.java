@@ -123,7 +123,7 @@ public class ExploreDevice {
   public Future<Boolean> setSamplingRate(SamplingRate sr)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
-    c.setArg(sr.getValue());
+    c.setArg(sr.getCode());
     return submitCommand(c);
   }
 
