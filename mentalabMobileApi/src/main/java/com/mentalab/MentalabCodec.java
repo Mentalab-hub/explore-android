@@ -47,7 +47,7 @@ public final class MentalabCodec {
       throws InvalidDataException {
     final PacketID p =
         Arrays.stream(PacketID.values())
-            .filter(packetId -> packetId.getNumVal() == pId)
+            .filter(packetID -> packetID.getNumVal() == pId)
             .findFirst()
             .orElse(null);
     if (p == null) {

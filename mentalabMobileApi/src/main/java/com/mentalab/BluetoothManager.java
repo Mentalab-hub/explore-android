@@ -62,7 +62,7 @@ public class BluetoothManager {
   }
 
   private static void establishRFCommWithDevice(BluetoothDevice device)
-      throws NoConnectionException, IOException {
+          throws NoConnectionException, IOException {
     closeSocket();
     try {
       mmSocket = device.createRfcommSocketToServiceRecord(UUID.fromString(UUID_BLUETOOTH_SPP));
@@ -74,7 +74,7 @@ public class BluetoothManager {
   }
 
   public static ExploreDevice connectToDevice(ExploreDevice device)
-      throws NoConnectionException, IOException {
+          throws NoConnectionException, IOException {
     establishRFCommWithDevice(device.getBluetoothDevice());
     try {
       mmSocket.connect();

@@ -1,7 +1,6 @@
 package com.mentalab.service;
 
 import android.util.Log;
-import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.io.CommandAcknowledgeSubscriber;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.utils.Utils;
@@ -29,7 +28,6 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
    * @return boolean True when CommandAcknowledgement received, otherwise false
    * @throws IOException If the command cannot be written to the device OutputStream.
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
-   * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
   public Boolean call() throws IOException, InterruptedException {

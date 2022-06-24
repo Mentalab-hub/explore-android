@@ -117,14 +117,16 @@ public class ExploreDevice {
    *
    * @param sr SamplingRate Can be either 250, 500 or 1000 Hz. Default is 250Hz.
    */
-  public Future<Boolean> setSamplingRate(SamplingRate sr) throws InvalidCommandException, IOException, NoBluetoothException {
+  public Future<Boolean> setSamplingRate(SamplingRate sr)
+      throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getValue());
     return submitCommand(c);
   }
 
   /** Formats internal memory of device. */
-  public Future<Boolean> formatMemory() throws InvalidCommandException, IOException, NoBluetoothException {
+  public Future<Boolean> formatMemory()
+      throws InvalidCommandException, IOException, NoBluetoothException {
     return submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
@@ -132,7 +134,8 @@ public class ExploreDevice {
    * Formats internal memory of device. However, when the sampling rate has changed, this command
    * fails.
    */
-  public Future<Boolean> softReset() throws InvalidCommandException, IOException, NoBluetoothException {
+  public Future<Boolean> softReset()
+      throws InvalidCommandException, IOException, NoBluetoothException {
     return submitCommand(Command.CMD_SOFT_RESET);
   }
 
