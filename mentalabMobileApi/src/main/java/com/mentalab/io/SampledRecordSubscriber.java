@@ -1,6 +1,5 @@
 package com.mentalab.io;
 
-import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.Topic;
 
 import java.io.BufferedWriter;
@@ -16,15 +15,10 @@ public class SampledRecordSubscriber extends RecordSubscriber {
   }
 
   @Override
-  protected void writePacketToCSV(BufferedWriter writer, Packet packet) throws IOException {
-    double currentTimestamp = packet.getTimeStamp();
-    initNewLine(writer, currentTimestamp);
-    for (int i = 0; i < packet.getData().size(); i++) {
-      writeToLine(writer, packet, i);
-      if (requireNewLine(packet, i)) {
-        currentTimestamp += 1d / sr;
-        initNewLine(writer, currentTimestamp);
-      }
+  protected void writeNewLine(int channelCount, int i) throws IOException {
+    if (requireNewLine(channelCount, i)) {
+      currentTimestamp += 1d / sr;
+      initNewLine(currentTimestamp);
     }
   }
 }

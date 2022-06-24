@@ -36,11 +36,11 @@ public class RecordTask implements Callable<Boolean> {
   @RequiresApi(api = Build.VERSION_CODES.Q)
   @Override
   public Boolean call() throws IOException {
-    final Uri exgUri = files.get(Topic.EXG);
-    recordEeg(exgUri);
-
-    final Uri ornUri = files.get(Topic.ORN);
-    recordOrn(ornUri);
+//    final Uri exgUri = files.get(Topic.EXG);
+//    recordEeg(exgUri);
+//
+//    final Uri ornUri = files.get(Topic.ORN);
+//    recordOrn(ornUri);
 
     final Uri markerUri = files.get(Topic.MARKER);
     recordMarker(markerUri);

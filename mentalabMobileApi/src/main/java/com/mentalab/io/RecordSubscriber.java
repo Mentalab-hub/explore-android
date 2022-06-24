@@ -7,10 +7,12 @@ import com.mentalab.utils.constants.Topic;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class RecordSubscriber extends Subscriber {
 
   protected final BufferedWriter wr;
+  protected double currentTimestamp;
 
   public RecordSubscriber(Topic t, BufferedWriter w) {
     super(t);
@@ -20,40 +22,38 @@ public class RecordSubscriber extends Subscriber {
   @Override
   public void accept(Packet packet) {
     try {
-      writePacketToCSV(wr, packet);
+      currentTimestamp = packet.getTimeStamp();
+      writePacketToCSV(packet.getData(), packet.getDataCount());
     } catch (IOException e) {
       Log.e(Utils.TAG, e.getMessage());
     }
   }
 
-  protected void writePacketToCSV(BufferedWriter writer, Packet packet) throws IOException {
-    double currentTimestamp = packet.getTimeStamp();
-    initNewLine(writer, currentTimestamp);
-    for (int i = 0; i < packet.getData().size(); i++) {
-      writeToLine(writer, packet, i);
-      if (requireNewLine(packet, i)) {
-        initNewLine(writer, currentTimestamp);
-      }
+  protected void writePacketToCSV(List<Float> data, int dataCount) throws IOException {
+    for (int i = 0; i < data.size(); i++) {
+      writeNewLine(dataCount, i);
+      writeDataPoint(data.get(i));
     }
   }
 
-  protected void writeToLine(BufferedWriter writer, Packet packet, int i) throws IOException {
-    writer.write(",");
-    writer.write(packet.getData().get(i).toString());
+  protected void writeDataPoint(Float v) throws IOException {
+    wr.write(",");
+    wr.write(v.toString());
   }
 
-  protected static boolean requireNewLine(Packet p, int i) {
-    if (i == p.getData().size() - 1) {
-      return false;
+  protected void writeNewLine(int channelCount, int i) throws IOException {
+    if (requireNewLine(channelCount, i)) {
+      initNewLine(currentTimestamp);
     }
-    final int channelCount = p.getDataCount();
-    final int channelNo = i % channelCount + 1; // 1, 2, 3, 4,...
-    return channelNo == channelCount; // break line after 2, 4 or 8 entries
   }
 
-  protected static void initNewLine(BufferedWriter writer, double ts) throws IOException {
-    writer.newLine();
-    writer.write(Utils.round(ts));
-    writer.flush();
+  protected static boolean requireNewLine(int channelCount, int i) {
+    return i % channelCount == 0; // break line after 2, 4 or 8 entries
+  }
+
+  protected void initNewLine(double ts) throws IOException {
+    wr.newLine();
+    wr.write(Utils.round(ts));
+    wr.flush();
   }
 }
