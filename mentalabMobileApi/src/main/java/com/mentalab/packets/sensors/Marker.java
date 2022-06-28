@@ -5,12 +5,12 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Attributes;
 import com.mentalab.packets.PublishablePacket;
 import com.mentalab.utils.constants.Topic;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 
 public class Marker extends PublishablePacket {
 
@@ -37,13 +37,6 @@ public class Marker extends PublishablePacket {
   @Override
   public int getDataCount() {
     return 1;
-  }
-
-  @Override
-  public List<Float> getData() {
-    List<Float> tempList = new ArrayList<>();
-    tempList.add((float) markerCode);
-    return tempList;
   }
 
   public Topic getTopic() {

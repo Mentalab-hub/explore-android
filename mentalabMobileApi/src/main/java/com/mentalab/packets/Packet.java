@@ -10,6 +10,8 @@ import java.util.Set;
 
 public abstract class Packet {
 
+  private static final int BYTES_PER_DOUBLE = 2;
+
   private final double timeStamp;
 
   public Set<Attributes> attributes;
@@ -19,29 +21,33 @@ public abstract class Packet {
     this.timeStamp = timeStamp;
   }
 
-  protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) // TODO: IntelliJ suggests the second parameter is always 2
+  protected static double[] bytesToDouble(byte[] bytes)
       throws InvalidDataException {
-    if (bytes.length % numOfbytesPerNumber != 0) {
-      throw new InvalidDataException("Illegal length", null);
-    }
+    checkByteLength(bytes);
 
-    int arraySize = bytes.length / numOfbytesPerNumber;
-    double[] values = new double[arraySize];
-    for (int i = 0; i < bytes.length; i += numOfbytesPerNumber) {
-      int signBit = bytes[i + numOfbytesPerNumber - 1] >> 7;
-      double value;
+    final int arraySize = bytes.length / BYTES_PER_DOUBLE;
+    final double[] values = new double[arraySize];
+    return updateValues(bytes, values);
+  }
 
-      value =
-          ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
-              .order(ByteOrder.LITTLE_ENDIAN)
-              .getShort();
-      if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
-        value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
-      }
-
-      values[i / numOfbytesPerNumber] = value;
+  private static double[] updateValues(byte[] bytes, double[] values) {
+    for (int i = 0; i < bytes.length; i += BYTES_PER_DOUBLE) {
+      double value = parseByte(bytes, i);
+      values[i / BYTES_PER_DOUBLE] = value;
     }
     return values;
+  }
+
+  protected static double parseByte(byte[] bytes, int i) {
+    return ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
+        .order(ByteOrder.LITTLE_ENDIAN)
+        .getShort();
+  }
+
+  private static void checkByteLength(byte[] bytes) throws InvalidDataException {
+    if (bytes.length % BYTES_PER_DOUBLE != 0) {
+      throw new InvalidDataException("Illegal length", null);
+    }
   }
 
   public double getTimeStamp() {
