@@ -6,18 +6,14 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import androidx.annotation.RequiresApi;
-import com.mentalab.service.RecordFile;
-import com.mentalab.utils.constants.Topic;
+import com.mentalab.service.record.RecordFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FileGenerator {
 
   private static final String RESERVED_CHARS = "|\\?*<\":>+[]/'";
 
-  private final Map<Topic, Uri> files = new HashMap<>();
   private final Uri directory;
   private final Context context;
 
@@ -33,22 +29,12 @@ public class FileGenerator {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Map<Topic, Uri> generateFiles(String filename) throws IOException {
+  public RecordFile generateFile(String filename) throws IOException {
     validateFilename(filename);
 
-    final RecordFile exg = new RecordFile(filename + "_Exg");
-    final Uri exgDir = exg.createFile(directory, context);
-    files.put(Topic.EXG, exgDir);
-
-    final RecordFile orn = new RecordFile(filename + "_Orn");
-    final Uri ornDir = orn.createFile(directory, context);
-    files.put(Topic.ORN, ornDir);
-
-    final RecordFile marker = new RecordFile(filename + "_Marker");
-    final Uri markerDir = marker.createFile(directory, context);
-    files.put(Topic.MARKER, markerDir);
-
-    return files;
+    final RecordFile file = new RecordFile(filename);
+    file.createFile(directory, context);
+    return file;
   }
 
   private static void validateFilename(String filename) throws IOException {

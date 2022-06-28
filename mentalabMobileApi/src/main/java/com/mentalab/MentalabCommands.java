@@ -1,23 +1,15 @@
 package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
-import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.service.ConfigureChannelCountTask;
 import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.ExploreExecutor;
-import com.mentalab.service.RecordTask;
-import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
-import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -106,34 +98,6 @@ public final class MentalabCommands {
     if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
       throw new InitializationFailureException("Device Info not updated. Exiting.");
     }
-  }
-
-  /**
-   * Record data to CSV. Requires appropriate permissions from Android.
-   *
-   * @throws IOException - Can occur both in the generation of files and in the execution of the
-   *     subscriber.
-   * @see <a href="https://developer.android.com/guide/topics/permissions/overview">android
-   *     permissions docs</a>.
-   *     <p>Currently, a lot of functionality missing including: blocking on record, setting a
-   *     duration for recording, masking channels and overwriting previous files.
-   */
-  @RequiresApi(api = Build.VERSION_CODES.Q)
-  public static void record(Context cxt, String filename) throws IOException {
-    final Map<Topic, Uri> topicToFile = generateFiles(cxt, filename);
-    ExploreExecutor.submitTask(new RecordTask(cxt, topicToFile, connectedDevice));
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.Q)
-  public static void record(Context cxt) throws IOException {
-    final String filename = String.valueOf(System.currentTimeMillis());
-    record(cxt, filename);
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.Q)
-  private static Map<Topic, Uri> generateFiles(Context c, String filename) throws IOException {
-    final FileGenerator androidFileGenerator = new FileGenerator(c);
-    return androidFileGenerator.generateFiles(filename);
   }
 
   public static void shutdown() throws IOException {

@@ -41,7 +41,9 @@ public class Marker extends PublishablePacket {
 
   @Override
   public List<Float> getData() {
-    return new ArrayList<>(markerCode);
+    List<Float> tempList = new ArrayList<>();
+    tempList.add((float) markerCode);
+    return tempList;
   }
 
   public Topic getTopic() {

@@ -1,11 +1,15 @@
 package com.mentalab;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.os.Build;
+import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
+import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
@@ -173,6 +177,18 @@ public class ExploreDevice {
       throw new InvalidCommandException("Failed to encode command. Exiting.");
     }
     return encodedBytes;
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  public Future<Boolean> record(Context cxt, String filename) {
+    final RecordTask task = new RecordTask(cxt, filename, this);
+    return ExploreExecutor.submitTask(task);
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  public Future<Boolean> record(Context cxt) {
+    final String filename = String.valueOf(System.currentTimeMillis());
+    return record(cxt, filename);
   }
 
   public Future<Boolean> pushToLSL() {
