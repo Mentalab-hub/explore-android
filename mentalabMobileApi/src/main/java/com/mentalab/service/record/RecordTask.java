@@ -1,6 +1,7 @@
 package com.mentalab.service.record;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
 import com.mentalab.ExploreDevice;
@@ -41,9 +42,9 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
   public Boolean call() throws IOException {
     final FileGenerator androidFileGenerator = new FileGenerator(cxt);
 
-    final RecordFile exgFile = androidFileGenerator.generateFile(filename + "_Exg");
-    final RecordFile ornFile = androidFileGenerator.generateFile(filename + "_Orn");
-    final RecordFile markerFile = androidFileGenerator.generateFile(filename + "_Marker");
+    final Uri exgFile = androidFileGenerator.generateFile(filename + "_Exg");
+    final Uri ornFile = androidFileGenerator.generateFile(filename + "_Orn");
+    final Uri markerFile = androidFileGenerator.generateFile(filename + "_Marker");
 
     recordEeg(exgFile);
     recordOrn(ornFile);
@@ -52,33 +53,33 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  private void recordEeg(RecordFile exgFile) throws IOException {
+  private void recordEeg(Uri exgFile) throws IOException {
     this.eegWr =
         new BufferedWriter(
             new OutputStreamWriter(
-                cxt.getContentResolver().openOutputStream(exgFile.getUri(), "wa")));
+                cxt.getContentResolver().openOutputStream(exgFile, "wa")));
     writeHeader(eegWr, buildEEGHeader(count));
     ContentServer.getInstance()
         .registerSubscriber(new SampledRecordSubscriber(Topic.EXG, eegWr, sr.getAsInt()));
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  private void recordOrn(RecordFile ornFile) throws IOException {
+  private void recordOrn(Uri ornFile) throws IOException {
     this.ornWr =
         new BufferedWriter(
             new OutputStreamWriter(
-                cxt.getContentResolver().openOutputStream(ornFile.getUri(), "wa")));
+                cxt.getContentResolver().openOutputStream(ornFile, "wa")));
     writeHeader(ornWr, "TimeStamp,ax,ay,az,gx,gy,gz,mx,my,mz");
     ContentServer.getInstance()
         .registerSubscriber(new SampledRecordSubscriber(Topic.ORN, ornWr, ORN_SR));
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  private void recordMarker(RecordFile markerFile) throws IOException {
+  private void recordMarker(Uri markerFile) throws IOException {
     this.markerWr =
         new BufferedWriter(
             new OutputStreamWriter(
-                cxt.getContentResolver().openOutputStream(markerFile.getUri(), "wa")));
+                cxt.getContentResolver().openOutputStream(markerFile, "wa")));
     writeHeader(markerWr, "TimeStamp,Code");
     ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.MARKER, markerWr));
   }

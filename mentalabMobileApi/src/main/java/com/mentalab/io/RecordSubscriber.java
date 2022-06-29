@@ -31,7 +31,9 @@ public class RecordSubscriber extends Subscriber {
 
   protected void writePacketToCSV(List<Float> data, int dataCount) throws IOException {
     for (int i = 0; i < data.size(); i++) {
-      writeNewLine(dataCount, i);
+      if (requireNewLine(dataCount, i)) {
+        initNewLine(currentTimestamp);
+      }
       writeDataPoint(data.get(i));
     }
   }
@@ -39,12 +41,6 @@ public class RecordSubscriber extends Subscriber {
   protected void writeDataPoint(Float v) throws IOException {
     wr.write(",");
     wr.write(v.toString());
-  }
-
-  protected void writeNewLine(int channelCount, int i) throws IOException {
-    if (requireNewLine(channelCount, i)) {
-      initNewLine(currentTimestamp);
-    }
   }
 
   protected static boolean requireNewLine(int channelCount, int i) {

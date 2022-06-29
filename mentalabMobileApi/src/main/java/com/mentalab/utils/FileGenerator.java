@@ -29,12 +29,11 @@ public class FileGenerator {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public RecordFile generateFile(String filename) throws IOException {
+  public Uri generateFile(String filename) throws IOException {
     validateFilename(filename);
 
     final RecordFile file = new RecordFile(filename);
-    file.createFile(directory, context);
-    return file;
+    return file.createFile(directory, context);
   }
 
   private static void validateFilename(String filename) throws IOException {
