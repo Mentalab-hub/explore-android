@@ -63,11 +63,6 @@ public class Orientation extends PublishablePacket {
   }
 
   @Override
-  public List<Float> getData() {
-    return super.data;
-  }
-
-  @Override
   public Topic getTopic() {
     return Topic.ORN;
   }

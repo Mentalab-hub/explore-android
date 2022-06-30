@@ -5,11 +5,14 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.utils.constants.ConfigProtocol;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.Set;
 
 public class Utils {
 
   public static final String TAG = "Explore";
+  public static final DecimalFormat DF = new DecimalFormat("#.####");
 
   public static String checkName(String deviceName) throws NoConnectionException {
     deviceName = tryAppendWithExplore(deviceName);
@@ -52,5 +55,10 @@ public class Utils {
     return "Attempting to send a command using an invalid switch of type: "
         + falseType
         + ". Exiting.";
+  }
+
+  public static String round(double d) {
+    DF.setRoundingMode(RoundingMode.FLOOR);
+    return DF.format(d);
   }
 }
