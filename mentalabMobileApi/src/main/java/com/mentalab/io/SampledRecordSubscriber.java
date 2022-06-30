@@ -4,6 +4,7 @@ import com.mentalab.utils.constants.Topic;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class SampledRecordSubscriber extends RecordSubscriber {
 
@@ -15,10 +16,13 @@ public class SampledRecordSubscriber extends RecordSubscriber {
   }
 
   @Override
-  protected void writeNewLine(int channelCount, int i) throws IOException {
-    if (requireNewLine(channelCount, i)) {
-      currentTimestamp += 1d / sr;
-      initNewLine(currentTimestamp);
+  protected void writePacketToCSV(List<Float> data, int dataCount) throws IOException {
+    for (int i = 0; i < data.size(); i++) {
+      if (requireNewLine(dataCount, i)) {
+        currentTimestamp += 1d / sr;
+        initNewLine(currentTimestamp);
+      }
+      writeDataPoint(data.get(i));
     }
   }
 }

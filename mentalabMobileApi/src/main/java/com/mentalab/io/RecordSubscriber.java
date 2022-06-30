@@ -24,6 +24,7 @@ public class RecordSubscriber extends Subscriber {
     try {
       currentTimestamp = packet.getTimeStamp();
       writePacketToCSV(packet.getData(), packet.getDataCount());
+      wr.flush();
     } catch (IOException e) {
       Log.e(Utils.TAG, e.getMessage());
     }
