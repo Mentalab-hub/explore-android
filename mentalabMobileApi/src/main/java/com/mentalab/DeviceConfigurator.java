@@ -4,7 +4,6 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
-import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 
 import java.io.IOException;
@@ -28,14 +27,14 @@ public class DeviceConfigurator {
   }
 
   protected static CompletableFuture<Boolean> submitCommand(Command c, Runnable andThen)
-          throws InvalidCommandException, IOException, NoBluetoothException {
+      throws InvalidCommandException, IOException, NoBluetoothException {
     final CompletableFuture<Boolean> submittedCmd = submitCommand(c);
     submittedCmd.thenAccept(
-            x -> { // only perform the runnable if the submittedCommand is accepted
-              if (x) {
-                andThen.run();
-              }
-            });
+        x -> { // only perform the runnable if the submittedCommand is accepted
+          if (x) {
+            andThen.run();
+          }
+        });
     return submittedCmd;
   }
 
@@ -47,10 +46,11 @@ public class DeviceConfigurator {
    * @throws InvalidCommandException If the command cannot be encoded.
    */
   protected static CompletableFuture<Boolean> submitCommand(Command c)
-          throws InvalidCommandException, IOException, NoBluetoothException {
+      throws IOException, NoBluetoothException, InvalidCommandException {
     final byte[] encodedBytes = encodeCommand(c);
-    return Utils.supplyAsync(
-            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes));
+    return CompletableFuture.supplyAsync(
+            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes))
+        .exceptionally(e -> false); // if DeviceConfigurationTask throws an exception, return false (gracefully)
   }
 
   private static byte[] encodeCommand(Command c) throws InvalidCommandException {

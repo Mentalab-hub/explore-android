@@ -8,8 +8,6 @@ import com.mentalab.utils.constants.ConfigProtocol;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 
 public class Utils {
 
@@ -62,21 +60,5 @@ public class Utils {
   public static String round(double d) {
     DF.setRoundingMode(RoundingMode.FLOOR);
     return DF.format(d);
-  }
-
-  /**
-   * Workaround so we can use CompletableFuture with checked exception.
-   */
-  public static CompletableFuture<Boolean> supplyAsync(Callable<Boolean> c) {
-    CompletableFuture<Boolean> f = new CompletableFuture<>();
-    CompletableFuture.runAsync(
-        () -> {
-          try {
-            f.complete(c.call());
-          } catch (Throwable t) {
-            f.completeExceptionally(t);
-          }
-        });
-    return f;
   }
 }
