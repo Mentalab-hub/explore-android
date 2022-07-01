@@ -19,11 +19,6 @@ public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean
     this.command = encodedBytes;
   }
 
-  @Override
-  public Boolean get() {
-    return CheckedExceptionSupplier.super.get();
-  }
-
   /**
    * Send a command to a connected Explore device.
    *
