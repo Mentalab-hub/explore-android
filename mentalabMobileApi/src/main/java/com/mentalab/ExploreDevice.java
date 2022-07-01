@@ -32,6 +32,8 @@ public class ExploreDevice {
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
 
+  private RecordTask recordTask;
+
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
     this.deviceName = deviceName;
@@ -181,14 +183,22 @@ public class ExploreDevice {
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public Future<Boolean> record(Context cxt, String filename) {
-    final RecordTask task = new RecordTask(cxt, filename, this);
-    return ExploreExecutor.submitTask(task);
+    recordTask = new RecordTask(cxt, filename, this);
+    return ExploreExecutor.submitTask(recordTask);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public Future<Boolean> record(Context cxt) {
     final String filename = String.valueOf(System.currentTimeMillis());
     return record(cxt, filename);
+  }
+
+  public boolean stopRecord() throws IOException {
+    if (recordTask != null) {
+      recordTask.close();
+      return true;
+    }
+    return false;
   }
 
   public Future<Boolean> pushToLSL() {
