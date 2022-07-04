@@ -3,12 +3,14 @@ package com.mentalab.service.record;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.RecordSubscriber;
 import com.mentalab.io.SampledRecordSubscriber;
 import com.mentalab.utils.FileGenerator;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
@@ -105,13 +107,17 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
   }
 
   @Override
-  public void close() throws IOException {
+  public void close() {
     ContentServer.getInstance().deRegisterSubscriber(exgSubscriber);
     ContentServer.getInstance().deRegisterSubscriber(ornSubscriber);
     ContentServer.getInstance().deRegisterSubscriber(markerSubscriber);
-
-    eegWr.close();
-    ornWr.close();
-    markerWr.close();
+    try {
+      eegWr.close();
+      ornWr.close();
+      markerWr.close();
+    } catch (IOException e) {
+      // unlikely this will occur if we successfully wrote to file
+      Log.e(Utils.TAG, "Failed to close writer. Ignored.", e);
+    }
   }
 }
