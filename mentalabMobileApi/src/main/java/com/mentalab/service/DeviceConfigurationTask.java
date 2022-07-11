@@ -3,13 +3,15 @@ package com.mentalab.service;
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.io.CommandAcknowledgeSubscriber;
+import com.mentalab.io.CommandAcknowledgeSubscriber;
+import com.mentalab.io.ContentServer;
+import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
 
-public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
+public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> implements CheckedExceptionSupplier<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;
@@ -31,9 +33,9 @@ public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
    * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
-  public Boolean call() throws Exception {
+  public Boolean accept() throws Exception {
     final boolean acknowledged =
-        getResultOfSubscriberAfterTask(new CommandAcknowledgeSubscriber(), this::sendCommand);
+            getResultOfSubscriberAfterTask(new CommandAcknowledgeSubscriber(), this::sendCommand);
     if (acknowledged) {
       Log.d(Utils.TAG, "Command acknowledged.");
     }

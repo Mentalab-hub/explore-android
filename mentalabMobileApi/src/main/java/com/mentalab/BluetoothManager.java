@@ -44,7 +44,8 @@ public class BluetoothManager {
     return bondedExploreDevices;
   }
 
-  private static void addDeviceIfCorrectName(Set<BluetoothDevice> bondedExploreDevices, BluetoothDevice bt, String name) {
+  private static void addDeviceIfCorrectName(
+      Set<BluetoothDevice> bondedExploreDevices, BluetoothDevice bt, String name) {
     if (name.startsWith("Explore_")) {
       bondedExploreDevices.add(bt);
       Log.i(Utils.TAG, "Explore device available: " + name);
@@ -62,7 +63,7 @@ public class BluetoothManager {
   }
 
   private static void establishRFCommWithDevice(BluetoothDevice device)
-          throws NoConnectionException, IOException {
+      throws NoConnectionException, IOException {
     closeSocket();
     try {
       mmSocket = device.createRfcommSocketToServiceRecord(UUID.fromString(UUID_BLUETOOTH_SPP));
@@ -74,7 +75,7 @@ public class BluetoothManager {
   }
 
   public static ExploreDevice connectToDevice(ExploreDevice device)
-          throws NoConnectionException, IOException {
+      throws NoConnectionException, IOException {
     establishRFCommWithDevice(device.getBluetoothDevice());
     try {
       mmSocket.connect();

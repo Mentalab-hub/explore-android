@@ -72,7 +72,7 @@ public abstract class EEGPacket extends PublishablePacket {
     } catch (InvalidDataException | IOException e) {
       e.printStackTrace(); // TODO: React appropriately
     }
-    super.data = new ArrayList<>(values); // TODO: Do we need to reinitialise a new list?
+    super.data = values;
   }
 
   @NonNull
@@ -96,9 +96,5 @@ public abstract class EEGPacket extends PublishablePacket {
   @Override
   public Topic getTopic() {
     return Topic.EXG;
-  }
-
-  public List<Float> getData() {
-    return super.data;
   }
 }

@@ -3,7 +3,7 @@ package com.mentalab;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.PacketID;
+import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
@@ -45,9 +45,9 @@ public final class MentalabCodec {
 
   private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
       throws InvalidDataException {
-    final PacketID p =
-        Arrays.stream(PacketID.values())
-            .filter(packetID -> packetID.getNumVal() == pId)
+    final PacketId p =
+        Arrays.stream(PacketId.values())
+            .filter(packetId -> packetId.getNumVal() == pId)
             .findFirst()
             .orElse(null);
     if (p == null) {
