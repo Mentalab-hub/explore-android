@@ -3,15 +3,12 @@ package com.mentalab.service;
 import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.io.CommandAcknowledgeSubscriber;
-import com.mentalab.io.CommandAcknowledgeSubscriber;
-import com.mentalab.io.ContentServer;
-import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> implements CheckedExceptionSupplier<Boolean> {
+public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;
@@ -35,7 +32,7 @@ public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> imp
   @Override
   public Boolean accept() throws Exception {
     final boolean acknowledged =
-            getResultOfSubscriberAfterTask(new CommandAcknowledgeSubscriber(), this::sendCommand);
+            getResultOfTimeoutSubAfterTask(new CommandAcknowledgeSubscriber(), this::sendCommand);
     if (acknowledged) {
       Log.d(Utils.TAG, "Command acknowledged.");
     }

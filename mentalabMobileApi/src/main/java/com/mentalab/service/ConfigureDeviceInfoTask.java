@@ -5,8 +5,6 @@ import com.mentalab.ExploreDevice;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.service.io.DeviceInfoSubscriber;
 
-import java.util.concurrent.Callable;
-
 public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPacket> {
 
   private final ExploreDevice device;
@@ -22,7 +20,7 @@ public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPa
    * @throws InterruptedException when calling process timeout forces return from packet subscriber
    */
   @Override
-  public Boolean call() throws InterruptedException {
+  public Boolean accept() throws InterruptedException {
     final DeviceInfoPacket deviceInfo = getResultOf(new DeviceInfoSubscriber());
     return configureExploreDevice(deviceInfo);
   }

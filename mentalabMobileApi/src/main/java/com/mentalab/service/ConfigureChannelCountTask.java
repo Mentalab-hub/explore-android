@@ -4,8 +4,6 @@ import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
 import com.mentalab.service.io.ChannelCountSubscriber;
 
-import java.util.concurrent.Callable;
-
 public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> {
 
   private final ExploreDevice device;
@@ -21,7 +19,7 @@ public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> {
    * @throws InterruptedException when calling process timeout forces return from packet subscriber
    */
   @Override
-  public Boolean call() throws InterruptedException {
+  public Boolean accept() throws InterruptedException {
     final int channelCount = getResultOf(new ChannelCountSubscriber());
     return configureExploreDevice(channelCount);
   }
