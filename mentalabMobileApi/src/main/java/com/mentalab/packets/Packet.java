@@ -19,8 +19,8 @@ public abstract class Packet {
     this.timeStamp = timeStamp;
   }
 
-  protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber)
-      throws InvalidDataException { // TODO: IntelliJ suggests the second parameter is always 2
+  protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) // TODO: IntelliJ suggests the second parameter is always 2
+      throws InvalidDataException {
     if (bytes.length % numOfbytesPerNumber != 0) {
       throw new InvalidDataException("Illegal length", null);
     }

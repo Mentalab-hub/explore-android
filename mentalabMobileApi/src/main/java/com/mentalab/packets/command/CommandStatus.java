@@ -25,7 +25,7 @@ public class CommandStatus extends UtilPacket {
   @NonNull
   @Override
   public String toString() {
-    return "Command status is " + commandStatus;
+    return "Command status is " + commandStatus + ".";
   }
 
   @Override

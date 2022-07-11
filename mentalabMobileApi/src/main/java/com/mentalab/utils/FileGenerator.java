@@ -1,101 +1,58 @@
 package com.mentalab.utils;
 
-import static android.provider.MediaStore.MediaColumns.DISPLAY_NAME;
-import static android.provider.MediaStore.MediaColumns.MIME_TYPE;
-
-import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import androidx.annotation.RequiresApi;
-import com.mentalab.utils.constants.Topic;
-import java.io.BufferedWriter;
+import com.mentalab.service.record.RecordFile;
+
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FileGenerator {
 
-  private final Context context;
-  private final boolean overwrite;
+  private static final String RESERVED_CHARS = "|\\?*<\":>+[]/'";
 
-  public FileGenerator(Context context, boolean overwrite) {
+  private final Uri directory;
+  private final Context context;
+
+  public FileGenerator(Context context) {
     this.context = context;
-    this.overwrite = overwrite;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      this.directory = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+    } else {
+      this.directory =
+          Uri.fromFile(
+              Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS));
+    }
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Map<Topic, Uri> generateFiles(Uri directory, String filename) throws IOException {
-    // todo: handle & validate filename
-    final ContentValues metaDataExg = createMetaDataForFile(filename + "_Exg");
-    final ContentValues metaDataOrn = createMetaDataForFile(filename + "_Orn");
-    final ContentValues metaDataMarkers = createMetaDataForFile(filename + "_Markers");
+  public Uri generateFile(String filename) throws IOException {
+    validateFilename(filename);
 
-    final Map<Topic, Uri> createdUris = new HashMap<>();
-    if (!overwrite) {
-      final Uri exgFile = createFile(directory, metaDataExg, Topic.EXG);
-      addExgHeader(exgFile);
-      createdUris.put(Topic.EXG, exgFile);
+    final RecordFile file = new RecordFile(filename);
+    return file.createFile(directory, context);
+  }
 
-      final Uri ornFile = createFile(directory, metaDataOrn, Topic.ORN);
-      addOrnHeader(ornFile);
-      createdUris.put(Topic.ORN, ornFile);
-
-      final Uri markerFile = createFile(directory, metaDataMarkers, Topic.MARKER);
-      addMarkerHeader(markerFile);
-      createdUris.put(Topic.MARKER, markerFile);
-    } else {
-      // Todo: include a delete function
+  private static void validateFilename(String filename) throws IOException {
+    if (filename.length() < 1) {
+      throw new IOException("Filename is empty.");
     }
-
-    return createdUris;
+    checkValidChars(filename);
   }
 
-  private ContentValues createMetaDataForFile(String filename) {
-    final ContentValues metaData = new ContentValues();
-    metaData.put(DISPLAY_NAME, filename);
-    metaData.put(MIME_TYPE, "text/csv");
-    return metaData;
-  }
-
-  private void addMarkerHeader(Uri location) throws IOException {
-    try (final BufferedWriter writer =
-        new BufferedWriter(
-            new OutputStreamWriter(
-                context.getContentResolver().openOutputStream(location, "wa")))) {
-      writer.write("TimeStamp,Code");
-      writer.newLine();
+  private static void checkValidChars(String filename) throws IOException {
+    for (int i = 0; i < filename.length(); i++) {
+      char c = filename.charAt(i);
+      checkChar(c);
     }
   }
 
-  private void addOrnHeader(Uri location) throws IOException {
-    try (final BufferedWriter writer =
-        new BufferedWriter(
-            new OutputStreamWriter(
-                context.getContentResolver().openOutputStream(location, "wa")))) {
-      writer.write("TimeStamp,ax,ay,az,gx,gy,gz,mx,my,mz");
-      writer.newLine();
+  private static void checkChar(char c) throws IOException {
+    if (RESERVED_CHARS.indexOf(c) > -1) {
+      throw new IOException("Invalid filename, contains character: " + c);
     }
-  }
-
-  private void addExgHeader(Uri location) throws IOException {
-    try (final BufferedWriter writer =
-        new BufferedWriter(
-            new OutputStreamWriter(
-                context.getContentResolver().openOutputStream(location, "wa")))) {
-      writer.write("TimeStamp,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8");
-      writer.newLine();
-    }
-  }
-
-  private Uri createFile(Uri directory, ContentValues metaData, Topic topic) {
-    Uri location;
-    int i = 1;
-    while ((location = context.getContentResolver().insert(directory, metaData)) == null) {
-      metaData.put(DISPLAY_NAME, metaData.get(DISPLAY_NAME) + "(" + i + ")_" + topic.name());
-      i++;
-    }
-    return location;
   }
 }
