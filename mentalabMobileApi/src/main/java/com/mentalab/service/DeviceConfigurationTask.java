@@ -36,6 +36,8 @@ public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
             new CommandAcknowledgeSubscriber(), () -> postCmdToOutputStream(command, outputStream));
     if (acknowledged) {
       Log.d(Utils.TAG, "Command acknowledged.");
+    } else {
+      Log.d(Utils.TAG, "Command not acknowledged.");
     }
     return acknowledged;
   }

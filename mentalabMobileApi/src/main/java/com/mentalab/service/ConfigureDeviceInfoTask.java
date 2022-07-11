@@ -1,9 +1,10 @@
 package com.mentalab.service;
 
-import com.mentalab.DeviceConfigurator;
+import android.util.Log;
 import com.mentalab.ExploreDevice;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.service.io.DeviceInfoSubscriber;
+import com.mentalab.utils.Utils;
 
 public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPacket> {
 
@@ -26,8 +27,9 @@ public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPa
   }
 
   private Boolean configureExploreDevice(DeviceInfoPacket deviceInfo) {
-    final DeviceConfigurator configurator = new DeviceConfigurator(device);
-    configurator.setDeviceInfo(deviceInfo);
+    this.device.setSR(deviceInfo.getSamplingRate());
+    this.device.setChannelMask(deviceInfo.getChannelMask());
+    Log.d(Utils.TAG, "Device info set.");
     return true;
   }
 }

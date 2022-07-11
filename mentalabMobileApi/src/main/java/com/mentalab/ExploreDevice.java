@@ -8,12 +8,14 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.ConfigureChannelCountTask;
 import com.mentalab.service.ConfigureDeviceInfoTask;
+import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 import com.mentalab.utils.constants.SamplingRate;
 
@@ -30,7 +32,7 @@ public class ExploreDevice {
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  private int channelCount = 8;
+  private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
 
@@ -45,16 +47,12 @@ public class ExploreDevice {
     return btDevice;
   }
 
-  /**
-   * Start data acquisition process from explore device
-   *
-   * @throws IOException
-   * @throws NoBluetoothException
-   */
-  public void acquire() throws IOException, NoBluetoothException {
+  /** Start data acquisition process from explore device */
+  protected ExploreDevice acquire() throws IOException, NoBluetoothException {
     CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this));
     CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this));
     MentalabCodec.decodeInputStream(getInputStream());
+    return this;
   }
 
   /**
@@ -71,7 +69,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return DeviceConfigurator.submitCommand(c, () -> setChannelMask(c.getArg()));
+    return submitCommand(c, () -> setChannelMask(c.getArg()));
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -95,9 +93,6 @@ public class ExploreDevice {
     return binaryArg;
   }
 
-  /**
-   * Set a single channel on or off.
-   */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Set<ConfigSwitch> channelToList = new HashSet<>();
@@ -115,7 +110,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
-    return DeviceConfigurator.submitCommand(c);
+    return submitCommand(c);
   }
 
   private static Command generateModuleCommand(ConfigSwitch module) {
@@ -134,13 +129,12 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
-    return DeviceConfigurator.submitCommand(c, () -> setSR(sr));
+    return submitCommand(c, () -> setSR(sr));
   }
 
-  /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return DeviceConfigurator.submitCommand(Command.CMD_MEMORY_FORMAT);
+    return submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
   /**
@@ -149,16 +143,10 @@ public class ExploreDevice {
    */
   public Future<Boolean> softReset()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return DeviceConfigurator.submitCommand(Command.CMD_SOFT_RESET);
+    return submitCommand(Command.CMD_SOFT_RESET);
   }
 
-  /**
-   * Returns the device data stream.
-   *
-   * @return InputStream of raw bytes
-   * @throws IOException
-   * @throws NoBluetoothException If Bluetooth connection is lost during communication
-   */
+  /** Returns the device data stream. */
   public InputStream getInputStream() throws NoBluetoothException, IOException {
     return BluetoothManager.getInputStream();
   }
@@ -190,6 +178,43 @@ public class ExploreDevice {
     return true;
   }
 
+  private static CompletableFuture<Boolean> submitCommand(Command c, Runnable andThen)
+      throws InvalidCommandException, IOException, NoBluetoothException {
+    final CompletableFuture<Boolean> submittedCmd = submitCommand(c);
+    submittedCmd.thenAccept(
+        x -> { // only perform the runnable if the submittedCommand is accepted
+          if (x) {
+            andThen.run();
+          }
+        });
+    return submittedCmd;
+  }
+
+  /**
+   * Asynchronously submits a command to this device using the DeviceConfigurationTask.
+   *
+   * @param c Command the command to be sent to the device.
+   * @return Future True if the command was successfully received. Otherwise false
+   * @throws InvalidCommandException If the command cannot be encoded.
+   */
+  private static CompletableFuture<Boolean> submitCommand(Command c)
+      throws IOException, NoBluetoothException, InvalidCommandException {
+    final byte[] encodedBytes = encodeCommand(c);
+    return CompletableFuture.supplyAsync(
+            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes))
+        .exceptionally(
+            e ->
+                false); // if DeviceConfigurationTask throws an exception, return false (gracefully)
+  }
+
+  private static byte[] encodeCommand(Command c) throws InvalidCommandException {
+    final byte[] encodedBytes = MentalabCodec.encodeCommand(c);
+    if (encodedBytes == null) {
+      throw new InvalidCommandException("Failed to encode command. Exiting.");
+    }
+    return encodedBytes;
+  }
+
   public Future<Boolean> pushToLSL() {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
   }
@@ -198,7 +223,7 @@ public class ExploreDevice {
     return deviceName;
   }
 
-  public int getChannelCount() {
+  public ChannelCount getChannelCount() {
     return channelCount;
   }
 
@@ -206,15 +231,15 @@ public class ExploreDevice {
     return this.samplingRate;
   }
 
-  void setChannelCount(int count) {
+  public void setChannelCount(ChannelCount count) {
     this.channelCount = count;
   }
 
-  void setSR(SamplingRate sr) {
+  public void setSR(SamplingRate sr) {
     this.samplingRate = sr;
   }
 
-  void setChannelMask(int mask) {
+  public void setChannelMask(int mask) {
     this.channelMask = mask;
   }
 }
