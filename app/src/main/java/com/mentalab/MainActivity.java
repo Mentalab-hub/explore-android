@@ -17,6 +17,7 @@ import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,16 +31,22 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    final String exploreDeviceID = "CA4A";
+    final String exploreDeviceID = "CA26";
     try {
       connect(exploreDeviceID);
-      MentalabCodec.decodeInputStream(connectedDevice.getInputStream());
-
+      MentalabCommands.acquire();
     } catch (NoBluetoothException e) {
       askToTurnOnBT(exploreDeviceID);
+      return;
     } catch (IOException | NoConnectionException e) {
       askToTurnOnDevice(exploreDeviceID);
+      return;
+    } catch (InitializationFailureException e) {
+      createToastMsg(MainActivity.this, "Failed to initialize data acquisition.");
+    } catch (ExecutionException | InterruptedException e) {
+      e.printStackTrace();
     }
+    Log.d("DEBUG_ÈX", "vvv" + connectedDevice.channelCount + connectedDevice.channelMask);
 
     /* try {
       final Future<Boolean> formattedMemory = connectedDevice.formatMemory();

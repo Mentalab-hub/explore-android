@@ -95,7 +95,9 @@ public class ExploreDevice {
     return binaryArg;
   }
 
-  /** Set a single channel on or off. */
+  /**
+   * Set a single channel on or off.
+   */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Set<ConfigSwitch> channelToList = new HashSet<>();
