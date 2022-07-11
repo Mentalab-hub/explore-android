@@ -9,7 +9,6 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.ConfigureChannelCountTask;
 import com.mentalab.service.ConfigureDeviceInfoTask;
-import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
@@ -24,6 +23,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 /** A wrapper around BluetoothDevice */
@@ -69,10 +69,7 @@ public class ExploreDevice {
    * does not work. \\todo: CHECK FOR THIS
    *
    * <p>By default data from all channels is collected. Disable channels you do not need to save
-   * bandwidth and power. Calling setChannels with only some channels is supported. Trying to enable
-   * a channel that the device does not have results in a CommandFailedException thrown. When a
-   * CommandFailedException is received from this method, none or only some switches may have been
-   * set.
+   * bandwidth and power.
    *
    * @param switches List of channels to set on (true) or off (false) channel0 ... channel7
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
@@ -81,7 +78,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return submitCommand(c);
+    return DeviceConfigurator.submitCommand(c, () -> setChannelMask(c.getArg()));
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -107,9 +104,6 @@ public class ExploreDevice {
 
   /**
    * Set a single channel on or off.
-   *
-   * @param channel Switch The channel you would like to turn on (true) or off (false).
-   * @throws InvalidCommandException If the provided Switch is not of type Channel.
    */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
@@ -122,15 +116,13 @@ public class ExploreDevice {
    * Enables or disables data collection of a module.
    *
    * <p>By default data from all modules is collected. Disable modules you do not need to save
-   * bandwidth and power. Calling setModules with only some modules is supported.
-   *
-   * @param mSwitch The module to be turned on or off ORN, ENVIRONMENT, EXG
+   * bandwidth and power.
    */
   public Future<Boolean> setModule(ConfigSwitch mSwitch)
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
-    return submitCommand(c);
+    return DeviceConfigurator.submitCommand(c);
   }
 
   private static Command generateModuleCommand(ConfigSwitch module) {
@@ -144,20 +136,18 @@ public class ExploreDevice {
    *
    * <p>Sampling rate only applies to ExG data. Orientation and Environment data are always sampled
    * at 20Hz.
-   *
-   * @param sr SamplingRate Can be either 250, 500 or 1000 Hz. Default is 250Hz.
    */
-  public Future<Boolean> setSamplingRate(SamplingRate sr)
+  public CompletableFuture<Boolean> setSamplingRate(SamplingRate sr)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
-    return submitCommand(c);
+    return DeviceConfigurator.submitCommand(c, () -> setSR(sr));
   }
 
   /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return submitCommand(Command.CMD_MEMORY_FORMAT);
+    return DeviceConfigurator.submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
   /**
@@ -166,7 +156,7 @@ public class ExploreDevice {
    */
   public Future<Boolean> softReset()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return submitCommand(Command.CMD_SOFT_RESET);
+    return DeviceConfigurator.submitCommand(Command.CMD_SOFT_RESET);
   }
 
   /**
@@ -178,28 +168,6 @@ public class ExploreDevice {
    */
   public InputStream getInputStream() throws NoBluetoothException, IOException {
     return BluetoothManager.getInputStream();
-  }
-
-  /**
-   * Asynchronously submits a command to this device using the DeviceConfigurationTask.
-   *
-   * @param c Command the command to be sent to the device.
-   * @return Future True if the command was successfully received. Otherwise false
-   * @throws InvalidCommandException If the command cannot be encoded.
-   */
-  private Future<Boolean> submitCommand(Command c)
-      throws InvalidCommandException, IOException, NoBluetoothException {
-    final byte[] encodedBytes = encodeCommand(c);
-    return ExploreExecutor.submitTask(
-        new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes));
-  }
-
-  private static byte[] encodeCommand(Command c) throws InvalidCommandException {
-    final byte[] encodedBytes = MentalabCodec.encodeCommand(c);
-    if (encodedBytes == null) {
-      throw new InvalidCommandException("Failed to encode command. Exiting.");
-    }
-    return encodedBytes;
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
