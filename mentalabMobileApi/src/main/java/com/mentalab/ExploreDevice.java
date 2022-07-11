@@ -4,8 +4,11 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
+import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.service.ConfigureChannelCountTask;
+import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
@@ -20,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /** A wrapper around BluetoothDevice */
@@ -39,6 +43,25 @@ public class ExploreDevice {
 
   BluetoothDevice getBluetoothDevice() {
     return btDevice;
+  }
+
+  /**
+   * Start data acquisition process from explore device
+   *
+   * @throws IOException
+   * @throws NoBluetoothException
+   */
+  public void acquire()
+      throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
+          InterruptedException {
+    final Future<Boolean> channelCountConfigured =
+        ExploreExecutor.submitTask(new ConfigureChannelCountTask(this));
+    final Future<Boolean> deviceInfoConfigured =
+        ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(this));
+    MentalabCodec.decodeInputStream(getInputStream());
+    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
+      throw new InitializationFailureException("Device Info not updated. Exiting.");
+    }
   }
 
   /**
