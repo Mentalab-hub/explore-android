@@ -18,4 +18,9 @@ public abstract class CountDownSubscriber<T> extends Subscriber<T> {
     latch.await(timeout, TimeUnit.MILLISECONDS);
     return result;
   }
+
+  public T awaitResult() throws InterruptedException {
+    latch.await();
+    return result;
+  }
 }

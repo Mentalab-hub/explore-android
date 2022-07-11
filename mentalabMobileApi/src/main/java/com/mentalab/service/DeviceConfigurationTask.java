@@ -1,15 +1,14 @@
 package com.mentalab.service;
 
 import android.util.Log;
-import com.mentalab.io.CommandAcknowledgeSubscriber;
-import com.mentalab.io.ContentServer;
-import com.mentalab.utils.CheckedExceptionSupplier;
+import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.service.io.CommandAcknowledgeSubscriber;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean> {
+public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;
@@ -28,38 +27,23 @@ public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean
    * @return boolean True when CommandAcknowledgement received, otherwise false
    * @throws IOException If the command cannot be written to the device OutputStream.
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
+   * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
-  public Boolean accept() throws IOException, InterruptedException {
-    final CommandAcknowledgeSubscriber sub = sendCommand();
-    return awaitAcknowledgement(sub);
-  }
-
-  private CommandAcknowledgeSubscriber sendCommand() throws IOException {
-    final CommandAcknowledgeSubscriber sub = registerSubscriber();
-    postCmdToOutputStream(command, outputStream);
-    return sub;
-  }
-
-  private CommandAcknowledgeSubscriber registerSubscriber() {
-    final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
-    ContentServer.getInstance().registerSubscriber(sub);
-    return sub;
-  }
-
-  private static void postCmdToOutputStream(byte[] command, OutputStream outputStream) throws IOException {
-    outputStream.write(command);
-    outputStream.flush();
-    Log.d(Utils.TAG, "Command sent.");
-  }
-
-  private boolean awaitAcknowledgement(CommandAcknowledgeSubscriber sub)
-      throws InterruptedException {
-    boolean acknowledged = sub.awaitResultWithTimeout(3000);
+  public Boolean accept() throws Exception {
+    final boolean acknowledged =
+        getResultOfTimeoutSubAfterTask(
+            new CommandAcknowledgeSubscriber(), () -> postCmdToOutputStream(command, outputStream));
     if (acknowledged) {
       Log.d(Utils.TAG, "Command acknowledged.");
     }
-    ContentServer.getInstance().deRegisterSubscriber(sub);
     return acknowledged;
+  }
+
+  private Void postCmdToOutputStream(byte[] command, OutputStream outputStream) throws IOException {
+    outputStream.write(command);
+    outputStream.flush();
+    Log.d(Utils.TAG, "Command sent.");
+    return null;
   }
 }
