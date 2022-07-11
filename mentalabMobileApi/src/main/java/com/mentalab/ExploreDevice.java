@@ -184,12 +184,19 @@ public class ExploreDevice {
     return record(cxt, filename);
   }
 
-  public boolean stopRecord() throws IOException {
-    if (recordTask != null) {
-      recordTask.close();
-      return true;
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  public Future<Boolean> recordWithTimeout(Context cxt, int millis) {
+    final String filename = String.valueOf(System.currentTimeMillis());
+    recordTask = new RecordTask(cxt, filename, this);
+    return ExploreExecutor.submitTimeoutTask(recordTask, millis, () -> recordTask.close());
+  }
+
+  public boolean stopRecord() {
+    if (recordTask == null) {
+      return false;
     }
-    return false;
+    recordTask.close();
+    return true;
   }
 
   public Future<Boolean> pushToLSL() {
