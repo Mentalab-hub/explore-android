@@ -69,7 +69,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return submitCommand(c, () -> setChannelMask(c.getArg()));
+    return DeviceManager.submitCommand(c, () -> setChannelMask(c.getArg()));
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -110,7 +110,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
-    return submitCommand(c);
+    return DeviceManager.submitCommand(c);
   }
 
   private static Command generateModuleCommand(ConfigSwitch module) {
@@ -129,12 +129,12 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
-    return submitCommand(c, () -> setSR(sr));
+    return DeviceManager.submitCommand(c, () -> setSR(sr));
   }
 
   public Future<Boolean> formatMemory()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return submitCommand(Command.CMD_MEMORY_FORMAT);
+    return DeviceManager.submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
   /**
@@ -143,7 +143,7 @@ public class ExploreDevice {
    */
   public Future<Boolean> softReset()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return submitCommand(Command.CMD_SOFT_RESET);
+    return DeviceManager.submitCommand(Command.CMD_SOFT_RESET);
   }
 
   /** Returns the device data stream. */
@@ -176,43 +176,6 @@ public class ExploreDevice {
     }
     recordTask.close();
     return true;
-  }
-
-  private static CompletableFuture<Boolean> submitCommand(Command c, Runnable andThen)
-      throws InvalidCommandException, IOException, NoBluetoothException {
-    final CompletableFuture<Boolean> submittedCmd = submitCommand(c);
-    submittedCmd.thenAccept(
-        x -> { // only perform the runnable if the submittedCommand is accepted
-          if (x) {
-            andThen.run();
-          }
-        });
-    return submittedCmd;
-  }
-
-  /**
-   * Asynchronously submits a command to this device using the DeviceConfigurationTask.
-   *
-   * @param c Command the command to be sent to the device.
-   * @return Future True if the command was successfully received. Otherwise false
-   * @throws InvalidCommandException If the command cannot be encoded.
-   */
-  private static CompletableFuture<Boolean> submitCommand(Command c)
-      throws IOException, NoBluetoothException, InvalidCommandException {
-    final byte[] encodedBytes = encodeCommand(c);
-    return CompletableFuture.supplyAsync(
-            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes))
-        .exceptionally(
-            e ->
-                false); // if DeviceConfigurationTask throws an exception, return false (gracefully)
-  }
-
-  private static byte[] encodeCommand(Command c) throws InvalidCommandException {
-    final byte[] encodedBytes = MentalabCodec.encodeCommand(c);
-    if (encodedBytes == null) {
-      throw new InvalidCommandException("Failed to encode command. Exiting.");
-    }
-    return encodedBytes;
   }
 
   public Future<Boolean> pushToLSL() {
