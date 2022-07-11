@@ -78,7 +78,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return DeviceConfigurator.submitCommand(c);
+    return DeviceConfigurator.submitCommand(c, () -> setChannelMask(c.getArg()));
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -104,9 +104,6 @@ public class ExploreDevice {
 
   /**
    * Set a single channel on or off.
-   *
-   * @param channel Switch The channel you would like to turn on (true) or off (false).
-   * @throws InvalidCommandException If the provided Switch is not of type Channel.
    */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
