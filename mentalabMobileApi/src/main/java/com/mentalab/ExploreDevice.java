@@ -4,8 +4,11 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Build;
 import androidx.annotation.RequiresApi;
+import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.service.ConfigureChannelCountTask;
+import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
@@ -19,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -42,6 +46,25 @@ public class ExploreDevice {
   }
 
   /**
+   * Start data acquisition process from explore device
+   *
+   * @throws IOException
+   * @throws NoBluetoothException
+   */
+  public void acquire()
+      throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
+          InterruptedException {
+    final Future<Boolean> channelCountConfigured =
+        ExploreExecutor.submitTask(new ConfigureChannelCountTask(this));
+    final Future<Boolean> deviceInfoConfigured =
+        ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(this));
+    MentalabCodec.decodeInputStream(getInputStream());
+    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
+      throw new InitializationFailureException("Device Info not updated. Exiting.");
+    }
+  }
+
+  /**
    * Enables or disables data collection of a channel. Sending a mix of enable and disable switches
    * does not work. \\todo: CHECK FOR THIS
    *
@@ -55,7 +78,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return DeviceConfigurator.submitCommand(c, () -> setChannelMask(c.getArg()));
+    return DeviceConfigurator.submitCommand(c);
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -81,6 +104,9 @@ public class ExploreDevice {
 
   /**
    * Set a single channel on or off.
+   *
+   * @param channel Switch The channel you would like to turn on (true) or off (false).
+   * @throws InvalidCommandException If the provided Switch is not of type Channel.
    */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
