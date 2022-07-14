@@ -4,10 +4,9 @@ import uk.me.berndporr.iirj.Butterworth;
 
 public class ButterworthFilter {
   /**
-   * Butterworth Filter The Butterworth class implements low-pass, high-pass, band-pass and
+   * The Butterworth class implements low-pass, high-pass, band-pass and
    * band-stop filter using the Butterworth polynomials. Has the flattest pass-band but a poor
-   * roll-off rate. Reference <a href="https://en.wikipedia.org/wiki/Butterworth_filter">article</a>
-   * for more information on Buttterworth Filters.
+   * roll-off rate. Reference: https://en.wikipedia.org/wiki/Butterworth_filter
    */
   private double samplingFreq;
 
