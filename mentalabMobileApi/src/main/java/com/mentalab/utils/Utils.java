@@ -66,8 +66,7 @@ public class Utils {
   public static ChannelCount getChannelCountFromInt(int i) {
     if (i < 5) {
       return ChannelCount.CC_4;
-    } else {
-      return ChannelCount.CC_8;
     }
+    return ChannelCount.CC_8;
   }
 }
