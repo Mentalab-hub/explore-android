@@ -39,7 +39,6 @@ public abstract class CommandTranslator {
     convertedData[i++] = (byte) opcode;
 
     convertedData[i++] = (byte) arg;
-    Log.d("DEBUG_SR", "Index is: " + i);
     for (int fletcherArrayIndex = 0; fletcherArrayIndex < 4; fletcherArrayIndex++) {
       convertedData[fletcherArrayIndex + i] = (byte) FLETCHER_BYTES[fletcherArrayIndex];
     }
