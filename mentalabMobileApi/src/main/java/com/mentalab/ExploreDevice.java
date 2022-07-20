@@ -47,25 +47,36 @@ public class ExploreDevice {
     return btDevice;
   }
 
-  /** Start data acquisition process from explore device */
+  /**
+   * Start acquiring data from this device.
+   *
+   * <p>Before reading the Bluetooth input stream, two tasks are assigned that wait for packets and
+   * configure the device based on those packets. If these packets are not received, or the device
+   * is not configured, we cannot proceed.
+   */
   protected ExploreDevice acquire()
       throws IOException, NoBluetoothException, ExecutionException, InterruptedException {
-    CompletableFuture<List<Boolean>> deviceConfig = Utils.sequence(getInitCommands());
+    final List<CompletableFuture<Boolean>> deviceConfig = getInitCommands();
     MentalabCodec.decodeInputStream(getInputStream());
-    // wait on config, otherwise connection failed
-    for (boolean f : deviceConfig.get()) {
-      if (!f) {
-        throw new IOException("Unable to initialise device. Cannot proceed.");
-      }
-    }
+    waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
     return this;
   }
 
   private List<CompletableFuture<Boolean>> getInitCommands() {
-    List<CompletableFuture<Boolean>> list = new ArrayList<>();
+    final List<CompletableFuture<Boolean>> list = new ArrayList<>();
     list.add(CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)));
     list.add(CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this)));
     return list;
+  }
+
+  private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
+      throws ExecutionException, InterruptedException, IOException {
+    for (CompletableFuture<Boolean> f : deviceConfig) {
+      if (!f.get()) {
+        MentalabCommands.shutdown();
+        throw new IOException("Unable to initialise device. Cannot proceed.");
+      }
+    }
   }
 
   /**

@@ -74,25 +74,4 @@ public class Utils {
       return ChannelCount.CC_8;
     }
   }
-
-  /**
-   * Waits for futures to complete and return a list of results, or else exits on first exception.
-   */
-  public static CompletableFuture<List<Boolean>> sequence(List<CompletableFuture<Boolean>> com) {
-    CompletableFuture<List<Boolean>> result =
-        CompletableFuture.allOf(com.toArray(new CompletableFuture<?>[2]))
-            .thenApply(v -> com.stream().map(CompletableFuture::join).collect(Collectors.toList()));
-
-    com.forEach(
-        f ->
-            f.whenComplete(
-                (t, ex) -> {
-                  if (ex != null) {
-                    result.completeExceptionally(ex);
-                    ExploreExecutor.getExecutorInstance()
-                        .shutdownNow(); // stop immediately if we cannot proceed
-                  }
-                }));
-    return result;
-  }
 }
