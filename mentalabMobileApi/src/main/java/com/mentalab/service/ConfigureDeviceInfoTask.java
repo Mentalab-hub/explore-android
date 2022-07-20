@@ -2,8 +2,8 @@ package com.mentalab.service;
 
 import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ContentServer;
-import com.mentalab.io.Subscriber;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.Subscriber;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.utils.constants.Topic;
