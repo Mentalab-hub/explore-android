@@ -1,7 +1,5 @@
 package com.mentalab;
 
-import static com.mentalab.utils.Utils.TAG;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -9,12 +7,15 @@ import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.utils.Utils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.mentalab.utils.Utils.TAG;
 
 public class BluetoothManager {
 
@@ -30,7 +31,7 @@ public class BluetoothManager {
     return bondedDevices;
   }
 
-  public static Set<BluetoothDevice> getBondedExploreDevices() throws NoBluetoothException {
+  protected static Set<BluetoothDevice> getBondedExploreDevices() throws NoBluetoothException {
     final Set<BluetoothDevice> bondedDevices = BluetoothManager.getBondedDevices();
     return getAllExploreDevices(bondedDevices);
   }
@@ -74,7 +75,7 @@ public class BluetoothManager {
     Log.i(TAG, "Received rfComm socket.");
   }
 
-  public static ExploreDevice connectToDevice(ExploreDevice device)
+  protected static ExploreDevice connectToDevice(ExploreDevice device)
       throws NoConnectionException, IOException {
     establishRFCommWithDevice(device.getBluetoothDevice());
     try {
@@ -86,7 +87,7 @@ public class BluetoothManager {
     return device;
   }
 
-  public static void closeSocket() throws IOException {
+  protected static void closeSocket() throws IOException {
     if (mmSocket == null) {
       return;
     }
@@ -94,14 +95,14 @@ public class BluetoothManager {
     mmSocket = null;
   }
 
-  static InputStream getInputStream() throws NoBluetoothException, IOException {
+  protected static InputStream getInputStream() throws NoBluetoothException, IOException {
     if (BluetoothManager.mmSocket == null) {
       throw new NoBluetoothException("No Bluetooth socket available.");
     }
     return mmSocket.getInputStream();
   }
 
-  static OutputStream getOutputStream() throws NoBluetoothException, IOException {
+  protected static OutputStream getOutputStream() throws NoBluetoothException, IOException {
     if (mmSocket == null) {
       throw new NoBluetoothException("No Bluetooth socket available.");
     }
