@@ -9,6 +9,7 @@ public class ButterworthFilter {
    * roll-off rate. Reference: https://en.wikipedia.org/wiki/Butterworth_filter
    */
   private double samplingFreq;
+  private static final int  filterOrder = 6;
 
   /**
    * This constructor initialises the prerequisites required to use Butterworth filter.
@@ -24,14 +25,13 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
    * @param cutoffFreq The cutoff frequency for the filter in Hz
    * @return double[] Filtered signal
    */
-  public double[] lowPassFilter(double[] signal, int order, double cutoffFreq) {
+  public double[] lowPassFilter(double[] signal, double cutoffFreq) {
     double[] output = new double[signal.length];
     Butterworth lp = new Butterworth();
-    lp.lowPass(order, this.samplingFreq, cutoffFreq);
+    lp.lowPass(filterOrder, this.samplingFreq, cutoffFreq);
     for (int i = 0; i < output.length; i++) {
       output[i] = lp.filter(signal[i]);
     }
@@ -43,14 +43,13 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
    * @param cutoffFreq The cutoff frequency for the filter in Hz
    * @return double[] Filtered signal
    */
-  public double[] highPassFilter(double[] signal, int order, double cutoffFreq) {
+  public double[] highPassFilter(double[] signal, double cutoffFreq) {
     double[] output = new double[signal.length];
     Butterworth hp = new Butterworth();
-    hp.highPass(order, this.samplingFreq, cutoffFreq);
+    hp.highPass(filterOrder, this.samplingFreq, cutoffFreq);
     for (int i = 0; i < output.length; i++) {
       output[i] = hp.filter(signal[i]);
     }
@@ -62,14 +61,13 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
    * @param lowCutoff The lower cutoff frequency for the filter in Hz
    * @param highCutoff The upper cutoff frequency for the filter in Hz
    * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandPassFilter(double[] signal, int order, double lowCutoff, double highCutoff)
+  public double[] bandPassFilter(double[] signal, double lowCutoff, double highCutoff)
       throws IllegalArgumentException {
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
@@ -79,7 +77,7 @@ public class ButterworthFilter {
     double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
     Butterworth bp = new Butterworth();
-    bp.bandPass(order, this.samplingFreq, centreFreq, width);
+    bp.bandPass(filterOrder, this.samplingFreq, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
       output[i] = bp.filter(signal[i]);
     }
@@ -91,14 +89,13 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
    * @param lowCutoff The lower cutoff frequency for the filter in Hz
    * @param highCutoff The upper cutoff frequency for the filter in Hz
    * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandStopFilter(double[] signal, int order, double lowCutoff, double highCutoff)
+  public double[] bandStopFilter(double[] signal, double lowCutoff, double highCutoff)
       throws IllegalArgumentException {
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
@@ -108,7 +105,7 @@ public class ButterworthFilter {
     double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
     Butterworth bs = new Butterworth();
-    bs.bandStop(order, this.samplingFreq, centreFreq, width);
+    bs.bandStop(filterOrder, this.samplingFreq, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
       output[i] = bs.filter(signal[i]);
     }
