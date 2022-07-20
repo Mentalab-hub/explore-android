@@ -3,12 +3,16 @@ package com.mentalab.utils;
 import android.util.Log;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.service.ExploreExecutor;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -69,5 +73,26 @@ public class Utils {
     } else {
       return ChannelCount.CC_8;
     }
+  }
+
+  /**
+   * Waits for futures to complete and return a list of results, or else exits on first exception.
+   */
+  public static CompletableFuture<List<Boolean>> sequence(List<CompletableFuture<Boolean>> com) {
+    CompletableFuture<List<Boolean>> result =
+        CompletableFuture.allOf(com.toArray(new CompletableFuture<?>[2]))
+            .thenApply(v -> com.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+
+    com.forEach(
+        f ->
+            f.whenComplete(
+                (t, ex) -> {
+                  if (ex != null) {
+                    result.completeExceptionally(ex);
+                    ExploreExecutor.getExecutorInstance()
+                        .shutdownNow(); // stop immediately if we cannot proceed
+                  }
+                }));
+    return result;
   }
 }

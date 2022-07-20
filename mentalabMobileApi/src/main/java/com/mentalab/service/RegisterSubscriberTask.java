@@ -8,24 +8,24 @@ import java.util.concurrent.Callable;
 
 public abstract class RegisterSubscriberTask<T> implements CheckedExceptionSupplier<Boolean> {
 
-  T getResultOf(CountDownSubscriber<T> sub) throws InterruptedException {
+  protected T getResultOf(CountDownSubscriber<T> sub) throws InterruptedException {
     ContentServer.getInstance().registerSubscriber(sub);
     T result = sub.awaitResult();
     ContentServer.getInstance().deRegisterSubscriber(sub);
     return result;
   }
 
-  T getResultOfTimeoutSub(CountDownSubscriber<T> sub) throws InterruptedException {
+  T registerTimeoutSub(CountDownSubscriber<T> sub) throws InterruptedException {
     ContentServer.getInstance().registerSubscriber(sub);
     T result = sub.awaitResultWithTimeout(3000);
     ContentServer.getInstance().deRegisterSubscriber(sub);
     return result;
   }
 
-  T getResultOfTimeoutSubAfterTask(CountDownSubscriber<T> sub, Callable<Void> task)
+  T registerTimeoutSubAndThen(CountDownSubscriber<T> sub, Callable<Void> andThen)
       throws Exception {
     ContentServer.getInstance().registerSubscriber(sub);
-    task.call();
+    andThen.call();
     T result = sub.awaitResultWithTimeout(3000);
     ContentServer.getInstance().deRegisterSubscriber(sub);
     return result;

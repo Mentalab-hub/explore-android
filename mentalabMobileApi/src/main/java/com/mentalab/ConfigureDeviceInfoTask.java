@@ -1,10 +1,12 @@
-package com.mentalab.service;
+package com.mentalab;
 
-import android.util.Log;
-import com.mentalab.ExploreDevice;
+import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.packets.info.DeviceInfoPacket;
+import com.mentalab.service.RegisterSubscriberTask;
 import com.mentalab.service.io.DeviceInfoSubscriber;
-import com.mentalab.utils.Utils;
+
+import java.io.IOException;
 
 public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPacket> {
 
@@ -21,7 +23,7 @@ public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPa
    * @throws InterruptedException when calling process timeout forces return from packet subscriber
    */
   @Override
-  public Boolean accept() throws InterruptedException {
+  public Boolean accept() throws InterruptedException, InvalidCommandException, IOException, NoBluetoothException {
     final DeviceInfoPacket deviceInfo = getResultOf(new DeviceInfoSubscriber());
     return configureExploreDevice(deviceInfo);
   }
@@ -29,7 +31,6 @@ public class ConfigureDeviceInfoTask extends RegisterSubscriberTask<DeviceInfoPa
   private Boolean configureExploreDevice(DeviceInfoPacket deviceInfo) {
     this.device.setSR(deviceInfo.getSamplingRate());
     this.device.setChannelMask(deviceInfo.getChannelMask());
-    Log.d(Utils.TAG, "Device info set.");
     return true;
   }
 }

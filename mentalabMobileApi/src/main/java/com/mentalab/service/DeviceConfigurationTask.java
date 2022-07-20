@@ -31,15 +31,8 @@ public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
    */
   @Override
   public Boolean accept() throws Exception {
-    final boolean acknowledged =
-        getResultOfTimeoutSubAfterTask(
-            new CommandAcknowledgeSubscriber(), () -> postCmdToOutputStream(command, outputStream));
-    if (acknowledged) {
-      Log.d(Utils.TAG, "Command acknowledged.");
-    } else {
-      Log.d(Utils.TAG, "Command not acknowledged.");
-    }
-    return acknowledged;
+    return registerTimeoutSubAndThen(
+        new CommandAcknowledgeSubscriber(), () -> postCmdToOutputStream(command, outputStream));
   }
 
   private Void postCmdToOutputStream(byte[] command, OutputStream outputStream) throws IOException {

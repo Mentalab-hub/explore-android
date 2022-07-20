@@ -1,7 +1,6 @@
-package com.mentalab.service;
+package com.mentalab;
 
-import android.util.Log;
-import com.mentalab.ExploreDevice;
+import com.mentalab.service.RegisterSubscriberTask;
 import com.mentalab.service.io.ChannelCountSubscriber;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.ChannelCount;
@@ -32,7 +31,6 @@ public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> {
     }
     final ChannelCount cc = Utils.getChannelCountFromInt(channelCount);
     this.device.setChannelCount(cc);
-    Log.d(Utils.TAG, "Channel count set:" + channelCount);
     return true;
   }
 }

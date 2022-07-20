@@ -3,6 +3,7 @@ package com.mentalab;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.DeviceConfigurationTask;
+import com.mentalab.service.ExploreExecutor;
 import com.mentalab.utils.commandtranslators.Command;
 
 import java.io.IOException;
@@ -33,7 +34,8 @@ interface DeviceManager {
       throws IOException, NoBluetoothException, InvalidCommandException {
     final byte[] encodedBytes = encodeCommand(c);
     return CompletableFuture.supplyAsync(
-            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes))
+            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes),
+            ExploreExecutor.getExecutorInstance())
         .exceptionally(
             e ->
                 false); // if DeviceConfigurationTask throws an exception, return false (gracefully)

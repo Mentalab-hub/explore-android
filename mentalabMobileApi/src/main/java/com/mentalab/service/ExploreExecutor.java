@@ -2,14 +2,18 @@ package com.mentalab.service;
 
 import java.util.concurrent.*;
 
-public class ExploreExecutor {
+public final class ExploreExecutor {
 
-  private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(5);
+  private ExploreExecutor() { // Static class
+  }
+
+  private static final ExecutorService BLOCKING_EXECUTOR = Executors.newSingleThreadExecutor();
+  private static ExecutorService PARALLEL_EXECUTOR = Executors.newFixedThreadPool(5);
   private static final ScheduledExecutorService SCHEDULED_EXECUTOR =
       Executors.newScheduledThreadPool(2);
 
   public static Future<Boolean> submitTask(Callable<Boolean> task) {
-    return EXECUTOR_SERVICE.submit(task);
+    return PARALLEL_EXECUTOR.submit(task);
   }
 
   public static Future<Boolean> submitTimeoutTask(
@@ -25,8 +29,13 @@ public class ExploreExecutor {
     return handler;
   }
 
+  public static ExecutorService getExecutorInstance() {
+    return PARALLEL_EXECUTOR;
+  }
+
   public static void shutDown() {
-    EXECUTOR_SERVICE.shutdown();
+    BLOCKING_EXECUTOR.shutdown();
+    PARALLEL_EXECUTOR.shutdown();
     SCHEDULED_EXECUTOR.shutdown();
   }
 }

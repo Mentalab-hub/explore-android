@@ -3,12 +3,10 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.service.ConfigureChannelCountTask;
-import com.mentalab.service.ConfigureDeviceInfoTask;
-import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
@@ -21,9 +19,12 @@ import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /** A wrapper around BluetoothDevice */
@@ -31,7 +32,6 @@ public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
-
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
@@ -48,11 +48,24 @@ public class ExploreDevice {
   }
 
   /** Start data acquisition process from explore device */
-  protected ExploreDevice acquire() throws IOException, NoBluetoothException {
-    CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this));
-    CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this));
+  protected ExploreDevice acquire()
+      throws IOException, NoBluetoothException, ExecutionException, InterruptedException {
+    CompletableFuture<List<Boolean>> deviceConfig = Utils.sequence(getInitCommands());
     MentalabCodec.decodeInputStream(getInputStream());
+    // wait on config, otherwise connection failed
+    for (boolean f : deviceConfig.get()) {
+      if (!f) {
+        throw new IOException("Unable to initialise device. Cannot proceed.");
+      }
+    }
     return this;
+  }
+
+  private List<CompletableFuture<Boolean>> getInitCommands() {
+    List<CompletableFuture<Boolean>> list = new ArrayList<>();
+    list.add(CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)));
+    list.add(CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this)));
+    return list;
   }
 
   /**
@@ -187,7 +200,7 @@ public class ExploreDevice {
   }
 
   public ChannelCount getChannelCount() {
-    return channelCount;
+    return this.channelCount;
   }
 
   public SamplingRate getSamplingRate() {
@@ -195,14 +208,17 @@ public class ExploreDevice {
   }
 
   public void setChannelCount(ChannelCount count) {
+    Log.d(Utils.TAG, "Channel count set to: " + count);
     this.channelCount = count;
   }
 
   public void setSR(SamplingRate sr) {
+    Log.d(Utils.TAG, "Sampling rate set to: " + sr);
     this.samplingRate = sr;
   }
 
   public void setChannelMask(int mask) {
+    Log.d(Utils.TAG, "Channel mask set to: " + Integer.toBinaryString(mask));
     this.channelMask = mask;
   }
 }

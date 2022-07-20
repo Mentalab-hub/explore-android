@@ -8,6 +8,7 @@ import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public final class MentalabCommands {
 
@@ -22,7 +23,8 @@ public final class MentalabCommands {
    * @throws NoBluetoothException
    */
   public static ExploreDevice connect(String deviceName)
-      throws NoBluetoothException, NoConnectionException, IOException {
+      throws NoBluetoothException, NoConnectionException, IOException, ExecutionException,
+          InterruptedException {
     deviceName = Utils.checkName(deviceName);
     return connectToExploreDevice(deviceName).acquire();
   }
