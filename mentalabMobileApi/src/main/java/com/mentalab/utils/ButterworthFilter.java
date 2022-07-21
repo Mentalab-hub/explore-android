@@ -4,11 +4,13 @@ import uk.me.berndporr.iirj.Butterworth;
 
 public class ButterworthFilter {
   /**
-   * The Butterworth class implements low-pass, high-pass, band-pass and
-   * band-stop filter using the Butterworth polynomials. Has the flattest pass-band but a poor
-   * roll-off rate. Reference: https://en.wikipedia.org/wiki/Butterworth_filter
+   * The Butterworth class implements low-pass, high-pass, band-pass and band-stop filter using the
+   * Butterworth polynomials. Has the flattest pass-band but a poor roll-off rate. Reference:
+   * https://en.wikipedia.org/wiki/Butterworth_filter
    */
-  private double samplingFreq;
+  private final double samplingFreq;
+
+  private static final int notchFreq = 50;
 
   /**
    * This constructor initialises the prerequisites required to use Butterworth filter.
@@ -91,15 +93,16 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
-   * @param lowCutoff The lower cutoff frequency for the filter in Hz
-   * @param highCutoff The upper cutoff frequency for the filter in Hz
    * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandStopFilter(double[] signal, int order, double lowCutoff, double highCutoff)
-      throws IllegalArgumentException {
+  public double[] bandStopFilter(double[] signal) throws IllegalArgumentException {
+
+    int order = 5;
+    double nyquistFreq = samplingFreq / 2;
+    double lowCutoff = (notchFreq - 2) / nyquistFreq;
+    double highCutoff = (notchFreq + 2) / nyquistFreq;
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
           "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
