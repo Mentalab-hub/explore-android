@@ -9,7 +9,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 
-public class RecordSubscriber extends Subscriber {
+public class RecordSubscriber extends Subscriber<Void> {
 
   protected final BufferedWriter wr;
   protected double currentTimestamp;

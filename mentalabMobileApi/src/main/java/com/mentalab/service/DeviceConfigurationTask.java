@@ -1,15 +1,14 @@
 package com.mentalab.service;
 
 import android.util.Log;
+import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.io.CommandAcknowledgeSubscriber;
-import com.mentalab.service.io.ContentServer;
-import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean> {
+public class DeviceConfigurationTask extends RegisterSubscriberTask<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;
@@ -28,18 +27,18 @@ public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean
    * @return boolean True when CommandAcknowledgement received, otherwise false
    * @throws IOException If the command cannot be written to the device OutputStream.
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
+   * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
-  public Boolean accept() throws IOException, InterruptedException {
-    final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
-    ContentServer.getInstance().registerSubscriber(sub);
-    sendCommand();
-    return sub.getAcknowledgement(); // blocking for 3s
+  public Boolean accept() throws Exception {
+    return registerTimeoutSubAndThen(
+        new CommandAcknowledgeSubscriber(), () -> postCmdToOutputStream(command, outputStream));
   }
 
-  private void sendCommand() throws IOException {
+  private Void postCmdToOutputStream(byte[] command, OutputStream outputStream) throws IOException {
     outputStream.write(command);
     outputStream.flush();
     Log.d(Utils.TAG, "Command sent.");
+    return null;
   }
 }
