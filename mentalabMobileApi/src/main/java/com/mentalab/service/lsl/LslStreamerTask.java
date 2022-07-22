@@ -40,7 +40,7 @@ public class LslStreamerTask implements Callable<Boolean> {
           new StreamInfo(
               connectedDevice + "_ExG",
               "ExG",
-              connectedDevice.getChannelCount(),
+              connectedDevice.getChannelCount().getAsInt(),
               samplingRate,
               ChannelFormat.FLOAT_32,
               connectedDevice + "_ExG");
