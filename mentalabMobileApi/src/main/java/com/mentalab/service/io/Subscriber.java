@@ -1,4 +1,4 @@
-package com.mentalab.io;
+package com.mentalab.service.io;
 
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.Topic;
