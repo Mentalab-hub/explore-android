@@ -158,6 +158,7 @@ public class ExploreDevice {
     return DeviceManager.submitCommand(c, () -> setSR(sr));
   }
 
+  /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
       throws InvalidCommandException, IOException, NoBluetoothException {
     return DeviceManager.submitCommand(Command.CMD_MEMORY_FORMAT);
