@@ -3,16 +3,12 @@ package com.mentalab.utils;
 import android.util.Log;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoConnectionException;
-import com.mentalab.service.ExploreExecutor;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -70,8 +66,7 @@ public class Utils {
   public static ChannelCount getChannelCountFromInt(int i) {
     if (i < 5) {
       return ChannelCount.CC_4;
-    } else {
-      return ChannelCount.CC_8;
     }
+    return ChannelCount.CC_8;
   }
 }

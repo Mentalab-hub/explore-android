@@ -32,6 +32,7 @@ public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
+
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
@@ -117,6 +118,7 @@ public class ExploreDevice {
     return binaryArg;
   }
 
+  /** Set a single channel on or off. */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Set<ConfigSwitch> channelToList = new HashSet<>();
@@ -207,7 +209,7 @@ public class ExploreDevice {
   }
 
   public String getDeviceName() {
-    return deviceName;
+    return this.deviceName;
   }
 
   public ChannelCount getChannelCount() {
