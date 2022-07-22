@@ -6,7 +6,6 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.Subscriber;
 import com.mentalab.packets.Packet;
-import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +15,7 @@ public class LslStreamerTask implements Callable<Boolean> {
 
   private static final int nominalSamplingRateOrientation = 20;
   private static final int dataCountOrientation = 9;
+  private static int samplingRate;
 
   static StreamOutlet lslStreamOutletExg;
   static StreamOutlet lslStreamOutletOrn;
@@ -30,11 +30,28 @@ public class LslStreamerTask implements Callable<Boolean> {
   // Pushes ExG, Orientation and Marker packets to LSL(Lab Streaming Layer)
   public LslStreamerTask(ExploreDevice device) {
     this.connectedDevice = device;
+    samplingRate = device.getSamplingRate().getAsInt();
   }
 
   @Override
   public Boolean call() throws InvalidDataException {
     try {
+
+      lslStreamInfoExg =
+          new StreamInfo(
+              connectedDevice + "_ExG",
+              "ExG",
+              connectedDevice.getChannelCount(),
+              samplingRate,
+              ChannelFormat.FLOAT_32,
+              connectedDevice + "_ExG");
+
+      if (lslStreamInfoExg == null) {
+        throw new IOException("Stream Info is Null!!");
+      }
+
+      lslStreamOutletExg = new StreamOutlet(lslStreamInfoExg);
+
       lslStreamInfoOrn =
           new StreamInfo(
               connectedDevice.getDeviceName() + "_ORN",
@@ -61,42 +78,34 @@ public class LslStreamerTask implements Callable<Boolean> {
         throw new IOException("Stream Info is Null!!");
       }
       lslStreamOutletMarker = new StreamOutlet(lslStreamInfoMarker);
-      Log.d(Utils.TAG, "Subscribing!!");
+
       ContentServer.getInstance()
           .registerSubscriber(
               new Subscriber(Topic.EXG) {
-                /**
-                 * Performs this operation on the given argument.
-                 *
-                 * @param packet the input argument
-                 */
+
                 @Override
                 public void accept(Packet packet) {
-                  if (lslStreamInfoExg == null) {
-                    lslStreamInfoExg =
-                        new StreamInfo(
-                            connectedDevice + "_ExG",
-                            "ExG",
-                            packet.getDataCount(),
-                            250,
-                            ChannelFormat.FLOAT_32,
-                            connectedDevice + "_ExG");
-                    if (lslStreamInfoExg != null) {
-                      try {
-                        lslStreamOutletExg = new StreamOutlet(lslStreamInfoExg);
-                      } catch (IOException exception) {
-                        exception.printStackTrace();
-                      }
-                    }
-                  }
-                  Log.d("TAG", "packetCallbackExG");
                   lslStreamOutletExg.push_chunk(convertArraylistToFloatArray(packet));
                 }
               });
 
-      // ContentServer.getInstance().subscribe("Orn", this::packetCallbackOrn);
+      ContentServer.getInstance()
+          .registerSubscriber(
+              new Subscriber(Topic.ORN) {
+                @Override
+                public void accept(Packet packet) {
+                  lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
+                }
+              });
 
-      // ContentServer.getInstance().subscribe("Marker", this::packetCallbackMarker);
+      ContentServer.getInstance()
+          .registerSubscriber(
+              new Subscriber(Topic.MARKER) {
+                @Override
+                public void accept(Packet packet) {
+                  lslStreamOutletMarker.push_sample(convertArraylistToFloatArray(packet));
+                }
+              });
     } catch (IOException exception) {
       throw new InvalidDataException("Error while stream LSL stream", null);
     }
@@ -123,16 +132,6 @@ public class LslStreamerTask implements Callable<Boolean> {
     }
     Log.d("TAG", "packetCallbackExG");
     lslStreamOutletExg.push_chunk(convertArraylistToFloatArray(packet));
-  }
-
-  public void packetCallbackOrn(Packet packet) {
-    Log.d("TAG", "packetCallbackOrn");
-    lslStreamOutletOrn.push_sample(convertArraylistToFloatArray(packet));
-  }
-
-  public void packetCallbackMarker(Packet packet) {
-    Log.d("TAG", "packetCallbackMarker");
-    lslStreamOutletMarker.push_sample(convertArraylistToFloatArray(packet));
   }
 
   float[] convertArraylistToFloatArray(Packet packet) {
