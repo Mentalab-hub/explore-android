@@ -15,8 +15,6 @@ public class CommandStatus extends UtilPacket {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    double[] convertedRawValues =
-        bytesToDouble(byteBuffer, 2); // TODO: Is this a function with side-effects? Why is it here?
     short status =
         ByteBuffer.wrap(new byte[] {byteBuffer[5], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
     commandStatus = status != 0;
