@@ -161,13 +161,7 @@ public class ExploreDevice {
     return DeviceManager.submitCommand(Command.CMD_SOFT_RESET);
   }
 
-  /**
-   * Returns the device data stream.
-   *
-   * @return InputStream of raw bytes
-   * @throws IOException
-   * @throws NoBluetoothException If Bluetooth connection is lost during communication
-   */
+  /** Returns the device data stream. */
   public InputStream getInputStream() throws NoBluetoothException, IOException {
     return BluetoothManager.getInputStream();
   }
@@ -215,17 +209,17 @@ public class ExploreDevice {
     return this.samplingRate;
   }
 
-  void setChannelCount(ChannelCount count) {
+  public void setChannelCount(ChannelCount count) {
     Log.d(Utils.TAG, "Channel count set to: " + count);
     this.channelCount = count;
   }
 
-  void setSR(SamplingRate sr) {
+  public void setSR(SamplingRate sr) {
     Log.d(Utils.TAG, "Sampling rate set to: " + sr);
     this.samplingRate = sr;
   }
 
-  void setChannelMask(int mask) {
+  public void setChannelMask(int mask) {
     Log.d(Utils.TAG, "Channel mask set to: " + Integer.toBinaryString(mask));
     this.channelMask = mask;
   }
