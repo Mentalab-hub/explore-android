@@ -5,19 +5,20 @@ import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.constants.ChannelCount;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-public class DeviceConfigurator {
+public class DeviceManager {
 
   private final ExploreDevice device;
 
-  public DeviceConfigurator(ExploreDevice exploreDevice) {
+  public DeviceManager(ExploreDevice exploreDevice) {
     this.device = exploreDevice;
   }
 
-  public void setDeviceChannelCount(int channelCount) {
+  public void setDeviceChannelCount(ChannelCount channelCount) {
     this.device.setChannelCount(channelCount);
   }
 
