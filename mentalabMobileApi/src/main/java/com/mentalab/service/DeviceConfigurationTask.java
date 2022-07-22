@@ -3,13 +3,13 @@ package com.mentalab.service;
 import android.util.Log;
 import com.mentalab.io.CommandAcknowledgeSubscriber;
 import com.mentalab.io.ContentServer;
+import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
 
-public class DeviceConfigurationTask implements Callable<Boolean> {
+public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean> {
 
   final byte[] command;
   final OutputStream outputStream;
@@ -30,7 +30,7 @@ public class DeviceConfigurationTask implements Callable<Boolean> {
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
    */
   @Override
-  public Boolean call() throws IOException, InterruptedException {
+  public Boolean accept() throws IOException, InterruptedException {
     final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     sendCommand();

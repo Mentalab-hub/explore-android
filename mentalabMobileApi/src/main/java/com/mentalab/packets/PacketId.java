@@ -9,7 +9,7 @@ import com.mentalab.packets.sensors.Orientation;
 import com.mentalab.packets.sensors.exg.Eeg94;
 import com.mentalab.packets.sensors.exg.Eeg98;
 
-public enum PacketID {
+public enum PacketId {
   ORIENTATION(13) {
     @Override
     public Packet createInstance(double timeStamp) {
@@ -103,7 +103,7 @@ public enum PacketID {
 
   private final int value;
 
-  PacketID(int value) {
+  PacketId(int value) {
     this.value = value;
   }
 

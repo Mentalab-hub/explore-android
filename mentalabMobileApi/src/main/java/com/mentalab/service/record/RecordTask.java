@@ -3,16 +3,20 @@ package com.mentalab.service.record;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.RecordSubscriber;
 import com.mentalab.io.SampledRecordSubscriber;
 import com.mentalab.utils.FileGenerator;
+import com.mentalab.utils.Utils;
+import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.concurrent.Callable;
@@ -24,11 +28,15 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
   private final Context cxt;
   private final String filename;
   private final SamplingRate sr;
-  private final int count;
+  private final ChannelCount count;
 
   private BufferedWriter eegWr;
   private BufferedWriter ornWr;
   private BufferedWriter markerWr;
+
+  private RecordSubscriber exgSubscriber;
+  private RecordSubscriber ornSubscriber;
+  private RecordSubscriber markerSubscriber;
 
   public RecordTask(Context c, String filename, ExploreDevice e) {
     this.cxt = c;
@@ -54,34 +62,29 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
   private void recordEeg(Uri exgFile) throws IOException {
-    this.eegWr =
-        new BufferedWriter(
-            new OutputStreamWriter(
-                cxt.getContentResolver().openOutputStream(exgFile, "wa")));
-    writeHeader(eegWr, buildEEGHeader(count));
-    ContentServer.getInstance()
-        .registerSubscriber(new SampledRecordSubscriber(Topic.EXG, eegWr, sr.getAsInt()));
+    this.eegWr = createNewBufferedWriter(cxt, exgFile);
+    this.exgSubscriber = new SampledRecordSubscriber(Topic.EXG, eegWr, sr.getAsInt());
+
+    writeHeader(eegWr, buildEEGHeader(count.getAsInt()));
+    ContentServer.getInstance().registerSubscriber(exgSubscriber);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
   private void recordOrn(Uri ornFile) throws IOException {
-    this.ornWr =
-        new BufferedWriter(
-            new OutputStreamWriter(
-                cxt.getContentResolver().openOutputStream(ornFile, "wa")));
+    this.ornWr = createNewBufferedWriter(cxt, ornFile);
+    this.ornSubscriber = new SampledRecordSubscriber(Topic.ORN, ornWr, ORN_SR);
+
     writeHeader(ornWr, "TimeStamp,ax,ay,az,gx,gy,gz,mx,my,mz");
-    ContentServer.getInstance()
-        .registerSubscriber(new SampledRecordSubscriber(Topic.ORN, ornWr, ORN_SR));
+    ContentServer.getInstance().registerSubscriber(ornSubscriber);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
   private void recordMarker(Uri markerFile) throws IOException {
-    this.markerWr =
-        new BufferedWriter(
-            new OutputStreamWriter(
-                cxt.getContentResolver().openOutputStream(markerFile, "wa")));
+    this.markerWr = createNewBufferedWriter(cxt, markerFile);
+    this.markerSubscriber = new RecordSubscriber(Topic.MARKER, markerWr);
+
     writeHeader(markerWr, "TimeStamp,Code");
-    ContentServer.getInstance().registerSubscriber(new RecordSubscriber(Topic.MARKER, markerWr));
+    ContentServer.getInstance().registerSubscriber(markerSubscriber);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -98,10 +101,24 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
     return headerBuilder.toString();
   }
 
+  private static BufferedWriter createNewBufferedWriter(Context c, Uri uri)
+      throws FileNotFoundException {
+    return new BufferedWriter(
+        new OutputStreamWriter(c.getContentResolver().openOutputStream(uri, "wa")));
+  }
+
   @Override
-  public void close() throws IOException {
-    eegWr.close();
-    ornWr.close();
-    markerWr.close();
+  public void close() {
+    ContentServer.getInstance().deRegisterSubscriber(exgSubscriber);
+    ContentServer.getInstance().deRegisterSubscriber(ornSubscriber);
+    ContentServer.getInstance().deRegisterSubscriber(markerSubscriber);
+    try {
+      eegWr.close();
+      ornWr.close();
+      markerWr.close();
+    } catch (IOException e) {
+      // unlikely this will occur if we successfully wrote to file
+      Log.e(Utils.TAG, "Failed to close writer. Ignored.", e);
+    }
   }
 }
