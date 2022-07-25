@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class ImpedanceCalculator implements Callable<Boolean> {
+public class ImpedanceCalculatorTask implements Callable<Boolean> {
 
   private final ExploreDevice device;
   private final ButterworthFilter butterworthFilter;
@@ -20,7 +20,10 @@ public class ImpedanceCalculator implements Callable<Boolean> {
   private volatile double slope;
   private volatile double offset;
 
-  public ImpedanceCalculator(ExploreDevice device) {
+  private Subscriber impedanceSubscriber;
+  private Subscriber calibrationInforSubscriber;
+
+  public ImpedanceCalculatorTask(ExploreDevice device) {
     this.device = device;
     butterworthFilter = new ButterworthFilter(device.getSamplingRate().getAsInt());
   }
@@ -39,27 +42,25 @@ public class ImpedanceCalculator implements Callable<Boolean> {
   }
 
   public void calculate() {
-    ContentServer.getInstance()
-        .registerSubscriber(
-            new Subscriber(Topic.EXG) {
-              @Override
-              public void accept(Packet packet) {
-                if (Thread.currentThread().isInterrupted()) {}
-
-                double[] doubleArray = convertArraylistToDoubleArray(packet);
-                double[] notchedValues = butterworthFilter.bandStopFilter(doubleArray);
-                double[] nosieLevel =
-                    getPeakToPeak(butterworthFilter.bandPassFilter(notchedValues, false));
-                double[] bandpassedValues = butterworthFilter.bandPassFilter(notchedValues, true);
-                double[] denoised = calculateimpedance(getPeakToPeak(bandpassedValues), nosieLevel);
-              }
-            });
+    impedanceSubscriber =
+        new Subscriber(Topic.EXG) {
+          @Override
+          public void accept(Packet packet) {
+            double[] doubleArray = convertArraylistToDoubleArray(packet);
+            double[] notchedValues = butterworthFilter.bandStopFilter(doubleArray);
+            double[] nosieLevel =
+                getPeakToPeak(butterworthFilter.bandPassFilter(notchedValues, false));
+            double[] bandpassedValues = butterworthFilter.bandPassFilter(notchedValues, true);
+            double[] denoised = calculateImpedance(getPeakToPeak(bandpassedValues), nosieLevel);
+          }
+        };
+    ContentServer.getInstance().registerSubscriber(impedanceSubscriber);
   }
 
   private double[] convertArraylistToDoubleArray(Packet packet) {
     List<Float> packetVoltageValues = packet.getData();
     double[] floatArray = new double[packetVoltageValues.size()];
-    Object[] array = packetVoltageValues.toArray();
+
     for (int index = 0; index < packetVoltageValues.size(); index++) {
       floatArray[index] = packetVoltageValues.get(index).doubleValue();
     }
@@ -79,21 +80,21 @@ public class ImpedanceCalculator implements Callable<Boolean> {
   }
 
   void getCalibrationInfo() {
-    ContentServer.getInstance()
-        .registerSubscriber(
-            new Subscriber(Topic.DEVICE_INFO) {
-              @Override
-              public void accept(Packet packet) {
-                if (packet instanceof CalibrationInfo) {
-                  List<Float> data = ((CalibrationInfo) packet).getData();
-                  slope = data.get(0);
-                  offset = data.get(1);
-                }
-              }
-            });
+    calibrationInforSubscriber =
+        new Subscriber(Topic.DEVICE_INFO) {
+          @Override
+          public void accept(Packet packet) {
+            if (packet instanceof CalibrationInfo) {
+              List<Float> data = ((CalibrationInfo) packet).getData();
+              slope = data.get(0);
+              offset = data.get(1);
+            }
+          }
+        };
+    ContentServer.getInstance().registerSubscriber(calibrationInforSubscriber);
   }
 
-  double[] calculateimpedance(double[] first, double[] second) {
+  double[] calculateImpedance(double[] first, double[] second) {
     int length = first.length;
     double[] result = new double[length];
     for (int i = 0; i < length; i++) {
@@ -102,5 +103,10 @@ public class ImpedanceCalculator implements Callable<Boolean> {
     }
 
     return result;
+  }
+
+  void cancelTask() {
+    ContentServer.getInstance().deRegisterSubscriber(impedanceSubscriber);
+    ContentServer.getInstance().deRegisterSubscriber(calibrationInforSubscriber);
   }
 }
