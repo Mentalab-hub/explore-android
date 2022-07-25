@@ -10,6 +10,7 @@ import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.service.ConfigureChannelCountTask;
 import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.ExploreExecutor;
+import com.mentalab.service.ImpedanceCalculator;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
@@ -17,13 +18,12 @@ import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.constants.ConfigProtocol;
 import com.mentalab.utils.constants.SamplingRate;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /** A wrapper around BluetoothDevice */
@@ -104,9 +104,7 @@ public class ExploreDevice {
     return binaryArg;
   }
 
-  /**
-   * Set a single channel on or off.
-   */
+  /** Set a single channel on or off. */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Set<ConfigSwitch> channelToList = new HashSet<>();
@@ -203,6 +201,13 @@ public class ExploreDevice {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
   }
 
+  public void calculateImpedance()
+      throws NoBluetoothException, IOException, InvalidCommandException {
+    final Command c = Command.CMD_SAMPLING_RATE_SET;
+    c.setArg(0x00);
+    DeviceConfigurator.submitCommand(c, ()-> startImpedanceTask());
+  }
+
   public String getDeviceName() {
     return deviceName;
   }
@@ -225,5 +230,10 @@ public class ExploreDevice {
 
   void setChannelMask(int mask) {
     this.channelMask = mask;
+  }
+
+  void startImpedanceTask(){
+
+    ExploreExecutor.submitTask(new ImpedanceCalculator(this));
   }
 }

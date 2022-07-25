@@ -12,6 +12,9 @@ public class ButterworthFilter {
 
   private static final int notchFreq = 50;
 
+  private double nyquistFreq;
+  private final int filterOrder = 5;
+
   /**
    * This constructor initialises the prerequisites required to use Butterworth filter.
    *
@@ -19,6 +22,7 @@ public class ButterworthFilter {
    */
   public ButterworthFilter(double Fs) {
     this.samplingFreq = Fs;
+    nyquistFreq = samplingFreq / 2;
   }
 
   /**
@@ -52,7 +56,7 @@ public class ButterworthFilter {
   public double[] highPassFilter(double[] signal, int order, double cutoffFreq) {
     double[] output = new double[signal.length];
     Butterworth hp = new Butterworth();
-    hp.highPass(order, this.samplingFreq, cutoffFreq);
+    hp.highPass(this.filterOrder, this.samplingFreq, cutoffFreq);
     for (int i = 0; i < output.length; i++) {
       output[i] = hp.filter(signal[i]);
     }
@@ -64,15 +68,13 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
-   * @param lowCutoff The lower cutoff frequency for the filter in Hz
-   * @param highCutoff The upper cutoff frequency for the filter in Hz
    * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandPassFilter(double[] signal, int order, double lowCutoff, double highCutoff)
-      throws IllegalArgumentException {
+  public double[] bandPassFilter(double[] signal) throws IllegalArgumentException {
+    double lowCutoff = (samplingFreq / 4 - 1.5) / nyquistFreq;
+    double highCutoff = (samplingFreq / 4 + 1.5) / nyquistFreq;
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
           "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
@@ -81,7 +83,7 @@ public class ButterworthFilter {
     double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
     Butterworth bp = new Butterworth();
-    bp.bandPass(order, this.samplingFreq, centreFreq, width);
+    bp.bandPass(this.filterOrder, this.samplingFreq, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
       output[i] = bp.filter(signal[i]);
     }
