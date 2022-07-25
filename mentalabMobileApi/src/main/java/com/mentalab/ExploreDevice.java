@@ -203,9 +203,10 @@ public class ExploreDevice {
 
   public void calculateImpedance()
       throws NoBluetoothException, IOException, InvalidCommandException {
-    final Command c = Command.CMD_SAMPLING_RATE_SET;
+    startImpedanceTask();
+    final Command c = Command.CMD_ZM_ENABLE;
     c.setArg(0x00);
-    DeviceConfigurator.submitCommand(c, ()-> startImpedanceTask());
+    DeviceConfigurator.submitCommand(c);
   }
 
   public String getDeviceName() {
@@ -232,7 +233,7 @@ public class ExploreDevice {
     this.channelMask = mask;
   }
 
-  void startImpedanceTask(){
+  void startImpedanceTask() {
 
     ExploreExecutor.submitTask(new ImpedanceCalculator(this));
   }

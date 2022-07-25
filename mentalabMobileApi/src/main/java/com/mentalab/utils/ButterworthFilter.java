@@ -72,9 +72,18 @@ public class ButterworthFilter {
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandPassFilter(double[] signal) throws IllegalArgumentException {
-    double lowCutoff = (samplingFreq / 4 - 1.5) / nyquistFreq;
-    double highCutoff = (samplingFreq / 4 + 1.5) / nyquistFreq;
+  public double[] bandPassFilter(double[] signal, boolean isDemodulationFilter)
+      throws IllegalArgumentException {
+
+    double lowCutoff;
+    double highCutoff;
+    if (isDemodulationFilter) {
+      lowCutoff = (samplingFreq / 4 - 1.5) / nyquistFreq;
+      highCutoff = (samplingFreq / 4 + 1.5) / nyquistFreq;
+    } else {
+      lowCutoff = (samplingFreq / 4 + 2.5) / nyquistFreq;
+      highCutoff = (samplingFreq / 4 + 5.5) / nyquistFreq;
+    }
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
           "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");

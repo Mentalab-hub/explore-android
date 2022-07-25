@@ -19,7 +19,9 @@ public abstract class Packet {
     this.timeStamp = timeStamp;
   }
 
-  protected static double[] bytesToDouble(byte[] bytes, int numOfbytesPerNumber) // TODO: IntelliJ suggests the second parameter is always 2
+  protected static double[] bytesToDouble(
+      byte[] bytes,
+      int numOfbytesPerNumber) // TODO: IntelliJ suggests the second parameter is always 2
       throws InvalidDataException {
     if (bytes.length % numOfbytesPerNumber != 0) {
       throw new InvalidDataException("Illegal length", null);
@@ -35,9 +37,6 @@ public abstract class Packet {
           ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
               .order(ByteOrder.LITTLE_ENDIAN)
               .getShort();
-      if (signBit == 1) { // TODO: IntelliJ suggests this IF statement is redundant...
-        value = -1 * (Math.pow(2, 8 * numOfbytesPerNumber) - value);
-      }
 
       values[i / numOfbytesPerNumber] = value;
     }

@@ -8,6 +8,9 @@ public enum Attributes {
   LIGHT("Light"),
   BATTERY("Battery"),
 
+  SLOPE("slope"),
+  OFFSET("offset"),
+
   MARKER("Marker"),
 
   ACCX("Accelerometer X"),

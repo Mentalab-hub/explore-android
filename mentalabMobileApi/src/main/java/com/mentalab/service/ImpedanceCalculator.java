@@ -4,6 +4,7 @@ import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
 import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
+import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.utils.ButterworthFilter;
 import com.mentalab.utils.constants.Topic;
 import java.util.Arrays;
@@ -16,6 +17,8 @@ public class ImpedanceCalculator implements Callable<Boolean> {
   private final ButterworthFilter butterworthFilter;
 
   private int nyquistFreq;
+  private volatile double slope;
+  private volatile double offset;
 
   public ImpedanceCalculator(ExploreDevice device) {
     this.device = device;
@@ -30,6 +33,7 @@ public class ImpedanceCalculator implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws Exception {
+    getCalibrationInfo();
     calculate();
     return true;
   }
@@ -40,9 +44,14 @@ public class ImpedanceCalculator implements Callable<Boolean> {
             new Subscriber(Topic.EXG) {
               @Override
               public void accept(Packet packet) {
+                if (Thread.currentThread().isInterrupted()) {}
+
                 double[] doubleArray = convertArraylistToDoubleArray(packet);
                 double[] notchedValues = butterworthFilter.bandStopFilter(doubleArray);
-                double[] bandpassedValues = butterworthFilter.bandPassFilter(notchedValues);
+                double[] nosieLevel =
+                    getPeakToPeak(butterworthFilter.bandPassFilter(notchedValues, false));
+                double[] bandpassedValues = butterworthFilter.bandPassFilter(notchedValues, true);
+                double[] denoised = calculateimpedance(getPeakToPeak(bandpassedValues), nosieLevel);
               }
             });
   }
@@ -67,5 +76,31 @@ public class ImpedanceCalculator implements Callable<Boolean> {
       peakToPeakValues[i / columnSize] = slice[slice.length] - slice[0];
     }
     return peakToPeakValues;
+  }
+
+  void getCalibrationInfo() {
+    ContentServer.getInstance()
+        .registerSubscriber(
+            new Subscriber(Topic.DEVICE_INFO) {
+              @Override
+              public void accept(Packet packet) {
+                if (packet instanceof CalibrationInfo) {
+                  List<Float> data = ((CalibrationInfo) packet).getData();
+                  slope = data.get(0);
+                  offset = data.get(1);
+                }
+              }
+            });
+  }
+
+  double[] calculateimpedance(double[] first, double[] second) {
+    int length = first.length;
+    double[] result = new double[length];
+    for (int i = 0; i < length; i++) {
+      result[i] = first[i] - second[i];
+      result[i] = (slope / Math.pow(10, 6)) - offset;
+    }
+
+    return result;
   }
 }

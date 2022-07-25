@@ -5,5 +5,6 @@ public enum Topic {
   COMMAND,
   ORN,
   MARKER,
-  DEVICE_INFO
+  DEVICE_INFO,
+  IMPEDANCE,
 }
