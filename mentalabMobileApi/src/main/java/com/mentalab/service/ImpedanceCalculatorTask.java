@@ -6,6 +6,7 @@ import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.utils.ButterworthFilter;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +47,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
         new Subscriber(Topic.EXG) {
           @Override
           public void accept(Packet packet) {
-            double[] doubleArray = convertArraylistToDoubleArray(packet);
+            double[] doubleArray = Utils.convertArraylistToDoubleArray(packet);
             double[] notchedValues = butterworthFilter.bandStopFilter(doubleArray);
             double[] nosieLevel =
                 getPeakToPeak(butterworthFilter.bandPassFilter(notchedValues, false));
@@ -55,16 +56,6 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
           }
         };
     ContentServer.getInstance().registerSubscriber(impedanceSubscriber);
-  }
-
-  private double[] convertArraylistToDoubleArray(Packet packet) {
-    List<Float> packetVoltageValues = packet.getData();
-    double[] floatArray = new double[packetVoltageValues.size()];
-
-    for (int index = 0; index < packetVoltageValues.size(); index++) {
-      floatArray[index] = packetVoltageValues.get(index).doubleValue();
-    }
-    return floatArray;
   }
 
   private double[] getPeakToPeak(double[] values) {
@@ -105,7 +96,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
     return result;
   }
 
-  void cancelTask() {
+  public void cancelTask() {
     ContentServer.getInstance().deRegisterSubscriber(impedanceSubscriber);
     ContentServer.getInstance().deRegisterSubscriber(calibrationInforSubscriber);
   }

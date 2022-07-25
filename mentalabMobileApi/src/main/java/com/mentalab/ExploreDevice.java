@@ -37,6 +37,7 @@ public class ExploreDevice {
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
 
   private RecordTask recordTask;
+  private ImpedanceCalculatorTask impedanceTask;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
@@ -201,12 +202,19 @@ public class ExploreDevice {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
   }
 
-  public void calculateImpedance()
+  public void startImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     startImpedanceTask();
     final Command c = Command.CMD_ZM_ENABLE;
     c.setArg(0x00);
     DeviceConfigurator.submitCommand(c);
+  }
+
+  public void stopImpedanceCalculation()
+      throws NoBluetoothException, IOException, InvalidCommandException {
+    final Command c = Command.CMD_ZM_DISABLE;
+    c.setArg(0x00);
+    DeviceConfigurator.submitCommand(c, () -> stopImpedanceTask());
   }
 
   public String getDeviceName() {
@@ -234,7 +242,11 @@ public class ExploreDevice {
   }
 
   void startImpedanceTask() {
+    impedanceTask = new ImpedanceCalculatorTask(this);
+    ExploreExecutor.submitTask(impedanceTask);
+  }
 
-    ExploreExecutor.submitTask(new ImpedanceCalculatorTask(this));
+  void stopImpedanceTask() {
+    impedanceTask.cancelTask();
   }
 }
