@@ -1,10 +1,10 @@
 package com.mentalab.service;
 
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ContentServer;
-import com.mentalab.io.Subscriber;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.Subscriber;
 import com.mentalab.utils.ButterworthFilter;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
@@ -59,7 +59,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
   }
 
   private double[] getPeakToPeak(double[] values) {
-    int columnSize = values.length / device.getChannelCount();
+    int columnSize = values.length / device.getChannelCount().getAsInt();
     double[] peakToPeakValues = new double[columnSize];
 
     for (int i = 0; i < values.length - 1; i += columnSize) {

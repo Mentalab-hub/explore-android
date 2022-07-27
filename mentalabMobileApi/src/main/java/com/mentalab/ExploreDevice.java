@@ -203,14 +203,14 @@ public class ExploreDevice {
     startImpedanceTask();
     final Command c = Command.CMD_ZM_ENABLE;
     c.setArg(0x00);
-    DeviceConfigurator.submitCommand(c);
+    DeviceManager.submitCommand(c);
   }
 
   public void stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
     c.setArg(0x00);
-    DeviceConfigurator.submitCommand(c, () -> stopImpedanceTask());
+    DeviceManager.submitCommand(c, () -> stopImpedanceTask());
   }
 
   public String getDeviceName() {
