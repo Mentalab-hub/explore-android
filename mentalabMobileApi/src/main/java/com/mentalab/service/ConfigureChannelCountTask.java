@@ -2,9 +2,9 @@ package com.mentalab.service;
 
 import com.mentalab.DeviceManager;
 import com.mentalab.ExploreDevice;
+import com.mentalab.packets.Packet;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.Subscriber;
-import com.mentalab.packets.Packet;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.Topic;
@@ -38,6 +38,7 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
             final DeviceManager manager = new DeviceManager(device);
             manager.setDeviceChannelCount(channelCount);
             result = true;
+            latch.countDown();
           }
         };
     ContentServer.getInstance().registerSubscriber(channelCountSubscriber);
