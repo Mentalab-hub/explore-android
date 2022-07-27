@@ -10,7 +10,7 @@ public interface CheckedExceptionSupplier<T> extends Supplier<T> {
   default T get() {
     try {
       return accept();
-    } catch (final Exception e) {
+    } catch (Exception e) {
       throw new CompletionException(e);
     }
   }

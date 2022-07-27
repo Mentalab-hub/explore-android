@@ -5,11 +5,8 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.service.ConfigureChannelCountTask;
-import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
@@ -22,7 +19,9 @@ import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -50,21 +49,34 @@ public class ExploreDevice {
   }
 
   /**
-   * Start data acquisition process from explore device
+   * Start acquiring data from this device.
    *
-   * @throws IOException
-   * @throws NoBluetoothException
+   * <p>Before reading the Bluetooth input stream, two tasks are assigned that wait for packets and
+   * configure the device based on those packets. If these packets are not received, or the device
+   * is not configured, we cannot proceed.
    */
-  public void acquire()
-      throws IOException, NoBluetoothException, InitializationFailureException, ExecutionException,
-          InterruptedException {
-    final Future<Boolean> channelCountConfigured =
-        ExploreExecutor.submitTask(new ConfigureChannelCountTask(this));
-    final Future<Boolean> deviceInfoConfigured =
-        ExploreExecutor.submitTask(new ConfigureDeviceInfoTask(this));
+  protected ExploreDevice acquire()
+      throws IOException, NoBluetoothException, ExecutionException, InterruptedException {
+    final List<CompletableFuture<Boolean>> deviceConfig = getInitCommands();
     MentalabCodec.decodeInputStream(getInputStream());
-    if (!(channelCountConfigured.get() && deviceInfoConfigured.get())) {
-      throw new InitializationFailureException("Device Info not updated. Exiting.");
+    waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
+    return this;
+  }
+
+  private List<CompletableFuture<Boolean>> getInitCommands() {
+    final List<CompletableFuture<Boolean>> list = new ArrayList<>();
+    list.add(CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)));
+    list.add(CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this)));
+    return list;
+  }
+
+  private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
+      throws ExecutionException, InterruptedException, IOException {
+    for (CompletableFuture<Boolean> f : deviceConfig) {
+      if (!f.get()) {
+        MentalabCommands.shutdown();
+        throw new IOException("Unable to initialise device. Cannot proceed.");
+      }
     }
   }
 
