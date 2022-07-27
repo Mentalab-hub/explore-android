@@ -6,11 +6,12 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ContentServer;
-import com.mentalab.io.RecordSubscriber;
-import com.mentalab.io.SampledRecordSubscriber;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.RecordSubscriber;
+import com.mentalab.service.io.SampledRecordSubscriber;
 import com.mentalab.utils.FileGenerator;
 import com.mentalab.utils.Utils;
+import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
@@ -27,7 +28,7 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
   private final Context cxt;
   private final String filename;
   private final SamplingRate sr;
-  private final int count;
+  private final ChannelCount count;
 
   private BufferedWriter eegWr;
   private BufferedWriter ornWr;
@@ -64,7 +65,7 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
     this.eegWr = createNewBufferedWriter(cxt, exgFile);
     this.exgSubscriber = new SampledRecordSubscriber(Topic.EXG, eegWr, sr.getAsInt());
 
-    writeHeader(eegWr, buildEEGHeader(count));
+    writeHeader(eegWr, buildEEGHeader(count.getAsInt()));
     ContentServer.getInstance().registerSubscriber(exgSubscriber);
   }
 

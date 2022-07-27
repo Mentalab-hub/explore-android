@@ -3,6 +3,7 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.InvalidCommandException;
@@ -16,6 +17,7 @@ import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 import com.mentalab.utils.constants.SamplingRate;
 import java.io.IOException;
@@ -32,7 +34,7 @@ public class ExploreDevice {
   private final BluetoothDevice btDevice;
   private final String deviceName;
 
-  private int channelCount = 8;
+  private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
 
@@ -81,7 +83,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return DeviceConfigurator.submitCommand(c, () -> setChannelMask(c.getArg()));
+    return DeviceManager.submitCommand(c, () -> setChannelMask(c.getArg()));
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -123,7 +125,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
-    return DeviceConfigurator.submitCommand(c);
+    return DeviceManager.submitCommand(c);
   }
 
   private static Command generateModuleCommand(ConfigSwitch module) {
@@ -142,13 +144,13 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
-    return DeviceConfigurator.submitCommand(c, () -> setSR(sr));
+    return DeviceManager.submitCommand(c, () -> setSR(sr));
   }
 
   /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return DeviceConfigurator.submitCommand(Command.CMD_MEMORY_FORMAT);
+    return DeviceManager.submitCommand(Command.CMD_MEMORY_FORMAT);
   }
 
   /**
@@ -157,16 +159,10 @@ public class ExploreDevice {
    */
   public Future<Boolean> softReset()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return DeviceConfigurator.submitCommand(Command.CMD_SOFT_RESET);
+    return DeviceManager.submitCommand(Command.CMD_SOFT_RESET);
   }
 
-  /**
-   * Returns the device data stream.
-   *
-   * @return InputStream of raw bytes
-   * @throws IOException
-   * @throws NoBluetoothException If Bluetooth connection is lost during communication
-   */
+  /** Returns the device data stream. */
   public InputStream getInputStream() throws NoBluetoothException, IOException {
     return BluetoothManager.getInputStream();
   }
@@ -218,26 +214,29 @@ public class ExploreDevice {
   }
 
   public String getDeviceName() {
-    return deviceName;
+    return this.deviceName;
   }
 
-  public int getChannelCount() {
-    return channelCount;
+  public ChannelCount getChannelCount() {
+    return this.channelCount;
   }
 
   public SamplingRate getSamplingRate() {
     return this.samplingRate;
   }
 
-  void setChannelCount(int count) {
+  public void setChannelCount(ChannelCount count) {
+    Log.d(Utils.TAG, "Channel count set to: " + count);
     this.channelCount = count;
   }
 
-  void setSR(SamplingRate sr) {
+  public void setSR(SamplingRate sr) {
+    Log.d(Utils.TAG, "Sampling rate set to: " + sr);
     this.samplingRate = sr;
   }
 
-  void setChannelMask(int mask) {
+  public void setChannelMask(int mask) {
+    Log.d(Utils.TAG, "Channel mask set to: " + Integer.toBinaryString(mask));
     this.channelMask = mask;
   }
 

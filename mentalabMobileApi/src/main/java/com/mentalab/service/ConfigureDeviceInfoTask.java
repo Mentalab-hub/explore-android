@@ -1,9 +1,9 @@
 package com.mentalab.service;
 
-import com.mentalab.DeviceConfigurator;
+import com.mentalab.DeviceManager;
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ContentServer;
-import com.mentalab.io.Subscriber;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.Subscriber;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.utils.constants.Topic;
@@ -34,8 +34,8 @@ public class ConfigureDeviceInfoTask implements Callable<Boolean> {
             new Subscriber(Topic.DEVICE_INFO) {
               @Override
               public void accept(Packet packet) {
-                DeviceConfigurator configurator =
-                    new DeviceConfigurator(device);
+                DeviceManager configurator =
+                    new DeviceManager(device);
                 configurator.setDeviceInfo((DeviceInfoPacket) packet);
                 result = true;
                 latch.countDown();

@@ -4,6 +4,7 @@ import android.util.Log;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.Packet;
+import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -71,5 +72,12 @@ public class Utils {
       floatArray[index] = packetVoltageValues.get(index).doubleValue();
     }
     return floatArray;
+  }
+
+  public static ChannelCount getChannelCountFromInt(int i) {
+    if (i < 5) {
+      return ChannelCount.CC_4;
+    }
+    return ChannelCount.CC_8;
   }
 }

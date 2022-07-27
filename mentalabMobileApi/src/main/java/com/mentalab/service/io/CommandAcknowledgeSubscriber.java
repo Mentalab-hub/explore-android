@@ -1,4 +1,4 @@
-package com.mentalab.io;
+package com.mentalab.service.io;
 
 import android.util.Log;
 import com.mentalab.packets.Packet;

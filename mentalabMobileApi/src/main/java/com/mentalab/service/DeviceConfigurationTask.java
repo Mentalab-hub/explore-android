@@ -1,8 +1,8 @@
 package com.mentalab.service;
 
 import android.util.Log;
-import com.mentalab.io.CommandAcknowledgeSubscriber;
-import com.mentalab.io.ContentServer;
+import com.mentalab.service.io.CommandAcknowledgeSubscriber;
+import com.mentalab.service.io.ContentServer;
 import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
 

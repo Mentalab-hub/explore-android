@@ -22,7 +22,7 @@ public class Orientation extends PublishablePacket {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    final double[] convertedRawValues = bytesToDouble(byteBuffer, 2);
+    final double[] convertedRawValues = bytesToDouble(byteBuffer);
 
     for (int i = 0; i < convertedRawValues.length; i++) {
       if (i < 3) {

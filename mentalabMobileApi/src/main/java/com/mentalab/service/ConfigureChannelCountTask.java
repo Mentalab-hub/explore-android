@@ -1,10 +1,12 @@
 package com.mentalab.service;
 
-import com.mentalab.DeviceConfigurator;
+import com.mentalab.DeviceManager;
 import com.mentalab.ExploreDevice;
-import com.mentalab.io.ContentServer;
-import com.mentalab.io.Subscriber;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.Subscriber;
 import com.mentalab.packets.Packet;
+import com.mentalab.utils.Utils;
+import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.Topic;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -32,9 +34,9 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
         new Subscriber(Topic.EXG) {
           @Override
           public void accept(Packet packet) {
-            int channelCount = packet.getDataCount();
-            DeviceConfigurator configurator = new DeviceConfigurator(device);
-            configurator.setDeviceChannelCount(channelCount);
+            final ChannelCount channelCount = Utils.getChannelCountFromInt(packet.getDataCount());
+            final DeviceManager manager = new DeviceManager(device);
+            manager.setDeviceChannelCount(channelCount);
             result = true;
           }
         };
