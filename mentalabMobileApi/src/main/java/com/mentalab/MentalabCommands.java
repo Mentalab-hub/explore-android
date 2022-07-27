@@ -26,7 +26,7 @@ public final class MentalabCommands {
       throws NoBluetoothException, NoConnectionException, IOException, ExecutionException,
           InterruptedException {
     deviceName = Utils.checkName(deviceName);
-    return connectToExploreDevice(deviceName).acquire();
+    return connectToExploreDevice(deviceName);
   }
 
   private static ExploreDevice connectToExploreDevice(String deviceName)
