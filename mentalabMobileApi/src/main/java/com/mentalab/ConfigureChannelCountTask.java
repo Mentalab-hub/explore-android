@@ -1,15 +1,16 @@
 package com.mentalab;
 
-import com.mentalab.service.RegisterSubscriberTask;
 import com.mentalab.service.io.ChannelCountSubscriber;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.ChannelCount;
 
-public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> {
+public class ConfigureChannelCountTask implements CheckedExceptionSupplier<Boolean> {
 
   private final ExploreDevice device;
 
-  public ConfigureChannelCountTask(ExploreDevice device) {
+  ConfigureChannelCountTask(ExploreDevice device) {
     this.device = device;
   }
 
@@ -21,8 +22,16 @@ public class ConfigureChannelCountTask extends RegisterSubscriberTask<Integer> {
    */
   @Override
   public Boolean accept() throws InterruptedException {
-    final int channelCount = getResultOf(new ChannelCountSubscriber());
+    final ChannelCountSubscriber sub = registerSubscriber();
+    final int channelCount = sub.awaitResult();
+    ContentServer.getInstance().deRegisterSubscriber(sub);
     return configureExploreDevice(channelCount);
+  }
+
+  private ChannelCountSubscriber registerSubscriber() {
+    final ChannelCountSubscriber sub = new ChannelCountSubscriber();
+    ContentServer.getInstance().registerSubscriber(sub);
+    return sub;
   }
 
   private Boolean configureExploreDevice(int channelCount) {
