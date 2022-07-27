@@ -1,5 +1,6 @@
 package com.mentalab.service;
 
+import android.util.Log;
 import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
@@ -16,6 +17,8 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
   private final CountDownLatch latch = new CountDownLatch(1);
   private volatile Boolean result = false;
 
+  Subscriber channelCountSubscriber;
+
   public ConfigureChannelCountTask(ExploreDevice device) {
     this.device = device;
   }
@@ -28,19 +31,27 @@ public class ConfigureChannelCountTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws InterruptedException {
-    Subscriber channelCountSubscriber =
+    channelCountSubscriber =
         new Subscriber(Topic.EXG) {
           @Override
           public void accept(Packet packet) {
+            Log.d("EXPLORE_XX", "-----------------------------EXG");
             int channelCount = packet.getDataCount();
             DeviceConfigurator configurator = new DeviceConfigurator(device);
             configurator.setDeviceChannelCount(channelCount);
+            // deregister subscriber on successful configuration
+            deregisterOnExit();
             result = true;
+            latch.countDown();
           }
         };
     ContentServer.getInstance().registerSubscriber(channelCountSubscriber);
     latch.await(1000, TimeUnit.MILLISECONDS);
     ContentServer.getInstance().deRegisterSubscriber(channelCountSubscriber);
     return result;
+  }
+
+  private void deregisterOnExit() {
+    ContentServer.getInstance().deRegisterSubscriber(channelCountSubscriber);
   }
 }

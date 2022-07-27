@@ -1,5 +1,6 @@
 package com.mentalab.service;
 
+import android.util.Log;
 import com.mentalab.DeviceConfigurator;
 import com.mentalab.ExploreDevice;
 import com.mentalab.io.ContentServer;
@@ -17,6 +18,8 @@ public class ConfigureDeviceInfoTask implements Callable<Boolean> {
   private final ExploreDevice device;
   private volatile Boolean result = false;
 
+  Subscriber deviceInfoSubscriber;
+
   public ConfigureDeviceInfoTask(ExploreDevice device) {
     this.device = device;
   }
@@ -29,20 +32,26 @@ public class ConfigureDeviceInfoTask implements Callable<Boolean> {
    */
   @Override
   public Boolean call() throws InterruptedException {
-    ContentServer.getInstance()
-        .registerSubscriber(
-            new Subscriber(Topic.DEVICE_INFO) {
-              @Override
-              public void accept(Packet packet) {
-                DeviceConfigurator configurator =
-                    new DeviceConfigurator(device);
-                configurator.setDeviceInfo((DeviceInfoPacket) packet);
-                result = true;
-                latch.countDown();
-              }
-            });
+    deviceInfoSubscriber =
+        new Subscriber(Topic.DEVICE_INFO) {
+          @Override
+          public void accept(Packet packet) {
+            Log.d("EXPLORE_XX", "-----------------------------DEVICE_INFO");
+            DeviceConfigurator configurator = new DeviceConfigurator(device);
+            configurator.setDeviceInfo((DeviceInfoPacket) packet);
+            // deregister subscriber on successful configuration
+            deregisterOnExit();
+            result = true;
+            latch.countDown();
+          }
+        };
+    ContentServer.getInstance().registerSubscriber(deviceInfoSubscriber);
 
     latch.await(1000, TimeUnit.MILLISECONDS);
     return result;
+  }
+
+  private void deregisterOnExit() {
+    ContentServer.getInstance().deRegisterSubscriber(deviceInfoSubscriber);
   }
 }
