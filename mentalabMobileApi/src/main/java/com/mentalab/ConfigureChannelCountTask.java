@@ -28,7 +28,7 @@ public class ConfigureChannelCountTask implements CheckedExceptionSupplier<Boole
     return configureExploreDevice(channelCount);
   }
 
-  private ChannelCountSubscriber registerSubscriber() {
+  private static ChannelCountSubscriber registerSubscriber() {
     final ChannelCountSubscriber sub = new ChannelCountSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     return sub;

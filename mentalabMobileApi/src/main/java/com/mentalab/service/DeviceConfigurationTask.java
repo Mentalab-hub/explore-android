@@ -42,7 +42,7 @@ public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean
     return result;
   }
 
-  private CommandAcknowledgeSubscriber registerSubscriber() {
+  private static CommandAcknowledgeSubscriber registerSubscriber() {
     final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     return sub;

@@ -31,7 +31,7 @@ public class ConfigureDeviceInfoTask implements CheckedExceptionSupplier<Boolean
     return configureExploreDevice(deviceInfo);
   }
 
-  private DeviceInfoSubscriber registerSubscriber() {
+  private static DeviceInfoSubscriber registerSubscriber() {
     final DeviceInfoSubscriber sub = new DeviceInfoSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     return sub;
