@@ -14,7 +14,7 @@ public class ContentServer {
 
   private ContentServer() {}
 
-  public static ContentServer getInstance() {
+  public static synchronized ContentServer getInstance() {
     if (INSTANCE == null) {
       INSTANCE = new ContentServer();
     }
