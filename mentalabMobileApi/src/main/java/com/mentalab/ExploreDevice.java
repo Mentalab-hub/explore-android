@@ -8,6 +8,7 @@ import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InitializationFailureException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.service.ConfigureChannelCountTask;
 import com.mentalab.service.ConfigureDeviceInfoTask;
 import com.mentalab.service.ExploreExecutor;
@@ -37,6 +38,8 @@ public class ExploreDevice {
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
+  private float slope;
+  private double offset;
 
   private RecordTask recordTask;
   private ImpedanceCalculatorTask impedanceTask;
@@ -200,10 +203,26 @@ public class ExploreDevice {
 
   public void startImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
-    startImpedanceTask();
     final Command c = Command.CMD_ZM_ENABLE;
     c.setArg(0x00);
-    DeviceManager.submitCommand(c);
+    CompletableFuture<CalibrationInfo> result = DeviceManager.processImpCommand(c);
+    result
+        .thenApply(
+            x -> {
+              if (x != null) {
+                Log.d(
+                    "IMPEDANCE",
+                    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                return setCalibrationValues(x);
+              }
+              return null;
+            })
+        .thenApply(
+            x -> {
+              startImpedanceTask(x);
+              return null;
+            });
+    Log.d("IMP", "Calling imp task");
   }
 
   public void stopImpedanceCalculation()
@@ -215,6 +234,14 @@ public class ExploreDevice {
 
   public String getDeviceName() {
     return this.deviceName;
+  }
+
+  public double getSlope() {
+    return this.slope;
+  }
+
+  public double getOffset() {
+    return this.slope;
   }
 
   public ChannelCount getChannelCount() {
@@ -240,12 +267,20 @@ public class ExploreDevice {
     this.channelMask = mask;
   }
 
-  void startImpedanceTask() {
+  void startImpedanceTask(ExploreDevice device) {
     impedanceTask = new ImpedanceCalculatorTask(this);
     ExploreExecutor.submitTask(impedanceTask);
   }
 
   void stopImpedanceTask() {
     impedanceTask.cancelTask();
+  }
+
+  ExploreDevice setCalibrationValues(CalibrationInfo calibrationInfo) {
+    synchronized (this) {
+      this.slope = calibrationInfo.getSlope();
+      this.offset = calibrationInfo.getOffset();
+      return this;
+    }
   }
 }

@@ -28,15 +28,13 @@ public class CommandAcknowledgeSubscriber extends Subscriber {
 
     if (p instanceof CommandStatus) {
       result = ((CommandStatus) p).getResult();
-    } else {
-      result = false;
     }
-
     latch.countDown();
   }
 
   public boolean getAcknowledgement() throws InterruptedException {
     latch.await(3000, TimeUnit.MILLISECONDS);
+    Log.d(Utils.TAG, "Returning with result------------- " + result);
     return result;
   }
 }

@@ -2,8 +2,10 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
+import com.mentalab.service.ImpedanceConfigurationTask;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.constants.ChannelCount;
 
@@ -37,6 +39,14 @@ public class DeviceManager {
           }
         });
     return submittedCmd;
+  }
+
+  protected static CompletableFuture<CalibrationInfo> processImpCommand(Command c)
+      throws InvalidCommandException, IOException, NoBluetoothException {
+    final byte[] encodedBytes = encodeCommand(c);
+    return CompletableFuture.supplyAsync(
+        new ImpedanceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes))
+        .exceptionally(e -> null);
   }
 
   /**

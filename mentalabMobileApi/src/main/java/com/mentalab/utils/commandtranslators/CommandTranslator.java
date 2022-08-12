@@ -1,6 +1,7 @@
 package com.mentalab.utils.commandtranslators;
 
 import android.util.Log;
+import com.mentalab.utils.Utils;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -22,6 +23,7 @@ public abstract class CommandTranslator {
     byte[] convertedData = new byte[dataLength];
     convertedData[0] = (byte) pId;
     convertedData[1] = (byte) count;
+    Log.d(Utils.TAG, "++++++++++++++++++++++ count is " + count);
     convertedData[2] = (byte) payload;
     convertedData[3] = (byte) 0;
 

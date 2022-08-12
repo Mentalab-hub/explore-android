@@ -3,6 +3,7 @@ package com.mentalab.service;
 import com.mentalab.DeviceManager;
 import com.mentalab.ExploreDevice;
 import com.mentalab.packets.Packet;
+import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.Subscriber;
@@ -34,6 +35,7 @@ public class ConfigureDeviceInfoTask implements Callable<Boolean> {
             new Subscriber(Topic.DEVICE_INFO) {
               @Override
               public void accept(Packet packet) {
+                if (packet instanceof CalibrationInfo) return;
                 DeviceManager configurator = new DeviceManager(device);
                 configurator.setDeviceInfo((DeviceInfoPacket) packet);
                 result = true;
