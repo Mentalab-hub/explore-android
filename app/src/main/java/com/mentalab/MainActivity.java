@@ -27,20 +27,13 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      ExploreDevice device = MentalabCommands.connect("CA26");
-      device.acquire();
-      device.startImpedanceCalculation();
-      //device.formatMemory();
-      Subscriber impsub = new Subscriber(Topic.IMPEDANCE) {
-        @Override
-        public void accept(Packet packet) {
-          Log.d("IMPEDANCE", "§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§ " + packet.getData());
-        }
-      };
-
-      ContentServer.getInstance().registerSubscriber(impsub);
-
-    } catch (NoBluetoothException | NoConnectionException | IOException | InitializationFailureException | ExecutionException | InterruptedException | InvalidCommandException e) {
+      MentalabCommands.connect("CA4A").acquire();
+    } catch (NoBluetoothException
+        | NoConnectionException
+        | IOException
+        | InitializationFailureException
+        | ExecutionException
+        | InterruptedException e) {
       e.printStackTrace();
     }
   }
