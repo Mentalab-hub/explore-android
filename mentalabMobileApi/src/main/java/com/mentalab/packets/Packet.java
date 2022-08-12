@@ -21,8 +21,7 @@ public abstract class Packet {
     this.timeStamp = timeStamp;
   }
 
-  protected static double[] bytesToDouble(byte[] bytes)
-          throws InvalidDataException {
+  protected static double[] bytesToDouble(byte[] bytes) throws InvalidDataException {
     checkByteLength(bytes);
 
     final int arraySize = bytes.length / BYTES_PER_DOUBLE;
@@ -40,8 +39,8 @@ public abstract class Packet {
 
   protected static double parseByte(byte[] bytes, int i) {
     return ByteBuffer.wrap(new byte[] {bytes[i], bytes[i + 1]})
-            .order(ByteOrder.LITTLE_ENDIAN)
-            .getShort();
+        .order(ByteOrder.LITTLE_ENDIAN)
+        .getShort();
   }
 
   private static void checkByteLength(byte[] bytes) throws InvalidDataException {

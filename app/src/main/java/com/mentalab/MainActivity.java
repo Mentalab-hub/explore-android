@@ -2,12 +2,19 @@ package com.mentalab;
 
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mentalab.exception.InitializationFailureException;
+import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 
+import com.mentalab.packets.Packet;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.Subscriber;
+import com.mentalab.utils.constants.SamplingRate;
+import com.mentalab.utils.constants.Topic;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 

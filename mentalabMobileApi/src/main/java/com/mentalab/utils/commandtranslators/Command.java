@@ -40,13 +40,13 @@ public enum Command {
   CMD_ZM_DISABLE(0xA6) {
     @Override
     public CommandTranslator createCommandTranslator() {
-      return null;
+      return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
     }
   },
   CMD_ZM_ENABLE(0xA7) {
     @Override
     public CommandTranslator createCommandTranslator() {
-      return null;
+      return new TwoByteCommandTranslator(this.getOperationCode(), 0);
     }
   },
   CMD_SOFT_RESET(0xA8) {

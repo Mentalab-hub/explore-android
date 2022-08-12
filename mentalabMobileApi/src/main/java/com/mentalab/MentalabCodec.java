@@ -1,10 +1,14 @@
 package com.mentalab;
 
+import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.packets.command.CommandStatus;
+import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
 import java.io.IOException;
@@ -79,6 +83,10 @@ public final class MentalabCodec {
       while (!Thread.currentThread().isInterrupted()) {
         buffer = new byte[1024];
         final int pID = readStreamToInt(1);
+        Log.d("IMPEDANCE", "Getting here PID: " + pID);
+        if (pID == 195){
+          Log.d("", "");
+        };
         readStreamToInt(1); // count, ignore
         final int payload = readStreamToInt(2);
         double timeStamp = readStreamToInt(4);
@@ -94,6 +102,7 @@ public final class MentalabCodec {
 
         if (packet instanceof Publishable) {
           ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
+          Log.d("TEST_", "getting packets!!!");
         }
       }
       return null;

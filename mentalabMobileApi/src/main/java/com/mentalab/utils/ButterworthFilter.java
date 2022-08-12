@@ -4,11 +4,16 @@ import uk.me.berndporr.iirj.Butterworth;
 
 public class ButterworthFilter {
   /**
-   * The Butterworth class implements low-pass, high-pass, band-pass and
-   * band-stop filter using the Butterworth polynomials. Has the flattest pass-band but a poor
-   * roll-off rate. Reference: https://en.wikipedia.org/wiki/Butterworth_filter
+   * The Butterworth class implements low-pass, high-pass, band-pass and band-stop filter using the
+   * Butterworth polynomials. Has the flattest pass-band but a poor roll-off rate. Reference:
+   * https://en.wikipedia.org/wiki/Butterworth_filter
    */
-  private double samplingFreq;
+  private final double samplingFreq;
+
+  private static final int notchFreq = 50;
+
+  private double nyquistFreq;
+  private final int filterOrder = 5;
 
   /**
    * This constructor initialises the prerequisites required to use Butterworth filter.
@@ -17,6 +22,7 @@ public class ButterworthFilter {
    */
   public ButterworthFilter(double Fs) {
     this.samplingFreq = Fs;
+    nyquistFreq = samplingFreq / 2;
   }
 
   /**
@@ -50,7 +56,7 @@ public class ButterworthFilter {
   public double[] highPassFilter(double[] signal, int order, double cutoffFreq) {
     double[] output = new double[signal.length];
     Butterworth hp = new Butterworth();
-    hp.highPass(order, this.samplingFreq, cutoffFreq);
+    hp.highPass(this.filterOrder, this.samplingFreq, cutoffFreq);
     for (int i = 0; i < output.length; i++) {
       output[i] = hp.filter(signal[i]);
     }
@@ -62,15 +68,22 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
-   * @param lowCutoff The lower cutoff frequency for the filter in Hz
-   * @param highCutoff The upper cutoff frequency for the filter in Hz
    * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandPassFilter(double[] signal, int order, double lowCutoff, double highCutoff)
+  public double[] bandPassFilter(double[] signal, boolean isDemodulationFilter)
       throws IllegalArgumentException {
+
+    double lowCutoff;
+    double highCutoff;
+    if (isDemodulationFilter) {
+      lowCutoff = (samplingFreq / 4 - 1.5) / nyquistFreq;
+      highCutoff = (samplingFreq / 4 + 1.5) / nyquistFreq;
+    } else {
+      lowCutoff = (samplingFreq / 4 + 2.5) / nyquistFreq;
+      highCutoff = (samplingFreq / 4 + 5.5) / nyquistFreq;
+    }
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
           "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
@@ -79,7 +92,7 @@ public class ButterworthFilter {
     double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
     Butterworth bp = new Butterworth();
-    bp.bandPass(order, this.samplingFreq, centreFreq, width);
+    bp.bandPass(this.filterOrder, this.samplingFreq, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
       output[i] = bp.filter(signal[i]);
     }
@@ -91,15 +104,16 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @param order Order of the filter
-   * @param lowCutoff The lower cutoff frequency for the filter in Hz
-   * @param highCutoff The upper cutoff frequency for the filter in Hz
    * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandStopFilter(double[] signal, int order, double lowCutoff, double highCutoff)
-      throws IllegalArgumentException {
+  public double[] bandStopFilter(double[] signal) throws IllegalArgumentException {
+
+    int order = 5;
+    double nyquistFreq = samplingFreq / 2;
+    double lowCutoff = (notchFreq - 2) / nyquistFreq;
+    double highCutoff = (notchFreq + 2) / nyquistFreq;
     if (lowCutoff >= highCutoff) {
       throw new IllegalArgumentException(
           "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
