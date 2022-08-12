@@ -59,6 +59,7 @@ Troubleshooting
 ===============
 
 * If your phone is not recognized by Android Studio, make sure that USB debugging is turned on on your Android device.
+* Make sure to pair the Explore device with your phone at first.
 
 You can also create a new issue in the GitHub repository.
 
