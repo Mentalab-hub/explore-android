@@ -38,6 +38,8 @@ public class ExploreDevice {
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
+  private float slope;
+  private double offset;
 
   private RecordTask recordTask;
   private ImpedanceCalculatorTask impedanceTask;
@@ -253,6 +255,14 @@ public class ExploreDevice {
 
   public SamplingRate getSamplingRate() {
     return this.samplingRate;
+  }
+
+  public float getSlope() {
+    return slope;
+  }
+
+  public double getOffset() {
+    return offset;
   }
 
   public void setChannelCount(ChannelCount count) {
