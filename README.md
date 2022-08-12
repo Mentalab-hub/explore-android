@@ -53,7 +53,7 @@ Please check troubleshooting section of this document in case of issues.
 Documentation
 =============
 
-For the full documentation of the API, please visit our [Javadoc page](https://github.com/Mentalab-hub/explore-android/tree/master/javadoc)
+For the full documentation of the API, please refer to javadoc folder in code repository.
 
 Troubleshooting
 ===============
