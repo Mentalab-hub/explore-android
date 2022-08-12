@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.mentalab"},{"l":"com.mentalab.CommandTranslators"},{"l":"com.mentalab.exception"}]
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"com.mentalab"}]
