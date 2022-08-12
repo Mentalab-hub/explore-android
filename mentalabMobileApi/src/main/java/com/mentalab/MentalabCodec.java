@@ -1,215 +1,118 @@
 package com.mentalab;
 
 import android.util.Log;
-import com.mentalab.CommandTranslators.CommandTranslator;
-import com.mentalab.MentalabConstants.Command;
-import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.InvalidDataException;
-
+import com.mentalab.packets.command.CommandStatus;
+import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.PacketId;
+import com.mentalab.packets.Publishable;
+import com.mentalab.utils.Utils;
+import com.mentalab.utils.commandtranslators.Command;
+import com.mentalab.utils.commandtranslators.CommandTranslator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class MentalabCodec {
+public final class MentalabCodec {
 
-  private static final String TAG = "Explore";
-  private static final int NTHREADPOOL = 100;
-  private static final ExecutorService executor = Executors.newFixedThreadPool(NTHREADPOOL);
-  public static Map<String, Queue<Float>> decodedDataMap = null;
-  private static Future<?> decoderTask = null;
+  private static final ExecutorService DECODE_EXECUTOR = Executors.newSingleThreadExecutor();
+  private static final ParseRawDataTask DECODER_TASK = new ParseRawDataTask();
+
+  private MentalabCodec() { // Static class
+  }
 
   /**
-   * Decodes a device raw data stream
+   * Tells the ExploreExecutor to decode the raw data.
    *
-   * <p>Incoming bytes from Bluetooth are converted to an immutable Map of Double Ended Queue of
-   * Float numbers. ExG channels are saved as single precision floating point numbers (Float) in the
-   * unit of mVolt. Launches one worker thread on first invocation. Currently the it provides the
-   * following data queues from Explore device: Channel_1, Channel_2...Channel_N where N is the maximum
-   * available numbers of channel of the device. Acc_X, Acc_Y, Acc_Z in the units of mg/LSB. Gyro_X,
-   * Gyro_Y and Gyro_Z in mdps/LSB. MAG_X, Mag_Y, Mag_Z in mgauss/LSB. To get a specific instance of
-   * the queue:
-   * <pre>{@code
-   * Map<String, Queue<Float>> map = MentalabCodec.decode(stream);
-   * Queue<Float> accXMap = map.get("Acc_X").poll();
-   * Queue<Float> channel2 = map.get("Channel2").poll();
-   * }<pre>
-   *
-   * @throws InvalidDataException throws when invalid data is received
-   * @stream InputStream of device bytes
-   * @return Immutable Map of Queues of Numbers
+   * @param rawData InputStream of device bytes
    */
-  public static Map<String, Queue<Float>> decode(InputStream stream) throws InvalidDataException {
-
-    decoderTask = executor.submit(new ConnectedThread(stream));
-    Log.d(TAG, "Started execution of decoder!!");
-    return decodedDataMap;
+  public static void decodeInputStream(InputStream rawData) {
+    DECODER_TASK.setInputStream(rawData);
+    DECODE_EXECUTOR.submit(DECODER_TASK);
   }
 
   /**
    * Encodes a command
    *
-   * @throws InvalidCommandException when the command is not recognized
    * @return byte[] encoded commands that can be sent to the device
    */
-  static byte[] encodeCommand(Command command, int extraArguments) throws InvalidCommandException {
-
-    CommandTranslator translator = command.createInstance(command, extraArguments);
-    byte[] translatedBytes = translator.translateCommand(extraArguments);
-    return translatedBytes;
+  static byte[] encodeCommand(Command command) {
+    final CommandTranslator translator = command.createCommandTranslator();
+    return translator.translateCommand();
   }
 
-  private static void parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
+  private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
       throws InvalidDataException {
-
-    for (Packet.PacketId packetId : Packet.PacketId.values()) {
-      if (packetId.getNumVal() == pId) {
-        Log.d(TAG, "Converting data for Explore");
-        Packet packet = packetId.createInstance(timeStamp);
-        if (packet != null) {
-          packet.convertData(byteBuffer);
-          Log.d(TAG, "Data decoded is " + packet.toString());
-          pushDataInQueue(packet);
-        }
-      }
+    final PacketId p =
+        Arrays.stream(PacketId.values())
+            .filter(packetId -> packetId.getNumVal() == pId)
+            .findFirst()
+            .orElse(null);
+    if (p == null) {
+      return null;
     }
-  }
-  // TODO refactor this method with new interfaces
-  private static void pushDataInQueue(Packet packet) {
-
-    if (packet instanceof DataPacket) {
-      DataPacket dataPacket = (DataPacket) packet;
-      int channelCount = dataPacket.getDataCount();
-
-      for (int index = 0; index < channelCount; index++) {
-        synchronized (decodedDataMap) {
-          ArrayList<Float> convertedSamples = ((DataPacket) packet).getData();
-          String channelKey = "Channel_" + String.valueOf(index + 1);
-          if (decodedDataMap.get(channelKey) == null) {
-            decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
-          }
-
-          ConcurrentLinkedDeque<Float> floats =
-              (ConcurrentLinkedDeque) decodedDataMap.get(channelKey);
-          floats.offerFirst(((DataPacket) packet).convertedSamples.get(index));
-        }
-      }
-      // Lsl Packet Subscriber implementation
-      PubSubManager.getInstance().publish("ExG", packet);
-
-    } else if (packet instanceof InfoPacket) {
-
-      int channelCount = packet.getDataCount();
-
-      for (int index = 0; index < channelCount; index++) {
-        synchronized (decodedDataMap) {
-          String channelKey = ((InfoPacket) packet).attributes.get(index);
-          if (decodedDataMap.get(channelKey) == null) {
-            decodedDataMap.put(channelKey, new ConcurrentLinkedDeque<>());
-          }
-          ConcurrentLinkedDeque<Float> floats =
-              (ConcurrentLinkedDeque) decodedDataMap.get(channelKey);
-          floats.offerFirst(((InfoPacket) packet).convertedSamples.get(index));
-        }
-      }
-      if (packet instanceof Orientation) {
-        PubSubManager.getInstance().publish("Orn", packet);
-      }
-
-      if (packet instanceof MarkerPacket) {
-        PubSubManager.getInstance().publish("Marker", packet);
-      }
-
-    } else if (packet instanceof CommandStatusPacket
-        || packet instanceof AckPacket
-        || packet instanceof CommandReceivedPacket) {
-      Log.d("DEBUG_SR", "Publishing packets of type command ");
-      PubSubManager.getInstance().publish("Command", packet);
+    final Packet packet = p.createInstance(timeStamp);
+    if (packet != null) {
+      packet.convertData(byteBuffer);
+      return packet;
     }
+    return null;
   }
 
-
-  public static int getAdsMask() {
-    return Objects.requireNonNull(decodedDataMap.get("Ads_Mask").poll()).intValue();
+  public static void shutdown() {
+    Thread.currentThread().interrupt();
+    DECODE_EXECUTOR.shutdownNow();
   }
 
+  private static class ParseRawDataTask implements Callable<Void> {
 
-  public static float getSamplingRate() {
-    return Objects.requireNonNull(decodedDataMap.get("Sampling_Rate").poll());
-  }
+    private InputStream btInputStream;
+    private byte[] buffer;
 
-
-  // TODO Decouple executor class from Codec class
-  public static void pushToLsl(String deviceName) {
-    executor.execute(new LslPacketSubscriber(deviceName));
-  }
-
-  static synchronized ExecutorService getExecutorService() {
-    return executor;
-  }
-
-  static void stopDecoder() {
-    decoderTask.cancel(true);
-  }
-
-  private static class ConnectedThread implements Callable<Void> {
-    private final InputStream mmInStream;
-
-    public ConnectedThread(InputStream inputStream) {
-      mmInStream = inputStream;
-      initializeMapInstance();
+    public void setInputStream(InputStream inputStream) {
+      btInputStream = inputStream;
     }
 
-    public Void call() throws InterruptedException {
+    public Void call() throws IOException, InvalidDataException {
+      while (!Thread.currentThread().isInterrupted()) {
+        buffer = new byte[1024];
+        final int pID = readStreamToInt(1);
+        Log.d("IMPEDANCE", "Getting here PID: " + pID);
+        if (pID == 195){
+          Log.d("", "");
+        };
+        readStreamToInt(1); // count, ignore
+        final int payload = readStreamToInt(2);
+        double timeStamp = readStreamToInt(4);
+        timeStamp = timeStamp / 10_000; // convert to seconds
 
-      int pId = 0;
-      while (true) {
-        try {
-          byte[] buffer = new byte[1024];
-          // reading PID
-          mmInStream.read(buffer, 0, 1);
-          pId = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-          Log.d(TAG, "pid .." + pId);
-          buffer = new byte[1024];
+        // read payload data
+        buffer = new byte[payload - 4];
+        btInputStream.read(buffer, 0, buffer.length); // read into buffer
 
-          // reading count
-          mmInStream.read(buffer, 0, 1);
-          int count = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-          buffer = new byte[1024];
+        // parsing payload data
+        final Packet packet =
+            parsePayloadData(pID, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
 
-          // reading payload
-          mmInStream.read(buffer, 0, 2);
-          int payload = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-          buffer = new byte[1024];
-
-          // reading timestamp
-          mmInStream.read(buffer, 0, 4);
-          double timeStamp =
-              ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-          timeStamp = timeStamp / 10_000; // convert to seconds
-
-          Log.d(TAG, "pid .." + pId + " payload is : " + payload);
-
-          // reading payload data
-          buffer = new byte[payload - 4];
-          int read = mmInStream.read(buffer, 0, buffer.length);
-          Log.d(TAG, "reading count is ...." + read);
-          // parsing payload data
-
-          parsePayloadData(pId, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
-
-        } catch (IOException | InvalidDataException exception) {
-          exception.printStackTrace();
+        if (packet instanceof Publishable) {
+          ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
+          Log.d("TEST_", "getting packets!!!");
         }
       }
+      return null;
     }
 
-    void initializeMapInstance() {
-
-      if (decodedDataMap == null) {
-        decodedDataMap = new HashMap<>();
-      }
+    private int readStreamToInt(int length) throws IOException {
+      btInputStream.read(buffer, 0, length); // read into buffer
+      int value = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+      buffer = new byte[1024]; // reset buffer for next read
+      return value;
     }
   }
 }
