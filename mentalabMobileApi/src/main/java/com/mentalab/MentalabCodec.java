@@ -66,6 +66,7 @@ public final class MentalabCodec {
   }
 
   public static void shutdown() {
+    Thread.currentThread().interrupt();
     DECODE_EXECUTOR.shutdownNow();
   }
 

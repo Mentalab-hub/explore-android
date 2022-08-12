@@ -26,7 +26,7 @@ public class ImpedanceConfigurationTask implements CheckedExceptionSupplier<Cali
     this.command = encodedBytes;
 
     ImpCommandSubscriber =
-        new Subscriber(Topic.DEVICE_INFO) {
+        new Subscriber<Packet>(Topic.DEVICE_INFO) {
           @Override
           public void accept(Packet p) {
 

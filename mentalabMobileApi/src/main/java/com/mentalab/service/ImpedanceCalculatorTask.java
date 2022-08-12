@@ -39,7 +39,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
 
   public void calculate() {
     impedanceSubscriber =
-        new Subscriber(Topic.EXG) {
+        new Subscriber<Packet>(Topic.EXG) {
           @Override
           public void accept(Packet packet) {
             Log.d("IMPEDANCE", "===================================================== here");

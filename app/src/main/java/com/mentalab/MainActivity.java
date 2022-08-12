@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
     } catch (NoBluetoothException
         | NoConnectionException
         | IOException
-        | InitializationFailureException
         | ExecutionException
         | InterruptedException e) {
       e.printStackTrace();
