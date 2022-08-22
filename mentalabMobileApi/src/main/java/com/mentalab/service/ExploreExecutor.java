@@ -7,7 +7,6 @@ public final class ExploreExecutor {
   private ExploreExecutor() { // Static class
   }
 
-  private static final ExecutorService BLOCKING_EXECUTOR = Executors.newSingleThreadExecutor();
   private static final ExecutorService PARALLEL_EXECUTOR = Executors.newFixedThreadPool(5);
   private static final ScheduledExecutorService SCHEDULED_EXECUTOR =
       Executors.newScheduledThreadPool(2);
@@ -34,7 +33,6 @@ public final class ExploreExecutor {
   }
 
   public static void shutDown() {
-    BLOCKING_EXECUTOR.shutdown();
     PARALLEL_EXECUTOR.shutdown();
     SCHEDULED_EXECUTOR.shutdown();
   }
