@@ -2,19 +2,19 @@ package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.utils.Utils;
+import com.mentalab.packets.PacketUtils;
 
-public class CommandStatus extends UtilPacket {
+public class CmdStatusPacket extends UtilPacket {
 
   private boolean commandStatus;
 
-  public CommandStatus(double timeStamp) {
+  public CmdStatusPacket(double timeStamp) {
     super(timeStamp);
   }
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    short status = Utils.bitsToShort(byteBuffer[5]);
+    short status = PacketUtils.bytesToShort(byteBuffer[5]);
     this.commandStatus = status != 0;
   }
 

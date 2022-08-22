@@ -2,25 +2,26 @@ package com.mentalab.packets.sensors;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.packets.Attributes;
-import com.mentalab.packets.PublishablePacket;
-import com.mentalab.utils.Utils;
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.PacketDataType;
+import com.mentalab.packets.PacketUtils;
+import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 
-public class Marker extends PublishablePacket {
+public class MarkerPacket extends Packet implements Publishable {
 
-  public Marker(double timeStamp) {
+  public MarkerPacket(double timeStamp) {
     super(timeStamp);
-    super.attributes = EnumSet.of(Attributes.MARKER);
+    super.type = EnumSet.of(PacketDataType.MARKER);
   }
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    int markerCode = Utils.bitsToShort(byteBuffer[0]);
+    int markerCode = PacketUtils.bytesToShort(byteBuffer[0]);
     super.data = new ArrayList<>(Collections.singletonList((float) markerCode));
   }
 

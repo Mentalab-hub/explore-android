@@ -1,6 +1,9 @@
 package com.mentalab.packets;
 
-public enum Attributes {
+import androidx.annotation.NonNull;
+
+public enum PacketDataType {
+
   ADS_MASK("Ads Mask"),
   SR("Sampling Rate"),
 
@@ -32,13 +35,14 @@ public enum Attributes {
   CH7("Channel 7"),
   CH8("Channel 8");
 
-  private final String name;
+  private final String type;
 
-  Attributes(String s) {
-    name = s;
+  PacketDataType(String s) {
+    this.type = s;
   }
 
+  @NonNull
   public String toString() {
-    return this.name;
+    return this.type;
   }
 }

@@ -1,47 +1,33 @@
 package com.mentalab.packets.info;
 
-import static com.mentalab.packets.Attributes.BATTERY;
-import static com.mentalab.packets.Attributes.TEMP;
-
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.PacketUtils;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-public class EnvironmentPacket extends InfoPacket {
+import static com.mentalab.packets.PacketDataType.BATTERY;
+import static com.mentalab.packets.PacketDataType.TEMP;
+
+public class EnvironmentPacket extends Packet {
 
   public EnvironmentPacket(double timeStamp) {
     super(timeStamp);
-    super.attributes = EnumSet.range(TEMP, BATTERY);
+    super.type = EnumSet.range(TEMP, BATTERY);
   }
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
     final List<Float> vals = new ArrayList<>();
-    vals.add(
-        (float)
-            ByteBuffer.wrap(new byte[] {byteBuffer[0], 0, 0, 0})
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .getInt());
-    vals.add(
-        (float)
-                (ByteBuffer.wrap(new byte[] {byteBuffer[1], byteBuffer[2], 0, 0})
-                    .order(ByteOrder.LITTLE_ENDIAN)
-                    .getInt())
-            * (1000 / 4095));
+    vals.add((float) PacketUtils.bytesToInt(byteBuffer[0]));
+    vals.add((float) PacketUtils.bytesToInt(byteBuffer[1], byteBuffer[2]) * (1000 / 4095));
     float batteryLevelRaw =
-        (float)
-            ((ByteBuffer.wrap(new byte[] {byteBuffer[3], byteBuffer[4], 0, 0})
-                        .order(ByteOrder.LITTLE_ENDIAN)
-                        .getInt()
-                    * 16.8
-                    / 6.8)
-                * (1.8 / 2457));
+        (float) ((PacketUtils.bytesToInt(byteBuffer[3], byteBuffer[4]) * 16.8 / 6.8) * (1.8 / 2457));
 
-    vals.add(getBatteryPercentage(batteryLevelRaw));
+    vals.add((float) getBatteryPercentage(batteryLevelRaw));
     super.data = new ArrayList<>(vals);
   }
 
@@ -53,29 +39,26 @@ public class EnvironmentPacket extends InfoPacket {
 
   @Override
   public int getDataCount() {
-    return super.attributes.size();
+    return super.type.size();
   }
 
-  private float getBatteryPercentage(float voltage) {
-    double perc;
+  private double getBatteryPercentage(float voltage) {
     if (voltage < 3.1) {
-      perc = 1d;
+      return 1d;
     } else if (voltage < 3.5) {
-      perc = 1d + (voltage - 3.1) / .4 * 10d;
+      return 1 + (voltage - 3.1) / .4 * 10;
     } else if (voltage < 3.8) {
-      perc = 10d + (voltage - 3.5) / .3 * 40d;
+      return 10d + (voltage - 3.5) / .3 * 40d;
     } else if (voltage < 3.9) {
-      perc = 40d + (voltage - 3.8) / .1 * 20d;
+      return 40d + (voltage - 3.8) / .1 * 20d;
     } else if (voltage < 4) {
-      perc = 60d + (voltage - 3.9) / .1 * 15d;
+      return 60d + (voltage - 3.9) / .1 * 15d;
     } else if (voltage < 4.1) {
-      perc = 75d + (voltage - 4.0) / .1 * 15d;
+      return 75d + (voltage - 4.0) / .1 * 15d;
     } else if (voltage < 4.2) {
-      perc = 90d + (voltage - 4.1) / .1 * 10d;
+      return 90d + (voltage - 4.1) / .1 * 10d;
     } else {
-      perc = 100d;
+      return 100d;
     }
-
-    return (float) perc;
   }
 }

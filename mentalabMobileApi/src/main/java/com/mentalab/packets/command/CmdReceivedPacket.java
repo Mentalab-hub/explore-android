@@ -1,16 +1,15 @@
 package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
-import com.mentalab.exception.InvalidDataException;
 
-public class CommandReceived extends UtilPacket {
+public class CmdReceivedPacket extends UtilPacket {
 
-  public CommandReceived(double timeStamp) {
+  public CmdReceivedPacket(double timeStamp) {
     super(timeStamp);
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+  public void convertData(byte[] byteBuffer) {
     // ignored
   }
 

@@ -2,7 +2,7 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceConfigurationTask;
@@ -25,7 +25,7 @@ interface DeviceManager {
     return submittedCmd;
   }
 
-  static CompletableFuture<CalibrationInfo> processImpCommand(Command c)
+  static CompletableFuture<CalibrationInfoPacket> processImpCommand(Command c)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
     return CompletableFuture.supplyAsync(

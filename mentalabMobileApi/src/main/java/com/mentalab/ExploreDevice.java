@@ -7,7 +7,7 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceCalculatorTask;
 import com.mentalab.service.lsl.LslStreamerTask;
@@ -217,7 +217,7 @@ public class ExploreDevice {
   public void startImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_ENABLE;
-    CompletableFuture<CalibrationInfo> result = DeviceManager.processImpCommand(c);
+    CompletableFuture<CalibrationInfoPacket> result = DeviceManager.processImpCommand(c);
     result
         .thenApply(
             x -> {
@@ -287,7 +287,7 @@ public class ExploreDevice {
     impedanceTask.cancelTask();
   }
 
-  ExploreDevice setCalibrationValues(CalibrationInfo calibrationInfo) {
+  ExploreDevice setCalibrationValues(CalibrationInfoPacket calibrationInfo) {
     synchronized (this) {
       this.slope = calibrationInfo.getSlope();
       this.offset = calibrationInfo.getOffset();
