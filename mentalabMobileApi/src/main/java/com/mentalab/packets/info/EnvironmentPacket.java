@@ -5,9 +5,7 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.List;
 
 import static com.mentalab.packets.PacketDataType.BATTERY;
 import static com.mentalab.packets.PacketDataType.TEMP;
@@ -21,14 +19,13 @@ public class EnvironmentPacket extends Packet {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    final List<Float> vals = new ArrayList<>();
-    vals.add((float) PacketUtils.bytesToInt(byteBuffer[0]));
-    vals.add((float) PacketUtils.bytesToInt(byteBuffer[1], byteBuffer[2]) * (1000 / 4095));
-    float batteryLevelRaw =
-        (float) ((PacketUtils.bytesToInt(byteBuffer[3], byteBuffer[4]) * 16.8 / 6.8) * (1.8 / 2457));
+    super.data.add((float) PacketUtils.bytesToInt(byteBuffer[0]));
+    super.data.add((float) PacketUtils.bytesToInt(byteBuffer[1], byteBuffer[2]) * (1000 / 4095));
+    super.data.add((float) getBatteryPercentage(getRawBattery(byteBuffer)));
+  }
 
-    vals.add((float) getBatteryPercentage(batteryLevelRaw));
-    super.data = new ArrayList<>(vals);
+  private static double getRawBattery(byte[] byteBuffer) throws InvalidDataException {
+    return (PacketUtils.bytesToInt(byteBuffer[3], byteBuffer[4]) * 16.8 / 6.8) * (1.8 / 2457);
   }
 
   @NonNull
@@ -42,7 +39,7 @@ public class EnvironmentPacket extends Packet {
     return super.type.size();
   }
 
-  private double getBatteryPercentage(float voltage) {
+  private static double getBatteryPercentage(double voltage) {
     if (voltage < 3.1) {
       return 1d;
     } else if (voltage < 3.5) {

@@ -8,8 +8,6 @@ import com.mentalab.packets.PacketUtils;
 import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 
 public class MarkerPacket extends Packet implements Publishable {
@@ -21,8 +19,8 @@ public class MarkerPacket extends Packet implements Publishable {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    int markerCode = PacketUtils.bytesToShort(byteBuffer[0]);
-    super.data = new ArrayList<>(Collections.singletonList((float) markerCode));
+    final int markerCode = PacketUtils.bytesToShort(byteBuffer[0]);
+    super.data.add((float) markerCode);
   }
 
   @NonNull
