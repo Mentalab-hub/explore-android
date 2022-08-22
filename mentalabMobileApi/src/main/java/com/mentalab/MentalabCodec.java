@@ -1,16 +1,13 @@
 package com.mentalab;
 
-import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.packets.command.CommandStatus;
-import com.mentalab.packets.info.CalibrationInfo;
-import com.mentalab.service.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
-import com.mentalab.utils.Utils;
+import com.mentalab.service.io.ContentServer;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -48,21 +45,23 @@ public final class MentalabCodec {
   }
 
   private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
-      throws InvalidDataException {
-    final PacketId p =
-        Arrays.stream(PacketId.values())
-            .filter(packetId -> packetId.getNumVal() == pId)
-            .findFirst()
-            .orElse(null);
-    if (p == null) {
-      return null;
-    }
-    final Packet packet = p.createInstance(timeStamp);
+      throws InvalidDataException, IOException {
+    final PacketId id = getPacketId(pId);
+    final Packet packet = id.createInstance(timeStamp);
     if (packet != null) {
       packet.convertData(byteBuffer);
       return packet;
     }
     return null;
+  }
+
+  private static PacketId getPacketId(int pId) throws InvalidDataException {
+    for (PacketId p : PacketId.values()) {
+      if (pId == p.getNumVal()) {
+        return p;
+      }
+    }
+    throw new InvalidDataException("Cannot identify packet type.");
   }
 
   public static void shutdown() {
@@ -83,10 +82,6 @@ public final class MentalabCodec {
       while (!Thread.currentThread().isInterrupted()) {
         buffer = new byte[1024];
         final int pID = readStreamToInt(1);
-        Log.d("IMPEDANCE", "Getting here PID: " + pID);
-        if (pID == 195){
-          Log.d("", "");
-        };
         readStreamToInt(1); // count, ignore
         final int payload = readStreamToInt(2);
         double timeStamp = readStreamToInt(4);
@@ -102,7 +97,6 @@ public final class MentalabCodec {
 
         if (packet instanceof Publishable) {
           ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
-          Log.d("TEST_", "getting packets!!!");
         }
       }
       return null;
