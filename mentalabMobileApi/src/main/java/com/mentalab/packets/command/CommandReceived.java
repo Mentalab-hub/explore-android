@@ -5,19 +5,19 @@ import com.mentalab.exception.InvalidDataException;
 
 public class CommandReceived extends UtilPacket {
 
-  float markerCode;
-
   public CommandReceived(double timeStamp) {
     super(timeStamp);
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {}
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    // ignored
+  }
 
   @NonNull
   @Override
   public String toString() {
-    return "Command received.";
+    return "PACKET: CommandReceived";
   }
 
   @Override

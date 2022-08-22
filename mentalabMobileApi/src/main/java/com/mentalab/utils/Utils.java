@@ -2,11 +2,16 @@ package com.mentalab.utils;
 
 import android.util.Log;
 import com.mentalab.exception.InvalidCommandException;
+import com.mentalab.exception.InvalidDataException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
+import com.mentalab.utils.constants.SamplingRate;
+
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Set;
@@ -79,5 +84,30 @@ public class Utils {
       return ChannelCount.CC_4;
     }
     return ChannelCount.CC_8;
+  }
+
+  public static SamplingRate codeToSamplingRate(int samplingRateCode) throws InvalidDataException {
+    for (SamplingRate sr : SamplingRate.values()) {
+      if (sr.getAdsCode() == samplingRateCode) {
+        return sr;
+      }
+    }
+    throw new InvalidDataException("Cannot decipher sampling rate from DeviceInfoPacket.");
+  }
+
+  public static int bitsToInt(byte... bits) {
+    final byte[] array = new byte[4];
+    for (int i = 0; i < bits.length; i++) {
+      array[i] = bits[i];
+    }
+    return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getInt();
+  }
+
+  public static short bitsToShort(byte... bits) {
+    final byte[] array = new byte[2];
+    for (int i = 0; i < bits.length; i++) {
+      array[i] = bits[i];
+    }
+    return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getShort();
   }
 }

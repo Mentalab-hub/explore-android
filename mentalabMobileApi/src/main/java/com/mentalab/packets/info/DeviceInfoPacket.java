@@ -1,18 +1,16 @@
 package com.mentalab.packets.info;
 
-import static com.mentalab.packets.Attributes.ADS_MASK;
-import static com.mentalab.packets.Attributes.SR;
-
 import androidx.annotation.NonNull;
+import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Publishable;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.EnumSet;
-import java.util.List;
+
+import static com.mentalab.packets.Attributes.ADS_MASK;
+import static com.mentalab.packets.Attributes.SR;
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 public class DeviceInfoPacket extends InfoPacket implements Publishable {
@@ -26,35 +24,16 @@ public class DeviceInfoPacket extends InfoPacket implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
-    final int samplingRateMultiplier =
-        ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
-            .order(ByteOrder.LITTLE_ENDIAN)
-            .getInt();
-
-    final double sr = 16000 / (Math.pow(2, samplingRateMultiplier));
-    if (sr < 300) {
-      this.samplingRate = SamplingRate.SR_250;
-    } else if (sr < 600) {
-      this.samplingRate = SamplingRate.SR_500;
-    } else {
-      this.samplingRate = SamplingRate.SR_1000;
-    }
-
+  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+    final int adsSamplingRateCode = Utils.bitsToInt(byteBuffer[2]); // 4, 5, or 6
+    this.samplingRate = Utils.codeToSamplingRate(adsSamplingRateCode);
     this.adsMask = byteBuffer[3] & 0xFF;
-
-    super.data = new ArrayList<>(Arrays.asList((float) adsMask, (float) sr));
-  }
-
-  @Override
-  public List<Float> getData() {
-    return super.data;
   }
 
   @NonNull
   @Override
   public String toString() {
-    return "DeviceInfoPacket";
+    return "PACKET: DeviceInfo";
   }
 
   @Override

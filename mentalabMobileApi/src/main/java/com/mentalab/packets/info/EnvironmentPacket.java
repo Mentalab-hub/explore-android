@@ -48,20 +48,7 @@ public class EnvironmentPacket extends InfoPacket {
   @NonNull
   @Override
   public String toString() {
-    final StringBuilder data = new StringBuilder("Environment packets: [");
-    for (int i = 0; i < super.data.size(); i++) {
-      final float sample = super.data.get(i);
-      if (i % 9 < 3) {
-        data.append(" Temperature: ").append(sample);
-      } else if (i % 9 < 6) {
-        data.append(" Light: ").append(sample);
-      } else {
-        data.append("Battery: ").append(sample);
-      }
-      data.append(",");
-    }
-    data.append("]");
-    return data.toString();
+    return "PACKET: Environment";
   }
 
   @Override

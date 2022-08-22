@@ -41,20 +41,7 @@ public class Orientation extends PublishablePacket {
   @NonNull
   @Override
   public String toString() {
-    StringBuilder data = new StringBuilder("Orientation packets: [");
-    for (int i = 0; i < this.data.size(); i++) {
-      final float sample = super.data.get(i);
-      if (i % 9 < 3) {
-        data.append(" accelerometer: ").append(sample);
-      } else if (i % 9 < 6) {
-        data.append(" magnetometer: ").append(sample);
-      } else {
-        data.append("gyroscope: ").append(sample);
-      }
-      data.append(",");
-    }
-    data.append("]");
-    return data.toString();
+    return "PACKET: Orientation";
   }
 
   @Override

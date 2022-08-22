@@ -3,10 +3,10 @@ package com.mentalab.packets.sensors.exg;
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.PublishablePacket;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
+
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,15 +36,9 @@ public abstract class EEGPacket extends PublishablePacket {
       int signBit = byteArray[i + 2] >> 7;
       double value;
       if (signBit == 0) {
-        value =
-            ByteBuffer.wrap(new byte[] {byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .getInt();
+        value = Utils.bitsToInt(byteArray[i], byteArray[i + 1], byteArray[i + 2]);
       } else {
-        int twosComplimentValue =
-            ByteBuffer.wrap(new byte[] {byteArray[i], byteArray[i + 1], byteArray[i + 2], 0})
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .getInt();
+        int twosComplimentValue = Utils.bitsToInt(byteArray[i], byteArray[i + 1], byteArray[i + 2]);
         value = -1 * (Math.pow(2, 24) - twosComplimentValue);
       }
       values[i / 3] = value;
@@ -78,14 +72,7 @@ public abstract class EEGPacket extends PublishablePacket {
   @NonNull
   @Override
   public String toString() {
-    StringBuilder data = new StringBuilder("ExG ");
-    data.append(channelNumber);
-    data.append(" channel: [");
-    for (float sample : super.data) {
-      data.append(sample).append(" ,");
-    }
-    data.append("]");
-    return data.toString();
+    return "PACKET: ExG";
   }
 
   @Override

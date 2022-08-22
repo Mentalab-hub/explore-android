@@ -8,8 +8,8 @@ public enum Attributes {
   LIGHT("Light"),
   BATTERY("Battery"),
 
-  SLOPE("slope"),
-  OFFSET("offset"),
+  SLOPE("Slope"),
+  OFFSET("Offset"),
 
   MARKER("Marker"),
 

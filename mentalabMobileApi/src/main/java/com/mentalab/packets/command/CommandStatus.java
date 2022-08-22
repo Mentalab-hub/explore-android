@@ -2,8 +2,7 @@ package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import com.mentalab.utils.Utils;
 
 public class CommandStatus extends UtilPacket {
 
@@ -15,15 +14,14 @@ public class CommandStatus extends UtilPacket {
 
   @Override
   public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    short status =
-        ByteBuffer.wrap(new byte[] {byteBuffer[5], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
-    commandStatus = status != 0;
+    short status = Utils.bitsToShort(byteBuffer[5]);
+    this.commandStatus = status != 0;
   }
 
   @NonNull
   @Override
   public String toString() {
-    return "Command status is " + commandStatus + ".";
+    return "PACKET: CommandStatus";
   }
 
   @Override
