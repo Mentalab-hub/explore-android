@@ -60,7 +60,7 @@ public class ExploreDevice {
    * configure the device based on those packets. If these packets are not received, or the device
    * is not configured, we cannot proceed.
    */
-  protected ExploreDevice acquire()
+  public ExploreDevice acquire()
       throws IOException, NoBluetoothException, ExecutionException, InterruptedException {
     final List<CompletableFuture<Boolean>> deviceConfig = getInitCommands();
     MentalabCodec.decodeInputStream(getInputStream());
