@@ -1,4 +1,4 @@
-package com.mentalab.packets.info;
+package com.mentalab.packets.sensors;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
@@ -7,36 +7,27 @@ import com.mentalab.packets.PacketUtils;
 
 import java.util.EnumSet;
 
-import static com.mentalab.packets.PacketDataType.BATTERY;
-import static com.mentalab.packets.PacketDataType.TEMP;
+import static com.mentalab.packets.PacketDataType.*;
 
 public class EnvironmentPacket extends Packet {
 
+  private static final double LUX_CONSTANT = 0.2442002442002442; // rounded to ~52-bit Mantissa
+  private static final double BATTERY_CONSTANT = 0.0018099547511312; // rounded
+
   public EnvironmentPacket(double timeStamp) {
     super(timeStamp);
-    super.type = EnumSet.range(TEMP, BATTERY);
+    super.type = EnumSet.of(TEMP, LIGHT, BATTERY);
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    super.data.add((float) PacketUtils.bytesToInt(byteBuffer[0]));
-    super.data.add((float) PacketUtils.bytesToInt(byteBuffer[1], byteBuffer[2]) * (1000 / 4095));
-    super.data.add((float) getBatteryPercentage(getRawBattery(byteBuffer)));
+  public void convertData(byte[] data) throws InvalidDataException {
+    super.data.add((float) PacketUtils.bytesToInt(data[0])); // temp
+    super.data.add((float) (PacketUtils.bytesToInt(data[1], data[2]) * LUX_CONSTANT)); // light
+    super.data.add((float) getBatteryPercentage(getRawBattery(data))); // battery
   }
 
   private static double getRawBattery(byte[] byteBuffer) throws InvalidDataException {
-    return (PacketUtils.bytesToInt(byteBuffer[3], byteBuffer[4]) * 16.8 / 6.8) * (1.8 / 2457);
-  }
-
-  @NonNull
-  @Override
-  public String toString() {
-    return "PACKET: Environment";
-  }
-
-  @Override
-  public int getDataCount() {
-    return super.type.size();
+    return PacketUtils.bytesToInt(byteBuffer[3], byteBuffer[4]) * BATTERY_CONSTANT;
   }
 
   private static double getBatteryPercentage(double voltage) {
@@ -57,5 +48,16 @@ public class EnvironmentPacket extends Packet {
     } else {
       return 100d;
     }
+  }
+
+  @NonNull
+  @Override
+  public String toString() {
+    return "PACKET: Environment";
+  }
+
+  @Override
+  public int getDataCount() {
+    return super.type.size();
   }
 }

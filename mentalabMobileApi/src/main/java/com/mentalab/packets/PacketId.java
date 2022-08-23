@@ -4,7 +4,7 @@ import com.mentalab.packets.command.CmdReceivedPacket;
 import com.mentalab.packets.command.CmdStatusPacket;
 import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.packets.info.DeviceInfoPacket;
-import com.mentalab.packets.info.EnvironmentPacket;
+import com.mentalab.packets.sensors.EnvironmentPacket;
 import com.mentalab.packets.sensors.MarkerPacket;
 import com.mentalab.packets.sensors.OrientationPacket;
 import com.mentalab.packets.sensors.exg.Eeg94Packet;
