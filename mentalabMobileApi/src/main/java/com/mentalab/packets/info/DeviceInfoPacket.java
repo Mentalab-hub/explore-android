@@ -25,10 +25,10 @@ public class DeviceInfoPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    final int adsSamplingRateCode = PacketUtils.bytesToInt(byteBuffer[2]); // 4, 5, or 6
+  public void convertData(byte[] data) throws InvalidDataException {
+    final int adsSamplingRateCode = PacketUtils.bytesToInt(data[2]); // 4, 5, or 6
     this.samplingRate = PacketUtils.adsCodeToSamplingRate(adsSamplingRateCode);
-    this.adsMask = byteBuffer[3] & 0xFF;
+    this.adsMask = data[3] & 0xFF;
   }
 
   @NonNull

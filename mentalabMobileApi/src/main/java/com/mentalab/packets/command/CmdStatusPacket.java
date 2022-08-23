@@ -16,8 +16,8 @@ public class CmdStatusPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    short status = PacketUtils.bytesToShort(byteBuffer[5]);
+  public void convertData(byte[] data) throws InvalidDataException {
+    short status = PacketUtils.bytesToShort(data[5]);
     this.commandStatus = status != 0;
   }
 

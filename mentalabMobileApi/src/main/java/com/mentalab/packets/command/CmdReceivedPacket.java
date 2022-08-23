@@ -12,7 +12,7 @@ public class CmdReceivedPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
+  public void convertData(byte[] data) {
     // ignored
   }
 

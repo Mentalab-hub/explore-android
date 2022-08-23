@@ -14,23 +14,27 @@ import static com.mentalab.packets.PacketDataType.GYROZ;
 
 public class OrientationPacket extends Packet implements Publishable {
 
+  private final static double ACCELEROMETER_CONSTANT = 0.061;
+  private final static double GYROSCOPE_CONSTANT = 8.750;
+  private final static double MAGNETOMETER_CONSTANT = 1.52;
+
   public OrientationPacket(double timeStamp) {
     super(timeStamp);
     super.type = EnumSet.range(ACCX, GYROZ);
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
-    final double[] val = PacketUtils.bytesToDoubles(byteBuffer);
-    for (int i = 0; i < val.length; i++) {
+  public void convertData(byte[] dataBytes) throws InvalidDataException {
+    final double[] dataDoubles = PacketUtils.bytesToDoubles(dataBytes);
+    for (int i = 0; i < dataDoubles.length; i++) {
       if (i < 3) {
-        super.data.add((float) (val[i] * 0.061));
+        super.data.add((float) (dataDoubles[i] * ACCELEROMETER_CONSTANT));
       } else if (i < 6) {
-        super.data.add((float) (val[i] * 8.750));
+        super.data.add((float) (dataDoubles[i] * GYROSCOPE_CONSTANT));
       } else if (i == 6) {
-        super.data.add((float) (val[i] * 1.52 * -1));
+        super.data.add((float) (dataDoubles[i] * MAGNETOMETER_CONSTANT * -1));
       } else {
-        super.data.add((float) (val[i] * 1.52));
+        super.data.add((float) (dataDoubles[i] * MAGNETOMETER_CONSTANT));
       }
     }
   }

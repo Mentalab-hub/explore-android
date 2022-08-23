@@ -19,13 +19,13 @@ public abstract class EEGPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException, IOException {
-    double[] data = PacketUtils.bytesToInt32s(byteBuffer);
-    for (int i = 0; i < data.length; i++) {
+  public void convertData(byte[] dataBytes) throws InvalidDataException, IOException {
+    double[] dataDoubles = PacketUtils.bytesToInt32s(dataBytes);
+    for (int i = 0; i < dataDoubles.length; i++) {
       if (i % (channelNumber + 1) == 0) {
         continue; // skip int representation of status bit
       }
-      super.data.add(adjustGain(data[i]));
+      super.data.add(adjustGain(dataDoubles[i]));
     }
   }
 
