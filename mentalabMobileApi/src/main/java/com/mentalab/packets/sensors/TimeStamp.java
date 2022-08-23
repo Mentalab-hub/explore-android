@@ -11,7 +11,7 @@ class TimeStamp extends Packet {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {}
+  public void populate(byte[] byteBuffer) {}
 
   @NonNull
   @Override

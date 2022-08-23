@@ -26,7 +26,7 @@ public class DeviceInfoPacket extends InfoPacket implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
+  public void populate(byte[] byteBuffer) {
     final int samplingRateMultiplier =
         ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
             .order(ByteOrder.LITTLE_ENDIAN)

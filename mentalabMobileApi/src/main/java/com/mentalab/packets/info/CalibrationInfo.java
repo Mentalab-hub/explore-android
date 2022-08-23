@@ -28,7 +28,7 @@ public class CalibrationInfo extends InfoPacket implements Publishable {
    * @param byteBuffer
    */
   @Override
-  public void convertData(byte[] byteBuffer) {
+  public void populate(byte[] byteBuffer) {
 
     slope =
         ByteBuffer.wrap(new byte[] {byteBuffer[0], byteBuffer[1], 0, 0})

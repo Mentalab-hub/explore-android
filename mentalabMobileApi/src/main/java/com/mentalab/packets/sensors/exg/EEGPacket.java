@@ -53,7 +53,7 @@ public abstract class EEGPacket extends PublishablePacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) {
+  public void populate(byte[] byteBuffer) {
     final List<Float> values = new ArrayList<>();
     try {
       double[] data = EEGPacket.toInt32(byteBuffer);

@@ -1,17 +1,18 @@
 package com.mentalab;
 
+import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
 import com.mentalab.service.io.ContentServer;
+import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,26 +45,6 @@ public final class MentalabCodec {
     return translator.translateCommand();
   }
 
-  private static Packet parsePayloadData(int pId, double timeStamp, byte[] byteBuffer)
-      throws InvalidDataException, IOException {
-    final PacketId id = getPacketId(pId);
-    final Packet packet = id.createInstance(timeStamp);
-    if (packet != null) {
-      packet.convertData(byteBuffer);
-      return packet;
-    }
-    return null;
-  }
-
-  private static PacketId getPacketId(int pId) throws InvalidDataException {
-    for (PacketId p : PacketId.values()) {
-      if (pId == p.getNumVal()) {
-        return p;
-      }
-    }
-    throw new InvalidDataException("Cannot identify packet type.");
-  }
-
   public static void shutdown() {
     Thread.currentThread().interrupt();
     DECODE_EXECUTOR.shutdownNow();
@@ -72,28 +53,20 @@ public final class MentalabCodec {
   private static class ParseRawDataTask implements Callable<Void> {
 
     private InputStream btInputStream;
-    private byte[] buffer;
 
     public void setInputStream(InputStream inputStream) {
-      btInputStream = inputStream;
+      this.btInputStream = inputStream;
     }
 
     public Void call() throws IOException, InvalidDataException {
       while (!Thread.currentThread().isInterrupted()) {
-        buffer = new byte[1024];
-        final int pID = readStreamToInt(1);
-        readStreamToInt(1); // count, ignore
-        final int payload = readStreamToInt(2);
-        double timeStamp = readStreamToInt(4);
-        timeStamp = timeStamp / 10_000; // convert to seconds
+        final int pID = readToInt(btInputStream, 1);
+        final int count = readToInt(btInputStream, 1);
+        final int length = readToInt(btInputStream, 2);
+        final double timeStamp = readToDouble(btInputStream, 4);
 
-        // read payload data
-        buffer = new byte[payload - 4];
-        btInputStream.read(buffer, 0, buffer.length); // read into buffer
-
-        // parsing payload data
-        final Packet packet =
-            parsePayloadData(pID, timeStamp, Arrays.copyOfRange(buffer, 0, buffer.length - 4));
+        byte[] buffer = readPayload(btInputStream, length - 4); // ignore 4-byte unused Fletcher
+        final Packet packet = parsePayload(buffer, pID, timeStamp);
 
         if (packet instanceof Publishable) {
           ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
@@ -102,11 +75,40 @@ public final class MentalabCodec {
       return null;
     }
 
-    private int readStreamToInt(int length) throws IOException {
-      btInputStream.read(buffer, 0, length); // read into buffer
-      int value = ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
-      buffer = new byte[1024]; // reset buffer for next read
-      return value;
+    private static int readToInt(InputStream i, int l) throws IOException {
+      final byte[] buffer = readPayload(i, l);
+      return ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
+    }
+
+    private static double readToDouble(InputStream i, int l) throws IOException {
+      final byte[] buffer = readPayload(i, l);
+      return ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getDouble();
+    }
+
+    private static byte[] readPayload(InputStream i, int length) throws IOException {
+      final byte[] buffer = new byte[length];
+      int read = i.read(buffer, 0, buffer.length); // read into buffer
+      if (read < length) {
+        Log.e(Utils.TAG, "Not all payload data read into buffer");
+      }
+      return buffer;
+    }
+
+    private static Packet parsePayload(byte[] bufferedData, int pId, double timeStamp)
+        throws InvalidDataException {
+      final PacketId id = getPacketId(pId);
+      final Packet packet = id.createInstance(timeStamp / 10_000); // to seconds
+      packet.populate(bufferedData);
+      return packet;
+    }
+
+    private static PacketId getPacketId(int pId) throws InvalidDataException {
+      for (PacketId p : PacketId.values()) {
+        if (pId == p.getNumVal()) {
+          return p;
+        }
+      }
+      throw new InvalidDataException("Cannot identify packet type.");
     }
   }
 }

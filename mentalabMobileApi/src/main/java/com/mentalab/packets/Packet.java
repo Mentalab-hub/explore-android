@@ -58,7 +58,7 @@ public abstract class Packet {
    *
    * @param byteBuffer
    */
-  public abstract void convertData(byte[] byteBuffer) throws InvalidDataException;
+  public abstract void populate(byte[] byteBuffer) throws InvalidDataException;
 
   /** String representation of attributes */
   @NonNull

@@ -14,7 +14,7 @@ public class CommandStatus extends UtilPacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+  public void populate(byte[] byteBuffer) throws InvalidDataException {
     short status =
         ByteBuffer.wrap(new byte[] {byteBuffer[5], 0}).order(ByteOrder.LITTLE_ENDIAN).getShort();
     commandStatus = status != 0;

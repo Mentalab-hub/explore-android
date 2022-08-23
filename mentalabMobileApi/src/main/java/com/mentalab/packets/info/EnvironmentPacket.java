@@ -19,7 +19,7 @@ public class EnvironmentPacket extends InfoPacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {
+  public void populate(byte[] byteBuffer) throws InvalidDataException {
     final List<Float> vals = new ArrayList<>();
     vals.add(
         (float)

@@ -12,7 +12,7 @@ public class CommandReceived extends UtilPacket {
   }
 
   @Override
-  public void convertData(byte[] byteBuffer) throws InvalidDataException {}
+  public void populate(byte[] byteBuffer) throws InvalidDataException {}
 
   @NonNull
   @Override
