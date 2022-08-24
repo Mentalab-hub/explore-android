@@ -10,7 +10,7 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.packets.info.ImpedanceInfo;
 import com.mentalab.service.ExploreExecutor;
-import com.mentalab.service.ImpedanceCalculatorTask;
+import com.mentalab.service.impedance.ImpedanceCalculatorTask;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
@@ -214,9 +214,9 @@ public class ExploreDevice {
   public Future<Boolean> calculateImpedance()
       throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
           InterruptedException, CommandFailedException {
-    CompletableFuture<Boolean> setSlopeOffset =
+    CompletableFuture<Boolean> impedanceConfigSucceeded =
         DeviceManager.submitImpCommand().thenApply(impInfo -> setSlopeAndOffset(impInfo));
-    if (setSlopeOffset.get()) {
+    if (impedanceConfigSucceeded.get()) {
       return ExploreExecutor.submitTask(impedanceTask);
     } else {
       throw new CommandFailedException(

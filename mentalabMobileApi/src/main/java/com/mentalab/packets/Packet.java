@@ -73,4 +73,11 @@ public abstract class Packet {
   public List<Float> getData() {
     return this.data;
   }
+
+  /** Clear data and reset */
+  public Packet overwriteData(List<Float> newData) {
+    this.data.clear();
+    this.data = newData;
+    return this;
+  }
 }
