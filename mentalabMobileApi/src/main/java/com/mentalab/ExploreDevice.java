@@ -214,23 +214,13 @@ public class ExploreDevice {
   public Future<Boolean> calculateImpedance()
       throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
           InterruptedException, CommandFailedException {
-    CompletableFuture<Boolean> impedanceConfigSucceeded =
-        DeviceManager.submitImpCommand().thenApply(impInfo -> setSlopeAndOffset(impInfo));
+    CompletableFuture<Boolean> impedanceConfigSucceeded = DeviceManager.submitImpCommand(this);
     if (impedanceConfigSucceeded.get()) {
       return ExploreExecutor.submitTask(impedanceTask);
     } else {
       throw new CommandFailedException(
           "Slope and offset not received. Unable to calculate impedance.");
     }
-  }
-
-  private boolean setSlopeAndOffset(ImpedanceInfo slopeOffset) {
-    if (slopeOffset == null) {
-      return false;
-    }
-    this.setOffset(slopeOffset.getOffset());
-    this.setSlope(slopeOffset.getSlope());
-    return true;
   }
 
   public void stopImpedanceCalculation()
@@ -274,12 +264,12 @@ public class ExploreDevice {
     this.channelMask = mask;
   }
 
-  private void setSlope(float slope) {
+  public void setSlope(float slope) {
     Log.d(Utils.TAG, "Impedance slope set to: " + slope);
     this.slope = slope;
   }
 
-  private void setOffset(double offset) {
+  public void setOffset(double offset) {
     Log.d(Utils.TAG, "Impedance offset set to: " + offset);
     this.offset = offset;
   }

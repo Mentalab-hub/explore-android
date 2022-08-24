@@ -1,6 +1,7 @@
 package com.mentalab.service;
 
 import android.util.Log;
+import com.mentalab.ExploreDevice;
 import com.mentalab.packets.info.ImpedanceInfo;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.ImpedanceConfigSubscriber;
@@ -10,16 +11,18 @@ import com.mentalab.utils.Utils;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class RequestImpedanceTask implements CheckedExceptionSupplier<ImpedanceInfo> {
+public class ConfigureImpedanceTask implements CheckedExceptionSupplier<Boolean> {
 
   private static final int TIMEOUT = 3000;
 
+  private final ExploreDevice device;
   private final byte[] startImpCmd;
   private final OutputStream outputStream;
 
-  public RequestImpedanceTask(OutputStream outputStream, byte[] encodedBytes) {
-    this.outputStream = outputStream;
-    this.startImpCmd = encodedBytes;
+  public ConfigureImpedanceTask(ExploreDevice d, OutputStream o, byte[] b) {
+    this.device = d;
+    this.outputStream = o;
+    this.startImpCmd = b;
   }
 
   /**
@@ -33,12 +36,12 @@ public class RequestImpedanceTask implements CheckedExceptionSupplier<ImpedanceI
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
    */
   @Override
-  public ImpedanceInfo accept() throws IOException, InterruptedException {
+  public Boolean accept() throws IOException, InterruptedException {
     final ImpedanceConfigSubscriber sub = registerSubscriber();
     postCmdToOutputStream(startImpCmd, outputStream);
     final ImpedanceInfo impedanceInfo = sub.awaitResultWithTimeout(TIMEOUT);
     ContentServer.getInstance().deRegisterSubscriber(sub);
-    return impedanceInfo;
+    return configureExploreDevice(impedanceInfo);
   }
 
   private static ImpedanceConfigSubscriber registerSubscriber() {
@@ -52,5 +55,14 @@ public class RequestImpedanceTask implements CheckedExceptionSupplier<ImpedanceI
     outputStream.write(command);
     outputStream.flush();
     Log.d(Utils.TAG, "Command sent.");
+  }
+
+  private boolean configureExploreDevice(ImpedanceInfo impedanceInfo) {
+    if (impedanceInfo == null) {
+      return false;
+    }
+    this.device.setOffset(impedanceInfo.getOffset());
+    this.device.setSlope(impedanceInfo.getSlope());
+    return true;
   }
 }

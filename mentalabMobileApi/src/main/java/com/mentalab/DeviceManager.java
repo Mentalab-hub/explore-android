@@ -2,10 +2,9 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.ImpedanceInfo;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
-import com.mentalab.service.RequestImpedanceTask;
+import com.mentalab.service.ConfigureImpedanceTask;
 import com.mentalab.utils.commandtranslators.Command;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 interface DeviceManager {
 
   /**
-   * Asynchronously submits a command to this device using the DeviceConfigurationTask.
+   * Asynchronously submits a command to the OutputStream using the DeviceConfigurationTask.
    *
    * @param c Command the command to be sent to the device.
    * @return Future True if the command was successfully received. Otherwise false
@@ -49,11 +48,11 @@ interface DeviceManager {
    * @return ImpedanceInfo results from the command. This data contains the slope and offset of the
    *     device.
    */
-  static CompletableFuture<ImpedanceInfo> submitImpCommand()
+  static CompletableFuture<Boolean> submitImpCommand(ExploreDevice device)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(Command.CMD_ZM_ENABLE);
     return CompletableFuture.supplyAsync(
-            new RequestImpedanceTask(BluetoothManager.getOutputStream(), encodedBytes),
+            new ConfigureImpedanceTask(device, BluetoothManager.getOutputStream(), encodedBytes),
             ExploreExecutor.getExecutorInstance())
         .exceptionally(e -> null); // return no impedance info
   }
