@@ -1,6 +1,5 @@
 package com.mentalab.service;
 
-import android.util.Log;
 import com.mentalab.ExploreDevice;
 import com.mentalab.packets.Packet;
 import com.mentalab.service.io.ContentServer;
@@ -42,8 +41,9 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
         new Subscriber<Packet>(Topic.EXG) {
           @Override
           public void accept(Packet packet) {
-            Log.d("IMPEDANCE", "===================================================== here");
-            if (slope != 0);
+            if (slope == 0) {
+              return;
+            }
             double[] doubleArray = Utils.convertArraylistToDoubleArray(packet);
             double[] notchedValues = butterworthFilter.bandStopFilter(doubleArray);
             final double[] values = butterworthFilter.bandPassFilter(notchedValues, false);
@@ -68,7 +68,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
 
   private double[] getPeakToPeak(double[] values) {
     int columnSize = values.length / channelCount;
-    double[] peakToPeakValues = new double[columnSize];
+    double[] peakToPeakValues = new double[channelCount];
 
     for (int i = 0; i < values.length - 1; i += columnSize) {
       double[] slice = Arrays.copyOfRange(values, i, i + columnSize);
@@ -83,7 +83,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
     double[] result = new double[length];
     for (int i = 0; i < length; i++) {
       result[i] = first[i] - second[i];
-      result[i] = (slope / Math.pow(10, 6)) - offset;
+      result[i] = result[i] * (slope / Math.pow(10, 6)) - offset;
     }
 
     return result;
