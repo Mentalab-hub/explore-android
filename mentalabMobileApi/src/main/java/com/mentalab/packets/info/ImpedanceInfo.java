@@ -9,15 +9,14 @@ import com.mentalab.utils.constants.Topic;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 
-public class CalibrationInfo extends InfoPacket implements Publishable {
+public class ImpedanceInfo extends InfoPacket implements Publishable {
 
   private float slope;
   private double offset;
 
-  public CalibrationInfo(double timeStamp) {
+  public ImpedanceInfo(double timeStamp) {
     super(timeStamp);
     super.attributes = EnumSet.of(SLOPE, OFFSET);
   }

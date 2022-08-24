@@ -2,13 +2,10 @@ package com.mentalab;
 
 import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
-import com.mentalab.packets.command.CommandStatus;
-import com.mentalab.packets.info.CalibrationInfo;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.packets.Publishable;
-import com.mentalab.utils.Utils;
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
 import java.io.IOException;

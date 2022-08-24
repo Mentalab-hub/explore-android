@@ -5,9 +5,10 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
+import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.packets.info.ImpedanceInfo;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceCalculatorTask;
 import com.mentalab.service.lsl.LslStreamerTask;
@@ -21,7 +22,7 @@ import com.mentalab.utils.constants.SamplingRate;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,8 +42,8 @@ public class ExploreDevice {
   private float slope;
   private double offset;
 
+  private final ImpedanceCalculatorTask impedanceTask = new ImpedanceCalculatorTask(this);
   private RecordTask recordTask;
-  private ImpedanceCalculatorTask impedanceTask;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
@@ -62,17 +63,13 @@ public class ExploreDevice {
    */
   protected ExploreDevice acquire()
       throws IOException, NoBluetoothException, ExecutionException, InterruptedException {
-    final List<CompletableFuture<Boolean>> deviceConfig = getInitCommands();
+    List<CompletableFuture<Boolean>> deviceConfig =
+        Arrays.asList(
+            CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)),
+            CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this))); // start config first
     MentalabCodec.decodeInputStream(getInputStream());
     waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
     return this;
-  }
-
-  private List<CompletableFuture<Boolean>> getInitCommands() {
-    final List<CompletableFuture<Boolean>> list = new ArrayList<>();
-    list.add(CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)));
-    list.add(CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this)));
-    return list;
   }
 
   private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
@@ -214,35 +211,32 @@ public class ExploreDevice {
     return ExploreExecutor.submitTask(new LslStreamerTask(this));
   }
 
-  public void startImpedanceCalculation()
-      throws NoBluetoothException, IOException, InvalidCommandException {
-    final Command c = Command.CMD_ZM_ENABLE;
-    c.setArg(0x00);
-    CompletableFuture<CalibrationInfo> result = DeviceManager.processImpCommand(c);
-    result
-        .thenApply(
-            x -> {
-              if (x != null) {
-                Log.d(
-                    "IMPEDANCE",
-                    "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                return setCalibrationValues(x);
-              }
-              return null;
-            })
-        .thenApply(
-            x -> {
-              startImpedanceTask(x);
-              return null;
-            });
-    Log.d("IMP", "Calling imp task");
+  public Future<Boolean> calculateImpedance()
+      throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
+          InterruptedException, CommandFailedException {
+    CompletableFuture<Boolean> setSlopeOffset =
+        DeviceManager.submitImpCommand().thenApply(impInfo -> setSlopeAndOffset(impInfo));
+    if (setSlopeOffset.get()) {
+      return ExploreExecutor.submitTask(impedanceTask);
+    } else {
+      throw new CommandFailedException(
+          "Slope and offset not received. Unable to calculate impedance.");
+    }
+  }
+
+  private boolean setSlopeAndOffset(ImpedanceInfo slopeOffset) {
+    if (slopeOffset == null) {
+      return false;
+    }
+    this.setOffset(slopeOffset.getOffset());
+    this.setSlope(slopeOffset.getSlope());
+    return true;
   }
 
   public void stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
-    c.setArg(0x00);
-    DeviceManager.submitCommand(c, () -> stopImpedanceTask());
+    DeviceManager.submitCommand(c, impedanceTask::cancelTask);
   }
 
   public String getDeviceName() {
@@ -258,11 +252,11 @@ public class ExploreDevice {
   }
 
   public float getSlope() {
-    return slope;
+    return this.slope;
   }
 
   public double getOffset() {
-    return offset;
+    return this.offset;
   }
 
   public void setChannelCount(ChannelCount count) {
@@ -280,20 +274,13 @@ public class ExploreDevice {
     this.channelMask = mask;
   }
 
-  void startImpedanceTask(ExploreDevice device) {
-    impedanceTask = new ImpedanceCalculatorTask(this);
-    ExploreExecutor.submitTask(impedanceTask);
+  private void setSlope(float slope) {
+    Log.d(Utils.TAG, "Impedance slope set to: " + slope);
+    this.slope = slope;
   }
 
-  void stopImpedanceTask() {
-    impedanceTask.cancelTask();
-  }
-
-  ExploreDevice setCalibrationValues(CalibrationInfo calibrationInfo) {
-    synchronized (this) {
-      this.slope = calibrationInfo.getSlope();
-      this.offset = calibrationInfo.getOffset();
-      return this;
-    }
+  private void setOffset(double offset) {
+    Log.d(Utils.TAG, "Impedance offset set to: " + offset);
+    this.offset = offset;
   }
 }

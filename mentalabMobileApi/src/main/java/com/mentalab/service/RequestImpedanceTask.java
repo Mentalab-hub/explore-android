@@ -1,24 +1,25 @@
 package com.mentalab.service;
 
 import android.util.Log;
-import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.service.io.CommandAcknowledgeSubscriber;
+import com.mentalab.packets.info.ImpedanceInfo;
 import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.ImpedanceConfigSubscriber;
 import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean> {
+public class RequestImpedanceTask implements CheckedExceptionSupplier<ImpedanceInfo> {
 
   private static final int TIMEOUT = 3000;
 
-  private final byte[] command;
+  private final byte[] startImpCmd;
   private final OutputStream outputStream;
 
-  public DeviceConfigurationTask(OutputStream outputStream, byte[] encodedBytes) {
+  public RequestImpedanceTask(OutputStream outputStream, byte[] encodedBytes) {
     this.outputStream = outputStream;
-    this.command = encodedBytes;
+    this.startImpCmd = encodedBytes;
   }
 
   /**
@@ -30,24 +31,24 @@ public class DeviceConfigurationTask implements CheckedExceptionSupplier<Boolean
    * @return boolean True when CommandAcknowledgement received, otherwise false
    * @throws IOException If the command cannot be written to the device OutputStream.
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
-   * @throws NoBluetoothException If no device is connected via BT.
    */
   @Override
-  public Boolean accept() throws Exception {
-    final CommandAcknowledgeSubscriber sub = registerSubscriber();
-    postCmdToOutputStream(command, outputStream);
-    final boolean result = sub.awaitResultWithTimeout(TIMEOUT);
+  public ImpedanceInfo accept() throws IOException, InterruptedException {
+    final ImpedanceConfigSubscriber sub = registerSubscriber();
+    postCmdToOutputStream(startImpCmd, outputStream);
+    final ImpedanceInfo impedanceInfo = sub.awaitResultWithTimeout(TIMEOUT);
     ContentServer.getInstance().deRegisterSubscriber(sub);
-    return result;
+    return impedanceInfo;
   }
 
-  private static CommandAcknowledgeSubscriber registerSubscriber() {
-    final CommandAcknowledgeSubscriber sub = new CommandAcknowledgeSubscriber();
+  private static ImpedanceConfigSubscriber registerSubscriber() {
+    final ImpedanceConfigSubscriber sub = new ImpedanceConfigSubscriber();
     ContentServer.getInstance().registerSubscriber(sub);
     return sub;
   }
 
-  private static void postCmdToOutputStream(byte[] command, OutputStream outputStream) throws IOException {
+  private static void postCmdToOutputStream(byte[] command, OutputStream outputStream)
+      throws IOException {
     outputStream.write(command);
     outputStream.flush();
     Log.d(Utils.TAG, "Command sent.");
