@@ -2,7 +2,7 @@ package com.mentalab.service;
 
 import android.util.Log;
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.Subscriber;
 import com.mentalab.utils.CheckedExceptionSupplier;
@@ -13,12 +13,12 @@ import java.io.OutputStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ImpedanceConfigurationTask implements CheckedExceptionSupplier<CalibrationInfo> {
+public class ImpedanceConfigurationTask implements CheckedExceptionSupplier<CalibrationInfoPacket> {
   final byte[] command;
   final OutputStream outputStream;
   private final CountDownLatch latch = new CountDownLatch(1);
   Subscriber ImpCommandSubscriber;
-  CalibrationInfo calibrationInfo;
+  CalibrationInfoPacket calibrationInfoPacket;
 
   public ImpedanceConfigurationTask(OutputStream outputStream, byte[] encodedBytes) {
     super();
@@ -30,8 +30,8 @@ public class ImpedanceConfigurationTask implements CheckedExceptionSupplier<Cali
           @Override
           public void accept(Packet p) {
 
-            if (p instanceof CalibrationInfo) {
-              calibrationInfo = (CalibrationInfo) p;
+            if (p instanceof CalibrationInfoPacket) {
+              calibrationInfoPacket = (CalibrationInfoPacket) p;
               latch.countDown();
             }
           }
@@ -50,12 +50,12 @@ public class ImpedanceConfigurationTask implements CheckedExceptionSupplier<Cali
    * @throws InterruptedException If the command cannot be written to the device OutputStream.
    */
   @Override
-  public CalibrationInfo accept() throws IOException, InterruptedException {
+  public CalibrationInfoPacket accept() throws IOException, InterruptedException {
 
     sendCommand();
     latch.await(3000, TimeUnit.MILLISECONDS);
     ContentServer.getInstance().deRegisterSubscriber(ImpCommandSubscriber);
-    return calibrationInfo;
+    return calibrationInfoPacket;
   }
 
   private void sendCommand() throws IOException {
