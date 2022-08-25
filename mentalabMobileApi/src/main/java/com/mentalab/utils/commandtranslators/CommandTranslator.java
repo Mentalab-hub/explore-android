@@ -23,7 +23,6 @@ public abstract class CommandTranslator {
     byte[] convertedData = new byte[dataLength];
     convertedData[0] = (byte) pId;
     convertedData[1] = (byte) count;
-    Log.d(Utils.TAG, "++++++++++++++++++++++ count is " + count);
     convertedData[2] = (byte) payload;
     convertedData[3] = (byte) 0;
 

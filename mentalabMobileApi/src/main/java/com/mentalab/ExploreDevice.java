@@ -179,7 +179,7 @@ public class ExploreDevice {
   }
 
   /** Returns the device data stream. */
-  public InputStream getInputStream() throws NoBluetoothException, IOException {
+  public static InputStream getInputStream() throws NoBluetoothException, IOException {
     return BluetoothManager.getInputStream();
   }
 
@@ -217,7 +217,6 @@ public class ExploreDevice {
   public void startImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_ENABLE;
-    c.setArg(0x00);
     CompletableFuture<CalibrationInfo> result = DeviceManager.processImpCommand(c);
     result
         .thenApply(
@@ -241,7 +240,6 @@ public class ExploreDevice {
   public void stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
-    c.setArg(0x00);
     DeviceManager.submitCommand(c, () -> stopImpedanceTask());
   }
 

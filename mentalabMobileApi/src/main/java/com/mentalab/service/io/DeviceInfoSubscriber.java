@@ -6,13 +6,13 @@ import com.mentalab.utils.constants.Topic;
 
 public class DeviceInfoSubscriber extends CountDownSubscriber<DeviceInfoPacket> {
 
-    public DeviceInfoSubscriber() {
-        super(Topic.DEVICE_INFO);
-    }
+  public DeviceInfoSubscriber() {
+    super(Topic.DEVICE_INFO);
+  }
 
-    @Override
-    public void accept(Packet packet) {
-        result = (DeviceInfoPacket) packet;
-        latch.countDown();
-    }
+  @Override
+  public void accept(Packet packet) {
+    result = (DeviceInfoPacket) packet;
+    latch.countDown();
+  }
 }
