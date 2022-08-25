@@ -20,7 +20,7 @@ interface DeviceManager {
    * @param task Task that will send command to the device.
    * @return Future<T>
    */
-  static <T> CompletableFuture<T> submitConfigCommand(
+  static <T> CompletableFuture<T> submitCommand(
       SendCommandTask<T> task, T exceptionalReturn) {
     return CompletableFuture.supplyAsync(task, ExploreExecutor.getExecutorInstance())
         .exceptionally(e -> exceptionalReturn); // if throws an exception, return gracefully
@@ -36,7 +36,7 @@ interface DeviceManager {
   static CompletableFuture<Boolean> submitConfigCommand(Command c)
       throws IOException, NoBluetoothException, InvalidCommandException {
     final byte[] encodedBytes = encodeCommand(c);
-    return submitConfigCommand(
+    return submitCommand(
         new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), false);
   }
 
@@ -71,7 +71,7 @@ interface DeviceManager {
   static CompletableFuture<ImpedanceInfo> submitImpCommand(Command c)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
-    return submitConfigCommand(
+    return submitCommand(
         new ImpedanceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), null);
   }
 
