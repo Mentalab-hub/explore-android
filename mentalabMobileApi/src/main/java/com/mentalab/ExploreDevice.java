@@ -9,7 +9,6 @@ import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.packets.info.ImpedanceInfo;
-import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.impedance.ImpedanceCalculatorTask;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
@@ -183,7 +182,7 @@ public class ExploreDevice {
   @RequiresApi(api = Build.VERSION_CODES.Q)
   public Future<Boolean> record(Context cxt, String filename) {
     recordTask = new RecordTask(cxt, filename, this);
-    return ExploreExecutor.submitTask(recordTask);
+    return DeviceManager.submitTask(recordTask);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -196,7 +195,7 @@ public class ExploreDevice {
   public Future<Boolean> recordWithTimeout(Context cxt, int millis) {
     final String filename = String.valueOf(System.currentTimeMillis());
     recordTask = new RecordTask(cxt, filename, this);
-    return ExploreExecutor.submitTimeoutTask(recordTask, millis, () -> recordTask.close());
+    return DeviceManager.submitTimeoutTask(recordTask, millis, () -> recordTask.close());
   }
 
   public boolean stopRecord() {
@@ -208,14 +207,14 @@ public class ExploreDevice {
   }
 
   public Future<Boolean> pushToLSL() {
-    return ExploreExecutor.submitTask(new LslStreamerTask(this));
+    return DeviceManager.submitTask(new LslStreamerTask(this));
   }
 
   public Future<Boolean> calculateImpedance()
       throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
           InterruptedException, CommandFailedException {
     startImpedanceMode();
-    return ExploreExecutor.submitTask(calculateImpedanceTask);
+    return DeviceManager.submitImpedanceTask(calculateImpedanceTask);
   }
 
   private void startImpedanceMode()
@@ -234,7 +233,8 @@ public class ExploreDevice {
   public void stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
-    DeviceManager.submitConfigCommand(c, calculateImpedanceTask::cancelTask);
+    DeviceManager.submitConfigCommand(
+        c, calculateImpedanceTask::cancelTask, ExploreExecutor::unblockExecutorServices);
   }
 
   public String getDeviceName() {
