@@ -272,12 +272,12 @@ public class ExploreDevice {
     this.channelMask = mask;
   }
 
-  public void setSlope(float slope) {
+  private void setSlope(float slope) {
     Log.d(Utils.TAG, "Impedance slope set to: " + slope);
     this.slope = slope;
   }
 
-  public void setOffset(double offset) {
+  private void setOffset(double offset) {
     Log.d(Utils.TAG, "Impedance offset set to: " + offset);
     this.offset = offset;
   }
