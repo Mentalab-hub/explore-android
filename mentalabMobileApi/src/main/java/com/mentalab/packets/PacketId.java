@@ -1,20 +1,20 @@
 package com.mentalab.packets;
 
-import com.mentalab.packets.command.CommandReceived;
-import com.mentalab.packets.command.CommandStatus;
-import com.mentalab.packets.info.CalibrationInfo;
+import com.mentalab.packets.command.CmdReceivedPacket;
+import com.mentalab.packets.command.CmdStatusPacket;
+import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.packets.info.DeviceInfoPacket;
-import com.mentalab.packets.info.EnvironmentPacket;
-import com.mentalab.packets.sensors.Marker;
-import com.mentalab.packets.sensors.Orientation;
-import com.mentalab.packets.sensors.exg.Eeg94;
-import com.mentalab.packets.sensors.exg.Eeg98;
+import com.mentalab.packets.sensors.EnvironmentPacket;
+import com.mentalab.packets.sensors.MarkerPacket;
+import com.mentalab.packets.sensors.OrientationPacket;
+import com.mentalab.packets.sensors.exg.Eeg94Packet;
+import com.mentalab.packets.sensors.exg.Eeg98Packet;
 
 public enum PacketId {
   ORIENTATION(13) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Orientation(timeStamp);
+      return new OrientationPacket(timeStamp);
     }
   },
   ENVIRONMENT(19) {
@@ -44,13 +44,13 @@ public enum PacketId {
   EEG94(144) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Eeg94(timeStamp);
+      return new Eeg94Packet(timeStamp);
     }
   },
   EEG98(146) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Eeg98(timeStamp);
+      return new Eeg98Packet(timeStamp);
     }
   },
   EEG99S(30) {
@@ -74,31 +74,31 @@ public enum PacketId {
   EEG98R(210) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Eeg98(timeStamp);
+      return new Eeg98Packet(timeStamp);
     }
   },
   CMDRCV(192) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new CommandReceived(timeStamp);
+      return new CmdReceivedPacket(timeStamp);
     }
   },
   CMDSTAT(193) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new CommandStatus(timeStamp);
+      return new CmdStatusPacket(timeStamp);
     }
   },
   MARKER(194) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new Marker(timeStamp);
+      return new MarkerPacket(timeStamp);
     }
   },
   CALIBINFO(195) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new CalibrationInfo(timeStamp);
+      return new CalibrationInfoPacket(timeStamp);
     }
   };
 

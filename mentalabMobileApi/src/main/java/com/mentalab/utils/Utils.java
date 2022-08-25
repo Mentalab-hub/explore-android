@@ -6,6 +6,7 @@ import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
+
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -80,4 +81,5 @@ public class Utils {
     }
     return ChannelCount.CC_8;
   }
+
 }
