@@ -39,10 +39,10 @@ public class ExploreDevice {
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
-  private float slope;
-  private double offset;
+  private float slope = 0f;
+  private double offset = 0d;
 
-  private final ImpedanceCalculatorTask impedanceTask = new ImpedanceCalculatorTask(this);
+  private final ImpedanceCalculatorTask calculateImpedanceTask = new ImpedanceCalculatorTask(this);
   private RecordTask recordTask;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
@@ -96,7 +96,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     final Command c = generateChannelCommand(switches);
-    return DeviceManager.submitCommand(c, () -> setChannelMask(c.getArg()));
+    return DeviceManager.submitConfigCommand(c, () -> setChannelMask(c.getArg()));
   }
 
   private Command generateChannelCommand(Set<ConfigSwitch> channelSwitches) {
@@ -138,7 +138,7 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
-    return DeviceManager.submitCommand(c);
+    return DeviceManager.submitConfigCommand(c);
   }
 
   private static Command generateModuleCommand(ConfigSwitch module) {
@@ -157,13 +157,13 @@ public class ExploreDevice {
       throws InvalidCommandException, IOException, NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
-    return DeviceManager.submitCommand(c, () -> setSR(sr));
+    return DeviceManager.submitConfigCommand(c, () -> setSR(sr));
   }
 
   /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return DeviceManager.submitCommand(Command.CMD_MEMORY_FORMAT);
+    return DeviceManager.submitConfigCommand(Command.CMD_MEMORY_FORMAT);
   }
 
   /**
@@ -172,7 +172,7 @@ public class ExploreDevice {
    */
   public Future<Boolean> softReset()
       throws InvalidCommandException, IOException, NoBluetoothException {
-    return DeviceManager.submitCommand(Command.CMD_SOFT_RESET);
+    return DeviceManager.submitConfigCommand(Command.CMD_SOFT_RESET);
   }
 
   /** Returns the device data stream. */
@@ -214,9 +214,17 @@ public class ExploreDevice {
   public Future<Boolean> calculateImpedance()
       throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
           InterruptedException, CommandFailedException {
-    CompletableFuture<Boolean> impedanceConfigSucceeded = DeviceManager.submitImpCommand(this);
-    if (impedanceConfigSucceeded.get()) {
-      return ExploreExecutor.submitTask(impedanceTask);
+    startImpedanceMode();
+    return ExploreExecutor.submitTask(calculateImpedanceTask);
+  }
+
+  private void startImpedanceMode()
+      throws InvalidCommandException, IOException, NoBluetoothException, ExecutionException,
+          InterruptedException, CommandFailedException {
+    final ImpedanceInfo slopeOffset = DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
+    if (slopeOffset != null) {
+      this.setSlope(slopeOffset.getSlope());
+      this.setOffset(slopeOffset.getOffset());
     } else {
       throw new CommandFailedException(
           "Slope and offset not received. Unable to calculate impedance.");
@@ -226,7 +234,7 @@ public class ExploreDevice {
   public void stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
-    DeviceManager.submitCommand(c, impedanceTask::cancelTask);
+    DeviceManager.submitConfigCommand(c, calculateImpedanceTask::cancelTask);
   }
 
   public String getDeviceName() {
