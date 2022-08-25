@@ -11,7 +11,7 @@ import com.mentalab.utils.Utils;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class ConfigureImpedanceTask implements CheckedExceptionSupplier<Boolean> {
+public class ImpedanceConfigurationTask implements CheckedExceptionSupplier<Boolean> {
 
   private static final int TIMEOUT = 3000;
 
@@ -19,7 +19,7 @@ public class ConfigureImpedanceTask implements CheckedExceptionSupplier<Boolean>
   private final byte[] startImpCmd;
   private final OutputStream outputStream;
 
-  public ConfigureImpedanceTask(ExploreDevice d, OutputStream o, byte[] b) {
+  public ImpedanceConfigurationTask(ExploreDevice d, OutputStream o, byte[] b) {
     this.device = d;
     this.outputStream = o;
     this.startImpCmd = b;
