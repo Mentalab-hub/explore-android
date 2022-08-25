@@ -61,7 +61,7 @@ public class ExploreDevice {
    * configure the device based on those packets. If these packets are not received, or the device
    * is not configured, we cannot proceed.
    */
-  protected ExploreDevice acquire()
+  public ExploreDevice acquire()
       throws IOException, NoBluetoothException, ExecutionException, InterruptedException {
     List<CompletableFuture<Boolean>> deviceConfig =
         Arrays.asList(
