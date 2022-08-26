@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
+import com.mentalab.utils.constants.Topic;
 
 import java.util.EnumSet;
 
@@ -59,5 +60,10 @@ public class EnvironmentPacket extends Packet {
   @Override
   public int getDataCount() {
     return super.type.size();
+  }
+
+  @Override
+  public Topic getTopic() {
+    return Topic.ENVIRONMENT;
   }
 }

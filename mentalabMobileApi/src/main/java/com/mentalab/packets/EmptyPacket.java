@@ -2,6 +2,7 @@ package com.mentalab.packets;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.utils.constants.Topic;
 
 public class EmptyPacket extends Packet {
 
@@ -17,6 +18,11 @@ public class EmptyPacket extends Packet {
     @NonNull
     @Override
     public String toString() {
-        return "";
+        return "PACKET: Empty";
+    }
+
+    @Override
+    public Topic getTopic() {
+        return null;
     }
 }

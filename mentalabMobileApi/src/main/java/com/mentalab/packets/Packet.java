@@ -2,6 +2,7 @@ package com.mentalab.packets;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,4 +41,5 @@ public abstract class Packet {
     return this.timeStamp;
   }
 
+  public abstract Topic getTopic();
 }

@@ -1,10 +1,9 @@
-package com.mentalab;
+package com.mentalab.service.decode;
 
 import android.util.Log;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
-import com.mentalab.packets.Publishable;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.utils.Utils;
 
@@ -18,7 +17,7 @@ class ParseRawDataTask implements Callable<Void> {
 
   private InputStream btInputStream;
 
-  public void setInputStream(InputStream inputStream) {
+  void setInputStream(InputStream inputStream) {
     this.btInputStream = inputStream;
   }
 
@@ -30,11 +29,8 @@ class ParseRawDataTask implements Callable<Void> {
         final int length = readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
         final double timeStamp = readToDouble(btInputStream, 4); // in ms * 10
 
-        final Packet packet = createPacket(pID, length, timeStamp);
-
-        if (packet instanceof Publishable) {
-          ContentServer.getInstance().publish(((Publishable) packet).getTopic(), packet);
-        }
+        final Packet packet = createPacket(pID, length, timeStamp / 10_000); // to seconds
+        ContentServer.getInstance().publish(packet.getTopic(), packet);
       } catch (IOException e) {
         Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
         break;
@@ -43,24 +39,17 @@ class ParseRawDataTask implements Callable<Void> {
     return null;
   }
 
-  private Packet createPacket(int pID, int length, double timeStamp) throws IOException {
-    byte[] buffer = readPayload(btInputStream, length - 4, length - 4); // already read timestamp
-    byte[] noFletcherBuffer =
-        Arrays.copyOfRange(buffer, 0, buffer.length - 4); // ignore 4 byte Fletcher
-    return parsePayload(noFletcherBuffer, pID, timeStamp);
-  }
-
   private static int readToInt(InputStream i, int noBytesToRead) throws IOException {
-    final byte[] buffer = readPayload(i, noBytesToRead, 1024);
+    final byte[] buffer = readStream(i, noBytesToRead, 1024);
     return ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt();
   }
 
   private static double readToDouble(InputStream i, int noBytesToRead) throws IOException {
-    final byte[] buffer = readPayload(i, noBytesToRead, 1024);
+    final byte[] buffer = readStream(i, noBytesToRead, 1024);
     return ByteBuffer.wrap(buffer).order(java.nio.ByteOrder.LITTLE_ENDIAN).getDouble();
   }
 
-  private static byte[] readPayload(InputStream i, int noBytesToRead, int initialBufferLength)
+  private static byte[] readStream(InputStream i, int noBytesToRead, int initialBufferLength)
       throws IOException {
     final byte[] buffer = new byte[initialBufferLength];
     int read = i.read(buffer, 0, noBytesToRead); // read into buffer
@@ -70,11 +59,21 @@ class ParseRawDataTask implements Callable<Void> {
     return buffer;
   }
 
+  private Packet createPacket(int pID, int length, double timeStamp) throws IOException {
+    final byte[] noFletcherBuffer = readStreamPayload(length);
+    return parsePayload(noFletcherBuffer, pID, timeStamp);
+  }
+
+  private byte[] readStreamPayload(int length) throws IOException {
+    final byte[] buffer =
+        readStream(btInputStream, length - 4, length - 4); // already read timestamp
+    return Arrays.copyOfRange(buffer, 0, buffer.length - 4); // ignore last 4 byte Fletcher
+  }
+
   private static Packet parsePayload(byte[] bufferedData, int pId, double timeStamp)
       throws IOException {
     try {
-      final PacketId id = getPacketId(pId);
-      final Packet packet = id.createInstance(timeStamp / 10_000); // to seconds
+      final Packet packet = getPacketId(pId).createInstance(timeStamp);
       packet.populate(bufferedData);
       return packet;
     } catch (InvalidDataException e) {

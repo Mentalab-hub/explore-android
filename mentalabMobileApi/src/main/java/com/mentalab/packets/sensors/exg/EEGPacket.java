@@ -4,12 +4,11 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
 
-public abstract class EEGPacket extends Packet implements Publishable {
+public abstract class EEGPacket extends Packet {
 
   private final int channelNumber;
 

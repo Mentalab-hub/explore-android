@@ -5,12 +5,11 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketDataType;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
 import java.util.EnumSet;
 
-public class MarkerPacket extends Packet implements Publishable {
+public class MarkerPacket extends Packet {
 
   public MarkerPacket(double timeStamp) {
     super(timeStamp);

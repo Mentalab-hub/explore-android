@@ -2,10 +2,9 @@ package com.mentalab.packets.command;
 
 import androidx.annotation.NonNull;
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
-public class CmdReceivedPacket extends Packet implements Publishable {
+public class CmdReceivedPacket extends Packet {
 
   public CmdReceivedPacket(double timeStamp) {
     super(timeStamp);

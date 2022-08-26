@@ -1,4 +1,4 @@
-package com.mentalab;
+package com.mentalab.service.decode;
 
 import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.commandtranslators.CommandTranslator;
@@ -31,7 +31,7 @@ public final class MentalabCodec {
    *
    * @return byte[] encoded commands that can be sent to the device
    */
-  static byte[] encodeCommand(Command command) {
+  public static byte[] encodeCommand(Command command) {
     final CommandTranslator translator = command.createCommandTranslator();
     return translator.translateCommand();
   }

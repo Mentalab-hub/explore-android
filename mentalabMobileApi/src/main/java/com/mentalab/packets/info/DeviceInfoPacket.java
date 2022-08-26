@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
 
@@ -14,7 +13,7 @@ import static com.mentalab.packets.PacketDataType.ADS_MASK;
 import static com.mentalab.packets.PacketDataType.SR;
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-public class DeviceInfoPacket extends Packet implements Publishable {
+public class DeviceInfoPacket extends Packet {
 
   private SamplingRate samplingRate;
   private int adsMask;

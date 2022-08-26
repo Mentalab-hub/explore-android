@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
 import java.util.EnumSet;
@@ -12,7 +11,7 @@ import java.util.EnumSet;
 import static com.mentalab.packets.PacketDataType.ACCX;
 import static com.mentalab.packets.PacketDataType.GYROZ;
 
-public class OrientationPacket extends Packet implements Publishable {
+public class OrientationPacket extends Packet {
 
   private final static double ACCELEROMETER_CONSTANT = 0.061;
   private final static double GYROSCOPE_CONSTANT = 8.750;

@@ -4,10 +4,9 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
-public class CmdStatusPacket extends Packet implements Publishable {
+public class CmdStatusPacket extends Packet {
 
   private boolean commandStatus;
 

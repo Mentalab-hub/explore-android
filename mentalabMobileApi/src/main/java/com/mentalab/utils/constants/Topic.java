@@ -7,4 +7,5 @@ public enum Topic {
   MARKER,
   DEVICE_INFO,
   IMPEDANCE,
+  ENVIRONMENT
 }
