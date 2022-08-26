@@ -77,6 +77,7 @@ public class ExploreDevice {
 
   private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
       throws ExecutionException, InterruptedException, IOException {
+    Log.i(Utils.TAG, "Waiting on initial configuration.");
     for (CompletableFuture<Boolean> f : deviceConfig) {
       if (!f.get()) {
         MentalabCommands.shutdown();

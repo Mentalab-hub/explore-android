@@ -32,7 +32,7 @@ public class PacketUtils {
     return addValsToArrayDouble(data, array);
   }
 
-  public static double[] bytesToInt32s(byte[] data) throws InvalidDataException, IOException {
+  public static double[] bytesToInt32s(byte[] data) throws InvalidDataException {
     if (data.length % BUFFER_LENGTH != 0) {
       throw new InvalidDataException("Illegal byte array length");
     }
