@@ -20,7 +20,7 @@ public abstract class Packet {
   }
 
   /** Converts binary data stream to human-readable voltage values */
-  public abstract void convertData(byte[] data) throws InvalidDataException, IOException;
+  public abstract void populate(byte[] data) throws InvalidDataException, IOException;
 
   /** String representation of attributes */
   @NonNull

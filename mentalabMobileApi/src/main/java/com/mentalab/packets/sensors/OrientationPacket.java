@@ -24,7 +24,7 @@ public class OrientationPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] dataBytes) throws InvalidDataException {
+  public void populate(byte[] dataBytes) throws InvalidDataException {
     final double[] dataDoubles = PacketUtils.bytesToDoubles(dataBytes);
     for (int i = 0; i < dataDoubles.length; i++) {
       if (i < 3) {

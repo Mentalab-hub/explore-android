@@ -18,7 +18,7 @@ public class MarkerPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] data) throws InvalidDataException {
+  public void populate(byte[] data) throws InvalidDataException {
     final int markerCode = PacketUtils.bytesToShort(data[0]);
     super.data.add((float) markerCode);
   }

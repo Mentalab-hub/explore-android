@@ -24,7 +24,7 @@ public class CalibrationInfoPacket extends Packet implements Publishable {
 
   /** Converts binary data stream to human-readable voltage values. */
   @Override
-  public void convertData(byte[] data) throws InvalidDataException {
+  public void populate(byte[] data) throws InvalidDataException {
     this.slope = PacketUtils.bytesToInt(data[0], data[1]) * 10;
     this.offset = PacketUtils.bytesToInt(data[2], data[3]) * 0.001;
   }

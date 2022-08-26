@@ -95,7 +95,7 @@ public final class MentalabCodec {
     }
 
     private static Packet parsePayload(byte[] bufferedData, int pId, double timeStamp)
-        throws InvalidDataException {
+            throws InvalidDataException, IOException {
       final PacketId id = getPacketId(pId);
       final Packet packet = id.createInstance(timeStamp / 10_000); // to seconds
       packet.populate(bufferedData);

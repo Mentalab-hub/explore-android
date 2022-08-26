@@ -20,7 +20,7 @@ public class EnvironmentPacket extends Packet {
   }
 
   @Override
-  public void convertData(byte[] data) throws InvalidDataException {
+  public void populate(byte[] data) throws InvalidDataException {
     super.data.add((float) PacketUtils.bytesToInt(data[0])); // temp
     super.data.add((float) (PacketUtils.bytesToInt(data[1], data[2]) * LUX_CONSTANT)); // light
     super.data.add((float) getBatteryPercentage(getRawBattery(data))); // battery
