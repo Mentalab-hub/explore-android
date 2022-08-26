@@ -2,7 +2,7 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.ImpedanceInfo;
+import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceConfigurationTask;
@@ -69,7 +69,7 @@ interface DeviceManager {
    * @param c Command to be sent to the device.
    * @return ImpedanceInfo containing slope and offset, or else null.
    */
-  static CompletableFuture<ImpedanceInfo> submitImpCommand(Command c)
+  static CompletableFuture<ImpedanceInfoPacket> submitImpCommand(Command c)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
     return submitCommand(

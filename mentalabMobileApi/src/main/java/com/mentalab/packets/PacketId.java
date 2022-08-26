@@ -1,6 +1,8 @@
 package com.mentalab.packets;
 
-import com.mentalab.packets.info.ImpedanceInfo;
+import com.mentalab.packets.command.CmdReceivedPacket;
+import com.mentalab.packets.command.CmdStatusPacket;
+import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.packets.info.DeviceInfoPacket;
 import com.mentalab.packets.sensors.EnvironmentPacket;
 import com.mentalab.packets.sensors.MarkerPacket;
@@ -96,7 +98,7 @@ public enum PacketId {
   CALIBINFO(195) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new ImpedanceInfo(timeStamp);
+      return new ImpedanceInfoPacket(timeStamp);
     }
   };
 

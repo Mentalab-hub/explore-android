@@ -1,6 +1,5 @@
 package com.mentalab.packets.info;
 
-import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
@@ -11,35 +10,35 @@ import java.util.EnumSet;
 import static com.mentalab.packets.PacketDataType.OFFSET;
 import static com.mentalab.packets.PacketDataType.SLOPE;
 
-public class CalibrationInfoPacket extends Packet {
+public class ImpedanceInfoPacket extends Packet {
 
   private float slope;
   private double offset;
 
-  public CalibrationInfoPacket(double timeStamp) {
+  public ImpedanceInfoPacket(double timeStamp) {
     super(timeStamp);
     super.type = EnumSet.of(SLOPE, OFFSET);
   }
 
-  /** Converts binary data stream to human-readable voltage values. */
   @Override
-  public void populate(byte[] data) throws InvalidDataException {
-    this.slope = PacketUtils.bytesToInt(data[0], data[1]) * 10;
-    this.offset = PacketUtils.bytesToInt(data[2], data[3]) * 0.001;
+  public void populate(byte[] byteBuffer) throws InvalidDataException {
+    this.slope = PacketUtils.bytesToFloat(byteBuffer[0], byteBuffer[1]) * 10f;
+    this.offset = PacketUtils.bytesToDouble(byteBuffer[2], byteBuffer[3]) * 0.001d;
+    super.data.add(slope);
+    super.data.add((float) offset);
   }
 
   public float getSlope() {
-    return this.slope;
+    return slope;
   }
 
   public double getOffset() {
-    return this.offset;
+    return offset;
   }
 
-  @NonNull
   @Override
   public String toString() {
-    return "PACKET: CalibrationInfo";
+    return "PACKET: ImpedanceInfo";
   }
 
   @Override

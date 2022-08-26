@@ -8,7 +8,7 @@ import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.ImpedanceInfo;
+import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.impedance.ImpedanceCalculatorTask;
 import com.mentalab.service.decode.MentalabCodec;
@@ -223,7 +223,7 @@ public class ExploreDevice {
   private void startImpedanceMode()
       throws InvalidCommandException, IOException, NoBluetoothException, ExecutionException,
           InterruptedException, CommandFailedException {
-    final ImpedanceInfo slopeOffset = DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
+    final ImpedanceInfoPacket slopeOffset = DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
     if (slopeOffset != null) {
       this.setSlope(slopeOffset.getSlope());
       this.setOffset(slopeOffset.getOffset());
