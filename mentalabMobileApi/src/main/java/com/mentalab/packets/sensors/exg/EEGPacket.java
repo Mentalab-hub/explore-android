@@ -4,12 +4,11 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
 
-public abstract class EEGPacket extends Packet implements Publishable {
+public abstract class EEGPacket extends Packet {
 
   private final int channelNumber;
 
@@ -19,7 +18,7 @@ public abstract class EEGPacket extends Packet implements Publishable {
   }
 
   @Override
-  public void convertData(byte[] dataBytes) throws InvalidDataException, IOException {
+  public void populate(byte[] dataBytes) throws InvalidDataException, IOException {
     double[] dataDoubles = PacketUtils.bytesToInt32s(dataBytes);
     for (int i = 0; i < dataDoubles.length; i++) {
       if (i % (channelNumber + 1) == 0) {

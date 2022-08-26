@@ -6,6 +6,7 @@ import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceConfigurationTask;
+import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.utils.commandtranslators.Command;
 
 import java.io.IOException;

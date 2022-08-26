@@ -2,6 +2,7 @@ package com.mentalab.packets;
 
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.utils.constants.Topic;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public abstract class Packet {
   }
 
   /** Converts binary data stream to human-readable voltage values */
-  public abstract void convertData(byte[] data) throws InvalidDataException, IOException;
+  public abstract void populate(byte[] data) throws InvalidDataException, IOException;
 
   /** String representation of attributes */
   @NonNull
@@ -40,4 +41,5 @@ public abstract class Packet {
     return this.timeStamp;
   }
 
+  public abstract Topic getTopic();
 }

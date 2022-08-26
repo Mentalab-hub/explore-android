@@ -26,13 +26,13 @@ public enum PacketId {
   TIMESTAMP(27) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return null;
+      return new EmptyPacket(timeStamp);
     }
   },
   DISCONNECT(25) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return null;
+      return new EmptyPacket(timeStamp);
     }
   },
   INFO(99) {
@@ -56,19 +56,19 @@ public enum PacketId {
   EEG99S(30) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return null;
+      return new EmptyPacket(timeStamp);
     }
   },
   EEG99(62) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return null;
+      return new EmptyPacket(timeStamp);
     }
   },
   EEG94R(208) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return null;
+      return new EmptyPacket(timeStamp);
     }
   },
   EEG98R(210) {

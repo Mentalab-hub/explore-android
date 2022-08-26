@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
+import com.mentalab.utils.constants.Topic;
 
 import java.util.EnumSet;
 
@@ -20,7 +21,7 @@ public class EnvironmentPacket extends Packet {
   }
 
   @Override
-  public void convertData(byte[] data) throws InvalidDataException {
+  public void populate(byte[] data) throws InvalidDataException {
     super.data.add((float) PacketUtils.bytesToInt(data[0])); // temp
     super.data.add((float) (PacketUtils.bytesToInt(data[1], data[2]) * LUX_CONSTANT)); // light
     super.data.add((float) getBatteryPercentage(getRawBattery(data))); // battery
@@ -59,5 +60,10 @@ public class EnvironmentPacket extends Packet {
   @Override
   public int getDataCount() {
     return super.type.size();
+  }
+
+  @Override
+  public Topic getTopic() {
+    return Topic.ENVIRONMENT;
   }
 }

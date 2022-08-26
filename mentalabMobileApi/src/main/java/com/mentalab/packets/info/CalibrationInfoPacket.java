@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
-import com.mentalab.packets.Publishable;
 import com.mentalab.utils.constants.Topic;
 
 import java.util.EnumSet;
@@ -12,7 +11,7 @@ import java.util.EnumSet;
 import static com.mentalab.packets.PacketDataType.OFFSET;
 import static com.mentalab.packets.PacketDataType.SLOPE;
 
-public class CalibrationInfoPacket extends Packet implements Publishable {
+public class CalibrationInfoPacket extends Packet {
 
   private float slope;
   private double offset;
@@ -24,7 +23,7 @@ public class CalibrationInfoPacket extends Packet implements Publishable {
 
   /** Converts binary data stream to human-readable voltage values. */
   @Override
-  public void convertData(byte[] data) throws InvalidDataException {
+  public void populate(byte[] data) throws InvalidDataException {
     this.slope = PacketUtils.bytesToInt(data[0], data[1]) * 10;
     this.offset = PacketUtils.bytesToInt(data[2], data[3]) * 0.001;
   }

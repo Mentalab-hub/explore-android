@@ -10,6 +10,7 @@ import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.packets.info.CalibrationInfoPacket;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceCalculatorTask;
+import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
@@ -77,6 +78,7 @@ public class ExploreDevice {
 
   private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
       throws ExecutionException, InterruptedException, IOException {
+    Log.i(Utils.TAG, "Waiting on initial configuration.");
     for (CompletableFuture<Boolean> f : deviceConfig) {
       if (!f.get()) {
         MentalabCommands.shutdown();
