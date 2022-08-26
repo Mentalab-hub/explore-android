@@ -109,7 +109,6 @@ public class ButterworthFilter {
    * @return double[] Filtered signal
    */
   public double[] bandStopFilter(double[] signal) throws IllegalArgumentException {
-
     int order = 5;
     double nyquistFreq = samplingFreq / 2;
     double lowCutoff = (notchFreq - 2) / nyquistFreq;
