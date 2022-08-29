@@ -233,10 +233,10 @@ public class ExploreDevice {
     }
   }
 
-  public void stopImpedanceCalculation()
+  public Future<Boolean> stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
-    DeviceManager.submitConfigCommand(c, calculateImpedanceTask::cancelTask);
+    return DeviceManager.submitConfigCommand(c, calculateImpedanceTask::cancelTask);
   }
 
   public String getDeviceName() {

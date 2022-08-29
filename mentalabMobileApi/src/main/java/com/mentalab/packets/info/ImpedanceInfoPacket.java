@@ -22,8 +22,8 @@ public class ImpedanceInfoPacket extends Packet {
 
   @Override
   public void populate(byte[] byteBuffer) throws InvalidDataException {
-    this.slope = PacketUtils.bytesToFloat(byteBuffer[0], byteBuffer[1]) * 10f;
-    this.offset = PacketUtils.bytesToDouble(byteBuffer[2], byteBuffer[3]) * 0.001d;
+    this.slope = PacketUtils.bytesToInt(byteBuffer[0], byteBuffer[1]) * 10f;
+    this.offset = PacketUtils.bytesToInt(byteBuffer[2], byteBuffer[3]) * 0.001d;
   }
 
   public float getSlope() {
@@ -41,6 +41,6 @@ public class ImpedanceInfoPacket extends Packet {
 
   @Override
   public Topic getTopic() {
-    return Topic.IMPEDANCE;
+    return Topic.DEVICE_INFO;
   }
 }
