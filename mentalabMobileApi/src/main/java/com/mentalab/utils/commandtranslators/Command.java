@@ -46,7 +46,7 @@ public enum Command {
   CMD_ZM_ENABLE(0xA7) {
     @Override
     public CommandTranslator createCommandTranslator() {
-      return new TwoByteCommandTranslator(this.getOperationCode(), 0);
+      return new TwoByteCommandTranslator(this.getOperationCode(), this.getArg());
     }
   },
   CMD_SOFT_RESET(0xA8) {
@@ -57,7 +57,7 @@ public enum Command {
   };
 
   private final int operation;
-  private int arg = 0; // default no argument
+  private int arg = 0x00; // default no argument
 
   Command(final int opCode) {
     this.operation = opCode;

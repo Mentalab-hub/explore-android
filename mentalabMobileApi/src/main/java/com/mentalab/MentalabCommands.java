@@ -3,6 +3,8 @@ package com.mentalab;
 import android.bluetooth.BluetoothDevice;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
+import com.mentalab.service.ExploreExecutor;
+import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.utils.Utils;
 
 import java.io.IOException;

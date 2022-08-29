@@ -8,8 +8,10 @@ import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.ImpedanceInfo;
+import com.mentalab.packets.info.ImpedanceInfoPacket;
+import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.impedance.ImpedanceCalculatorTask;
+import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
@@ -73,6 +75,7 @@ public class ExploreDevice {
 
   private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
       throws ExecutionException, InterruptedException, IOException {
+    Log.i(Utils.TAG, "Waiting on initial configuration.");
     for (CompletableFuture<Boolean> f : deviceConfig) {
       if (!f.get()) {
         MentalabCommands.shutdown();
@@ -175,7 +178,7 @@ public class ExploreDevice {
   }
 
   /** Returns the device data stream. */
-  public InputStream getInputStream() throws NoBluetoothException, IOException {
+  public static InputStream getInputStream() throws NoBluetoothException, IOException {
     return BluetoothManager.getInputStream();
   }
 
@@ -220,7 +223,7 @@ public class ExploreDevice {
   private void startImpedanceMode()
       throws InvalidCommandException, IOException, NoBluetoothException, ExecutionException,
           InterruptedException, CommandFailedException {
-    final ImpedanceInfo slopeOffset = DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
+    final ImpedanceInfoPacket slopeOffset = DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
     if (slopeOffset != null) {
       this.setSlope(slopeOffset.getSlope());
       this.setOffset(slopeOffset.getOffset());
@@ -230,10 +233,10 @@ public class ExploreDevice {
     }
   }
 
-  public void stopImpedanceCalculation()
+  public Future<Boolean> stopImpedanceCalculation()
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
-    DeviceManager.submitConfigCommand(
+    return DeviceManager.submitConfigCommand(
         c, calculateImpedanceTask::cancelTask, ExploreExecutor::unblockExecutorServices);
   }
 
