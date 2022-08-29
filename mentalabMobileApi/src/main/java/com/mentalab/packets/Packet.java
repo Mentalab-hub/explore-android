@@ -42,4 +42,11 @@ public abstract class Packet {
   }
 
   public abstract Topic getTopic();
+
+  /** Clear data and reset */
+  public Packet overwriteData(List<Float> newData) {
+    this.data.clear();
+    this.data = newData;
+    return this;
+  }
 }

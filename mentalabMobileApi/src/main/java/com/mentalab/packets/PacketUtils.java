@@ -22,6 +22,16 @@ public class PacketUtils {
     return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getShort();
   }
 
+  public static double bytesToDouble(byte... data) throws InvalidDataException {
+    final byte[] array = bytesToArray(4, data);
+    return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getDouble();
+  }
+
+  public static float bytesToFloat(byte... data) throws InvalidDataException {
+    final byte[] array = bytesToArray(4, data);
+    return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+  }
+
   public static double[] bytesToDoubles(byte[] data) throws InvalidDataException {
     if (data.length % BYTES_PER_DOUBLE != 0) {
       throw new InvalidDataException("Illegal byte array length");

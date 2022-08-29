@@ -9,6 +9,7 @@ import com.mentalab.utils.constants.ConfigProtocol;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -63,16 +64,6 @@ public class Utils {
   public static String round(double d) {
     DF.setRoundingMode(RoundingMode.FLOOR);
     return DF.format(d);
-  }
-
-  public static double[] convertArraylistToDoubleArray(Packet packet) {
-    List<Float> packetVoltageValues = packet.getData();
-    double[] floatArray = new double[packetVoltageValues.size()];
-
-    for (int index = 0; index < packetVoltageValues.size(); index++) {
-      floatArray[index] = packetVoltageValues.get(index).doubleValue();
-    }
-    return floatArray;
   }
 
   public static ChannelCount getChannelCountFromInt(int i) {

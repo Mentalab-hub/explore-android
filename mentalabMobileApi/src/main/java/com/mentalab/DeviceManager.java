@@ -2,10 +2,11 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.packets.info.CalibrationInfoPacket;
+import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ExploreExecutor;
 import com.mentalab.service.ImpedanceConfigurationTask;
+import com.mentalab.service.SendCommandTask;
 import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.utils.commandtranslators.Command;
 
@@ -14,9 +15,44 @@ import java.util.concurrent.CompletableFuture;
 
 interface DeviceManager {
 
-  static CompletableFuture<Boolean> submitCommand(Command c, Runnable andThen)
+  /**
+   * Asynchronously submits a command to the OutputStream using task.
+   *
+   * @param task Task that will send command to the device.
+   * @return Future<T>
+   */
+  static <T> CompletableFuture<T> submitCommand(
+      SendCommandTask<T> task, T exceptionalReturn) {
+    return CompletableFuture.supplyAsync(task, ExploreExecutor.getExecutorInstance())
+        .exceptionally(e -> exceptionalReturn); // if throws an exception, return gracefully
+  }
+
+  /**
+   * Asynchronously submits a command to the OutputStream using the DeviceConfigurationTask.
+   *
+   * @param c Command the command to be sent to the device.
+   * @return Future True if the command was successfully received. Otherwise false
+   * @throws InvalidCommandException If the command cannot be encoded.
+   */
+  static CompletableFuture<Boolean> submitConfigCommand(Command c)
+      throws IOException, NoBluetoothException, InvalidCommandException {
+    final byte[] encodedBytes = encodeCommand(c);
+    return submitCommand(
+        new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), false);
+  }
+
+  /**
+   * Asynchronously submits a command to the OutputStream using the DeviceConfigurationTask. If the
+   * command was successful, run andThen.
+   *
+   * @param c Command to be sent to the device.
+   * @param andThen Runnable to be completed only if the command is successfully received
+   * @return Future True if the command was successfully received. Otherwise false
+   * @throws InvalidCommandException If the command cannot be encoded.
+   */
+  static CompletableFuture<Boolean> submitConfigCommand(Command c, Runnable andThen)
       throws InvalidCommandException, IOException, NoBluetoothException {
-    final CompletableFuture<Boolean> submittedCmd = submitCommand(c);
+    final CompletableFuture<Boolean> submittedCmd = submitConfigCommand(c);
     submittedCmd.thenAccept(
         x -> { // only perform the runnable if the submittedCommand is accepted
           if (x) {
@@ -26,30 +62,18 @@ interface DeviceManager {
     return submittedCmd;
   }
 
-  static CompletableFuture<CalibrationInfoPacket> processImpCommand(Command c)
+  /**
+   * Asynchronously submits an impedance command to this device using the
+   * ImpedanceConfigurationTask.
+   *
+   * @param c Command to be sent to the device.
+   * @return ImpedanceInfo containing slope and offset, or else null.
+   */
+  static CompletableFuture<ImpedanceInfoPacket> submitImpCommand(Command c)
       throws InvalidCommandException, IOException, NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
-    return CompletableFuture.supplyAsync(
-        new ImpedanceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes))
-        .exceptionally(e -> null);
-  }
-
-  /**
-   * Asynchronously submits a command to this device using the DeviceConfigurationTask.
-   *
-   * @param c Command the command to be sent to the device.
-   * @return Future True if the command was successfully received. Otherwise false
-   * @throws InvalidCommandException If the command cannot be encoded.
-   */
-  static CompletableFuture<Boolean> submitCommand(Command c)
-      throws IOException, NoBluetoothException, InvalidCommandException {
-    final byte[] encodedBytes = encodeCommand(c);
-    return CompletableFuture.supplyAsync(
-            new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes),
-            ExploreExecutor.getExecutorInstance())
-        .exceptionally(
-            e ->
-                false); // if DeviceConfigurationTask throws an exception, return false (gracefully)
+    return submitCommand(
+        new ImpedanceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), null);
   }
 
   static byte[] encodeCommand(Command c) throws InvalidCommandException {
