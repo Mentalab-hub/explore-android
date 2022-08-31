@@ -13,7 +13,8 @@ public final class MentalabCodec {
   private static final ExecutorService DECODE_EXECUTOR = Executors.newSingleThreadExecutor();
   private static final ParseRawDataTask DECODER_TASK = new ParseRawDataTask();
 
-  private MentalabCodec() { // Static class
+  public static MentalabCodec getInstance() {
+    return MentalabCodec.InstanceHolder.INSTANCE;
   }
 
   /**
@@ -21,7 +22,7 @@ public final class MentalabCodec {
    *
    * @param rawData InputStream of device bytes
    */
-  public static void decodeInputStream(InputStream rawData) {
+  public void decodeInputStream(InputStream rawData) {
     DECODER_TASK.setInputStream(rawData);
     DECODE_EXECUTOR.submit(DECODER_TASK);
   }
@@ -36,8 +37,14 @@ public final class MentalabCodec {
     return translator.translateCommand();
   }
 
-  public static void shutdown() {
+  public void shutdown() {
     Thread.currentThread().interrupt();
     DECODE_EXECUTOR.shutdownNow();
+  }
+
+  private MentalabCodec() {}
+
+  private static class InstanceHolder { // Initialization-on-demand synchronization
+    private static final MentalabCodec INSTANCE = new MentalabCodec();
   }
 }

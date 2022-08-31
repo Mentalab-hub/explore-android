@@ -1,7 +1,5 @@
 package com.mentalab.utils.constants;
 
-import com.mentalab.exception.InvalidDataException;
-
 public enum SamplingRate {
   SR_250(0x01, 250, 6),
   SR_500(0x02, 500, 5),

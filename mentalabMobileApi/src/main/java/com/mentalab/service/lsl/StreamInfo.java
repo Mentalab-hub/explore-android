@@ -4,7 +4,7 @@ import com.sun.jna.Pointer;
 
 public class StreamInfo {
 
-  private Pointer obj;
+  private final Pointer obj;
 
   public StreamInfo(
       String name,

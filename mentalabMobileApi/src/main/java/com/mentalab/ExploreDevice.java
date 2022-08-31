@@ -8,10 +8,10 @@ import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.RejectedExecutionException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
-import com.mentalab.service.ExploreExecutor;
-import com.mentalab.service.impedance.ImpedanceCalculatorTask;
 import com.mentalab.service.decode.MentalabCodec;
+import com.mentalab.service.impedance.ImpedanceCalculatorTask;
 import com.mentalab.service.lsl.LslStreamerTask;
 import com.mentalab.service.record.RecordTask;
 import com.mentalab.utils.ConfigSwitch;
@@ -68,7 +68,7 @@ public class ExploreDevice {
         Arrays.asList(
             CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)),
             CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this))); // start config first
-    MentalabCodec.decodeInputStream(getInputStream());
+    MentalabCodec.getInstance().decodeInputStream(getInputStream());
     waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
     return this;
   }
@@ -85,8 +85,7 @@ public class ExploreDevice {
   }
 
   /**
-   * Enables or disables data collection of a channel. Sending a mix of enable and disable switches
-   * does not work. \\todo: CHECK FOR THIS
+   * Enables or disables data collection of a channel. Channels will be set in bulk out of order.
    *
    * <p>By default data from all channels is collected. Disable channels you do not need to save
    * bandwidth and power.
@@ -95,8 +94,10 @@ public class ExploreDevice {
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
   public Future<Boolean> setChannels(Set<ConfigSwitch> switches)
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
+    switches = Utils.removeRedundantSwitches(switches, this.getChannelCount());
     final Command c = generateChannelCommand(switches);
     return DeviceManager.submitConfigCommand(c, () -> setChannelMask(c.getArg()));
   }
@@ -109,22 +110,24 @@ public class ExploreDevice {
 
   private int generateChannelCmdArg(Set<ConfigSwitch> switches) {
     for (ConfigSwitch s : switches) {
-      channelMask = bitShiftIfOffSwitch(channelMask, s);
+      channelMask = bitShift(channelMask, s);
     }
     return channelMask;
   }
 
-  private static int bitShiftIfOffSwitch(int binaryArg, ConfigSwitch s) {
-    if (!s.isOn()) {
-      final int channelID = s.getProtocol().getID();
-      binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
+  private static int bitShift(int binaryArg, ConfigSwitch s) {
+    final int channelID = s.getProtocol().getID();
+    final int on = s.isOn() ? 1 : 0; // on = 1, off = 0
+    if ((binaryArg >> channelID & on) != 1) { // if binaryArg at channel id is on or off
+      binaryArg ^= (1 << channelID); // flip bit if necessary at the channel id
     }
     return binaryArg;
   }
 
   /** Set a single channel on or off. */
   public Future<Boolean> setChannel(ConfigSwitch channel)
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final Set<ConfigSwitch> channelToList = new HashSet<>();
     channelToList.add(channel);
     return setChannels(channelToList);
@@ -137,7 +140,8 @@ public class ExploreDevice {
    * bandwidth and power.
    */
   public Future<Boolean> setModule(ConfigSwitch mSwitch)
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
     return DeviceManager.submitConfigCommand(c);
@@ -156,7 +160,8 @@ public class ExploreDevice {
    * at 20Hz.
    */
   public CompletableFuture<Boolean> setSamplingRate(SamplingRate sr)
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
     return DeviceManager.submitConfigCommand(c, () -> setSR(sr));
@@ -164,7 +169,8 @@ public class ExploreDevice {
 
   /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     return DeviceManager.submitConfigCommand(Command.CMD_MEMORY_FORMAT);
   }
 
@@ -173,7 +179,8 @@ public class ExploreDevice {
    * fails.
    */
   public Future<Boolean> softReset()
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     return DeviceManager.submitConfigCommand(Command.CMD_SOFT_RESET);
   }
 
@@ -183,22 +190,23 @@ public class ExploreDevice {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Future<Boolean> record(Context cxt, String filename) {
+  public Future<Boolean> record(Context cxt, String filename) throws RejectedExecutionException {
     recordTask = new RecordTask(cxt, filename, this);
-    return ExploreExecutor.submitTask(recordTask);
+    return DeviceManager.submitTask(recordTask);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Future<Boolean> record(Context cxt) {
+  public Future<Boolean> record(Context cxt) throws RejectedExecutionException {
     final String filename = String.valueOf(System.currentTimeMillis());
     return record(cxt, filename);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Future<Boolean> recordWithTimeout(Context cxt, int millis) {
+  public Future<Boolean> recordWithTimeout(Context cxt, int millis)
+      throws RejectedExecutionException {
     final String filename = String.valueOf(System.currentTimeMillis());
     recordTask = new RecordTask(cxt, filename, this);
-    return ExploreExecutor.submitTimeoutTask(recordTask, millis, () -> recordTask.close());
+    return DeviceManager.submitTimeoutTask(recordTask, millis, () -> recordTask.close());
   }
 
   public boolean stopRecord() {
@@ -209,21 +217,23 @@ public class ExploreDevice {
     return true;
   }
 
-  public Future<Boolean> pushToLSL() {
-    return ExploreExecutor.submitTask(new LslStreamerTask(this));
+  public Future<Boolean> pushToLSL() throws RejectedExecutionException {
+    return DeviceManager.submitTask(new LslStreamerTask(this));
   }
 
   public Future<Boolean> calculateImpedance()
-      throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
-          InterruptedException, CommandFailedException {
+      throws RejectedExecutionException, IOException, ExecutionException, InterruptedException,
+          InvalidCommandException, NoBluetoothException, CommandFailedException {
     startImpedanceMode();
-    return ExploreExecutor.submitTask(calculateImpedanceTask);
+    ExploreExecutor.getInstance().resetExecutorServices();
+    return DeviceManager.submitTask(calculateImpedanceTask);
   }
 
   private void startImpedanceMode()
-      throws InvalidCommandException, IOException, NoBluetoothException, ExecutionException,
-          InterruptedException, CommandFailedException {
-    final ImpedanceInfoPacket slopeOffset = DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
+      throws RejectedExecutionException, IOException, ExecutionException, InterruptedException,
+          InvalidCommandException, NoBluetoothException, CommandFailedException {
+    final ImpedanceInfoPacket slopeOffset =
+        DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
     if (slopeOffset != null) {
       this.setSlope(slopeOffset.getSlope());
       this.setOffset(slopeOffset.getOffset());
@@ -234,9 +244,13 @@ public class ExploreDevice {
   }
 
   public Future<Boolean> stopImpedanceCalculation()
-      throws NoBluetoothException, IOException, InvalidCommandException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final Command c = Command.CMD_ZM_DISABLE;
-    return DeviceManager.submitConfigCommand(c, calculateImpedanceTask::cancelTask);
+    return DeviceManager.submitConfigCommand(
+        c,
+        calculateImpedanceTask::cancelTask,
+        () -> ExploreExecutor.getInstance().getLock().set(true));
   }
 
   public String getDeviceName() {
@@ -259,6 +273,10 @@ public class ExploreDevice {
     return this.offset;
   }
 
+  public int getChannelMask() {
+    return this.channelMask;
+  }
+
   public void setChannelCount(ChannelCount count) {
     Log.d(Utils.TAG, "Channel count set to: " + count);
     this.channelCount = count;
@@ -270,7 +288,8 @@ public class ExploreDevice {
   }
 
   public void setChannelMask(int mask) {
-    Log.d(Utils.TAG, "Channel mask set to: " + Integer.toBinaryString(mask));
+    Log.d(
+        Utils.TAG, "Channel mask set to: " + Utils.intToBinaryString(mask, this.getChannelCount()));
     this.channelMask = mask;
   }
 

@@ -61,9 +61,8 @@ public class PacketUtils {
   }
 
   private static byte[] addValsToArray(byte[] data, byte[] array) {
-    for (int i = 0; i < data.length; i++) {
-      array[i] = data[i]; // fill-in with our data
-    }
+      // fill-in with our data
+      System.arraycopy(data, 0, array, 0, data.length);
     return array;
   }
 

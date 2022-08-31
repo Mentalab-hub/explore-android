@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ContentServer {
+public final class ContentServer {
 
   // it is a good idea to provide a size estimate as an optional initialCapacity
   private final Map<Topic, Set<Subscriber<?>>> topicSubscribers = new ConcurrentHashMap<>(5);

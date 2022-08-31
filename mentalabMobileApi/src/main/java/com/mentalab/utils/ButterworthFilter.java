@@ -12,7 +12,7 @@ public class ButterworthFilter {
 
   private static final int notchFreq = 50;
 
-  private double nyquistFreq;
+  private final double nyquistFreq;
   private final int filterOrder = 5;
 
   /**

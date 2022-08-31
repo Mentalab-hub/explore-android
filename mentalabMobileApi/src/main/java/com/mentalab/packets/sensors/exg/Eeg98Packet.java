@@ -7,10 +7,10 @@ import java.util.EnumSet;
 
 public class Eeg98Packet extends EEGPacket {
 
-  private static final int CHANNEL_NUMBER = 8;
+  private static final int NO_CHANNELS = 8;
 
   public Eeg98Packet(double timeStamp) {
-    super(timeStamp, CHANNEL_NUMBER);
+    super(timeStamp, NO_CHANNELS);
     super.type = EnumSet.range(CH1, CH8);
   }
 }
