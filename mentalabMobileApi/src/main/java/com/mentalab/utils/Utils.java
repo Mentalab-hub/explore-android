@@ -3,15 +3,13 @@ package com.mentalab.utils;
 import android.util.Log;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoConnectionException;
-import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -73,4 +71,16 @@ public class Utils {
     return ChannelCount.CC_8;
   }
 
+  public static Set<ConfigSwitch> removeRedundantSwitches(
+      Set<ConfigSwitch> switches, ChannelCount channelCount) {
+    return switches.stream()
+        .filter(s -> s.getProtocol().getID() < channelCount.getAsInt())
+        .collect(Collectors.toSet());
+  }
+
+  /** 6 -> 0110 instead of 110 */
+  public static String intToBinaryString(int i, ChannelCount channelCount) {
+    return String.format("%" + channelCount.getAsInt() + "s", Integer.toBinaryString(i))
+        .replace(' ', '0');
+  }
 }

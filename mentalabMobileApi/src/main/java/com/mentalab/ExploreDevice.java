@@ -67,7 +67,7 @@ public class ExploreDevice {
         Arrays.asList(
             CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)),
             CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this))); // start config first
-    MentalabCodec.decodeInputStream(getInputStream());
+    MentalabCodec.getInstance().decodeInputStream(getInputStream());
     waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
     return this;
   }
@@ -84,8 +84,7 @@ public class ExploreDevice {
   }
 
   /**
-   * Enables or disables data collection of a channel. Sending a mix of enable and disable switches
-   * does not work. \\todo: CHECK FOR THIS
+   * Enables or disables data collection of a channel. Channels will be set in bulk out of order.
    *
    * <p>By default data from all channels is collected. Disable channels you do not need to save
    * bandwidth and power.
@@ -96,6 +95,7 @@ public class ExploreDevice {
   public Future<Boolean> setChannels(Set<ConfigSwitch> switches)
       throws InvalidCommandException, IOException, NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
+    switches = Utils.removeRedundantSwitches(switches, this.getChannelCount());
     final Command c = generateChannelCommand(switches);
     return DeviceManager.submitConfigCommand(c, () -> setChannelMask(c.getArg()));
   }
@@ -108,15 +108,16 @@ public class ExploreDevice {
 
   private int generateChannelCmdArg(Set<ConfigSwitch> switches) {
     for (ConfigSwitch s : switches) {
-      channelMask = bitShiftIfOffSwitch(channelMask, s);
+      channelMask = bitShift(channelMask, s);
     }
     return channelMask;
   }
 
-  private static int bitShiftIfOffSwitch(int binaryArg, ConfigSwitch s) {
-    if (!s.isOn()) {
-      final int channelID = s.getProtocol().getID();
-      binaryArg &= ~(1 << channelID); // reverse the bit at the channel id
+  private static int bitShift(int binaryArg, ConfigSwitch s) {
+    final int channelID = s.getProtocol().getID();
+    final int on = s.isOn() ? 1 : 0; // on = 1, off = 0
+    if ((binaryArg >> channelID & on) != 1) { // if binaryArg at channel id is on or off
+      binaryArg ^= (1 << channelID); // flip bit if necessary at the channel id
     }
     return binaryArg;
   }
@@ -216,7 +217,9 @@ public class ExploreDevice {
       throws NoBluetoothException, IOException, InvalidCommandException, ExecutionException,
           InterruptedException, CommandFailedException {
     startImpedanceMode();
-    return DeviceManager.submitImpedanceTask(calculateImpedanceTask);
+    ExploreExecutor.getInstance().resetExecutorServices();
+    ExploreExecutor.getInstance().getLock().set(false);
+    return DeviceManager.submitTask(calculateImpedanceTask);
   }
 
   private void startImpedanceMode()
@@ -237,7 +240,9 @@ public class ExploreDevice {
       throws NoBluetoothException, IOException, InvalidCommandException {
     final Command c = Command.CMD_ZM_DISABLE;
     return DeviceManager.submitConfigCommand(
-        c, calculateImpedanceTask::cancelTask, ExploreExecutor::unblockExecutorServices);
+        c,
+        calculateImpedanceTask::cancelTask,
+        () -> ExploreExecutor.getInstance().getLock().set(true));
   }
 
   public String getDeviceName() {
@@ -260,6 +265,10 @@ public class ExploreDevice {
     return this.offset;
   }
 
+  public int getChannelMask() {
+    return this.channelMask;
+  }
+
   public void setChannelCount(ChannelCount count) {
     Log.d(Utils.TAG, "Channel count set to: " + count);
     this.channelCount = count;
@@ -271,7 +280,7 @@ public class ExploreDevice {
   }
 
   public void setChannelMask(int mask) {
-    Log.d(Utils.TAG, "Channel mask set to: " + Integer.toBinaryString(mask));
+    Log.d(Utils.TAG, "Channel mask set to: " + Utils.intToBinaryString(mask, this.getChannelCount()));
     this.channelMask = mask;
   }
 

@@ -10,33 +10,27 @@ import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.utils.commandtranslators.Command;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
-interface DeviceManager {
+public class DeviceManager {
 
   static Future<Boolean> submitTask(Callable<Boolean> task) {
-    return ExploreExecutor.getExecutorInstance().submit(task);
+    return ExploreExecutor.getInstance().getExecutor().submit(task);
   }
 
   static Future<Boolean> submitTimeoutTask(Callable<Boolean> task, int millis, Runnable cleanup) {
-    final Future<Boolean> handler = ExploreExecutor.getScheduledExecutorInstance().submit(task);
-    ExploreExecutor.getScheduledExecutorInstance().schedule(
-        () -> {
-          handler.cancel(true);
-          cleanup.run();
-        },
-        millis,
-        TimeUnit.MILLISECONDS);
+    final Future<Boolean> handler =
+        ExploreExecutor.getInstance().getScheduledExecutor().submit(task);
+    ExploreExecutor.getInstance()
+        .getScheduledExecutor()
+        .schedule(
+            () -> {
+              handler.cancel(true);
+              cleanup.run();
+            },
+            millis,
+            TimeUnit.MILLISECONDS);
     return handler;
-  }
-
-  static Future<Boolean> submitImpedanceTask(Callable<Boolean> impedanceTask) throws InterruptedException {
-    ExploreExecutor.resetExecutorServices();
-    ExploreExecutor.blockExecutorServices();
-    return ExploreExecutor.getSerialExecutorInstance().submit(impedanceTask);
   }
 
   /**
@@ -46,7 +40,7 @@ interface DeviceManager {
    * @return Future<T>
    */
   static <T> CompletableFuture<T> submitCommand(SendCommandTask<T> task, T exceptionalReturn) {
-    return CompletableFuture.supplyAsync(task, ExploreExecutor.getSerialExecutorInstance())
+    return CompletableFuture.supplyAsync(task, ExploreExecutor.getInstance().getSerialExecutor())
         .exceptionally(e -> exceptionalReturn); // if throws an exception, return gracefully
   }
 
@@ -69,7 +63,8 @@ interface DeviceManager {
    * command was successful, run andThen.
    *
    * @param c Command to be sent to the device.
-   * @param andThen Runnables to be completed *in order* only if the command is successfully received
+   * @param andThen Runnables to be completed *in order* only if the command is successfully
+   *     received
    * @return Future True if the command was successfully received. Otherwise false
    * @throws InvalidCommandException If the command cannot be encoded.
    */

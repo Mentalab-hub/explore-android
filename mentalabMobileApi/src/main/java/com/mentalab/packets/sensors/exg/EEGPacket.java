@@ -10,19 +10,19 @@ import java.io.IOException;
 
 public abstract class EEGPacket extends Packet {
 
-  private final int channelNumber;
+  private final int noChannels;
 
-  public EEGPacket(double timeStamp, int channelNumber) {
+  public EEGPacket(double timeStamp, int noChannels) {
     super(timeStamp);
-    this.channelNumber = channelNumber;
+    this.noChannels = noChannels;
   }
 
   @Override
   public void populate(byte[] dataBytes) throws InvalidDataException, IOException {
     double[] dataDoubles = PacketUtils.bytesToInt32s(dataBytes);
     for (int i = 0; i < dataDoubles.length; i++) {
-      if (i % (channelNumber + 1) == 0) {
-        continue; // skip int representation of status bit
+      if (i % (noChannels + 1) == 0) {
+        continue; // skip status bit
       }
       super.data.add(adjustGain(dataDoubles[i]));
     }
@@ -43,7 +43,7 @@ public abstract class EEGPacket extends Packet {
 
   @Override
   public int getDataCount() {
-    return this.channelNumber;
+    return this.noChannels;
   }
 
   @Override

@@ -1,53 +1,68 @@
 package com.mentalab;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ExploreExecutor {
 
-  private ExploreExecutor() { // Static class
+  final AtomicBoolean isLocked = new AtomicBoolean(true);
+
+  private ExecutorService serialExecutor = Executors.newSingleThreadExecutor();
+  private ExecutorService parallelExecutor = Executors.newFixedThreadPool(5);
+  private ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(2);
+
+  public static ExploreExecutor getInstance() {
+    return ExploreExecutor.InstanceHolder.INSTANCE;
   }
 
-  private static ExecutorService SERIAL_EXECUTOR = Executors.newSingleThreadExecutor();
-  private static ExecutorService PARALLEL_EXECUTOR = Executors.newFixedThreadPool(5);
-  private static ScheduledExecutorService SCHEDULED_EXECUTOR = Executors.newScheduledThreadPool(2);
-
-  static ExecutorService getExecutorInstance() {
-    return PARALLEL_EXECUTOR;
+  ExecutorService getExecutor() {
+    testAvailablity();
+    return parallelExecutor;
   }
 
-  static ExecutorService getSerialExecutorInstance() {
-    return SERIAL_EXECUTOR;
+  ExecutorService getSerialExecutor() {
+    testAvailablity();
+    return serialExecutor;
   }
 
-  static ScheduledExecutorService getScheduledExecutorInstance() {
-    return SCHEDULED_EXECUTOR;
+  ScheduledExecutorService getScheduledExecutor() {
+    testAvailablity();
+    return scheduledExecutor;
   }
 
-  static void resetExecutorServices() {
-    SERIAL_EXECUTOR.shutdownNow();
-    SERIAL_EXECUTOR = Executors.newSingleThreadExecutor();
-
-    PARALLEL_EXECUTOR.shutdownNow();
-    PARALLEL_EXECUTOR = Executors.newFixedThreadPool(5);
-
-    SCHEDULED_EXECUTOR.shutdownNow();
-    SCHEDULED_EXECUTOR = Executors.newScheduledThreadPool(2);
+  void resetExecutorServices() {
+    shutDownNow();
+    serialExecutor = Executors.newSingleThreadExecutor();
+    parallelExecutor = Executors.newFixedThreadPool(5);
+    scheduledExecutor = Executors.newScheduledThreadPool(2);
   }
 
-  static void blockExecutorServices() throws InterruptedException {
-    PARALLEL_EXECUTOR.wait();
-    SCHEDULED_EXECUTOR.wait();
+  void shutDownNow() {
+    serialExecutor.shutdownNow();
+    parallelExecutor.shutdownNow();
+    scheduledExecutor.shutdownNow();
   }
 
-  static void unblockExecutorServices() {
-    PARALLEL_EXECUTOR.notifyAll();
-    SCHEDULED_EXECUTOR.notifyAll();
+  void shutDown() {
+    serialExecutor.shutdown();
+    parallelExecutor.shutdown();
+    scheduledExecutor.shutdown();
   }
 
-  static void shutDown() {
-    SERIAL_EXECUTOR.shutdown();
-    SCHEDULED_EXECUTOR.shutdown();
+  private ExploreExecutor() {}
+
+  private static class InstanceHolder { // Initialization-on-demand synchronization
+    private static final ExploreExecutor INSTANCE = new ExploreExecutor();
+  }
+
+  private synchronized void testAvailablity() {
+    if (!isLocked.get()) {
+      throw new RejectedExecutionException(
+              "Cannot proceed with task. This is most likely because the impedance task is runnning.");
+    }
+  }
+
+  public AtomicBoolean getLock() {
+    return isLocked;
   }
 }
