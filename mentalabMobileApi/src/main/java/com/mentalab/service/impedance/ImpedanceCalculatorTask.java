@@ -21,7 +21,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
 
   @Override
   public Boolean call() throws ArithmeticException {
-    ExploreExecutor.getInstance().getLock().set(false);
+    ExploreExecutor.getInstance().getLock().set(false); // block other tasks
 
     if (device.getSlope() == 0) {
       throw new ArithmeticException(

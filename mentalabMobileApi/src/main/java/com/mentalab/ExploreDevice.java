@@ -7,8 +7,8 @@ import android.util.Log;
 import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.MentalabException;
 import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.RejectedExecutionException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.service.impedance.ImpedanceCalculatorTask;
@@ -94,7 +94,8 @@ public class ExploreDevice {
    * @throws InvalidCommandException If the provided Switches are not all type Channel.
    */
   public Future<Boolean> setChannels(Set<ConfigSwitch> switches)
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     Utils.checkSwitchTypes(switches, ConfigProtocol.Type.Channel);
     switches = Utils.removeRedundantSwitches(switches, this.getChannelCount());
     final Command c = generateChannelCommand(switches);
@@ -125,7 +126,8 @@ public class ExploreDevice {
 
   /** Set a single channel on or off. */
   public Future<Boolean> setChannel(ConfigSwitch channel)
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final Set<ConfigSwitch> channelToList = new HashSet<>();
     channelToList.add(channel);
     return setChannels(channelToList);
@@ -138,7 +140,8 @@ public class ExploreDevice {
    * bandwidth and power.
    */
   public Future<Boolean> setModule(ConfigSwitch mSwitch)
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
     return DeviceManager.submitConfigCommand(c);
@@ -157,7 +160,8 @@ public class ExploreDevice {
    * at 20Hz.
    */
   public CompletableFuture<Boolean> setSamplingRate(SamplingRate sr)
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final Command c = Command.CMD_SAMPLING_RATE_SET;
     c.setArg(sr.getCode());
     return DeviceManager.submitConfigCommand(c, () -> setSR(sr));
@@ -165,7 +169,8 @@ public class ExploreDevice {
 
   /** Formats internal memory of device. */
   public Future<Boolean> formatMemory()
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     return DeviceManager.submitConfigCommand(Command.CMD_MEMORY_FORMAT);
   }
 
@@ -174,7 +179,8 @@ public class ExploreDevice {
    * fails.
    */
   public Future<Boolean> softReset()
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     return DeviceManager.submitConfigCommand(Command.CMD_SOFT_RESET);
   }
 
@@ -184,19 +190,20 @@ public class ExploreDevice {
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Future<Boolean> record(Context cxt, String filename) throws MentalabException {
+  public Future<Boolean> record(Context cxt, String filename) throws RejectedExecutionException {
     recordTask = new RecordTask(cxt, filename, this);
     return DeviceManager.submitTask(recordTask);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Future<Boolean> record(Context cxt) throws MentalabException {
+  public Future<Boolean> record(Context cxt) throws RejectedExecutionException {
     final String filename = String.valueOf(System.currentTimeMillis());
     return record(cxt, filename);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Future<Boolean> recordWithTimeout(Context cxt, int millis) throws MentalabException {
+  public Future<Boolean> recordWithTimeout(Context cxt, int millis)
+      throws RejectedExecutionException {
     final String filename = String.valueOf(System.currentTimeMillis());
     recordTask = new RecordTask(cxt, filename, this);
     return DeviceManager.submitTimeoutTask(recordTask, millis, () -> recordTask.close());
@@ -210,21 +217,21 @@ public class ExploreDevice {
     return true;
   }
 
-  public Future<Boolean> pushToLSL() throws MentalabException {
+  public Future<Boolean> pushToLSL() throws RejectedExecutionException {
     return DeviceManager.submitTask(new LslStreamerTask(this));
   }
 
   public Future<Boolean> calculateImpedance()
-          throws MentalabException, IOException, ExecutionException,
-          InterruptedException {
+      throws RejectedExecutionException, IOException, ExecutionException, InterruptedException,
+          InvalidCommandException, NoBluetoothException, CommandFailedException {
     startImpedanceMode();
     ExploreExecutor.getInstance().resetExecutorServices();
     return DeviceManager.submitTask(calculateImpedanceTask);
   }
 
   private void startImpedanceMode()
-          throws MentalabException, IOException, ExecutionException,
-          InterruptedException {
+      throws RejectedExecutionException, IOException, ExecutionException, InterruptedException,
+          InvalidCommandException, NoBluetoothException, CommandFailedException {
     final ImpedanceInfoPacket slopeOffset =
         DeviceManager.submitImpCommand(Command.CMD_ZM_ENABLE).get();
     if (slopeOffset != null) {
@@ -237,7 +244,8 @@ public class ExploreDevice {
   }
 
   public Future<Boolean> stopImpedanceCalculation()
-          throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final Command c = Command.CMD_ZM_DISABLE;
     return DeviceManager.submitConfigCommand(
         c,
@@ -280,7 +288,8 @@ public class ExploreDevice {
   }
 
   public void setChannelMask(int mask) {
-    Log.d(Utils.TAG, "Channel mask set to: " + Utils.intToBinaryString(mask, this.getChannelCount()));
+    Log.d(
+        Utils.TAG, "Channel mask set to: " + Utils.intToBinaryString(mask, this.getChannelCount()));
     this.channelMask = mask;
   }
 

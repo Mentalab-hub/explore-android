@@ -1,6 +1,6 @@
 package com.mentalab;
 
-import com.mentalab.exception.MentalabException;
+import com.mentalab.exception.RejectedExecutionException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,19 +19,19 @@ public final class ExploreExecutor {
     return ExploreExecutor.InstanceHolder.INSTANCE;
   }
 
-  ExecutorService getExecutor() throws MentalabException {
-    testAvailablity();
-    return parallelExecutor;
+  ExecutorService getExecutor() throws RejectedExecutionException {
+    checkAvailablity();
+    return this.parallelExecutor;
   }
 
-  ExecutorService getSerialExecutor() throws MentalabException {
-    testAvailablity();
-    return serialExecutor;
+  ExecutorService getSerialExecutor() throws RejectedExecutionException {
+    checkAvailablity();
+    return this.serialExecutor;
   }
 
-  ScheduledExecutorService getScheduledExecutor() throws MentalabException {
-    testAvailablity();
-    return scheduledExecutor;
+  ScheduledExecutorService getScheduledExecutor() throws RejectedExecutionException {
+    checkAvailablity();
+    return this.scheduledExecutor;
   }
 
   void resetExecutorServices() {
@@ -59,9 +59,13 @@ public final class ExploreExecutor {
     private static final ExploreExecutor INSTANCE = new ExploreExecutor();
   }
 
-  private synchronized void testAvailablity() throws MentalabException {
+  /**
+   * Checks to see whether the AtomicBoolean is set to false. If so, throws
+   * RejectedExecutionException
+   */
+  private synchronized void checkAvailablity() throws RejectedExecutionException {
     if (!isLocked.get()) {
-      throw new MentalabException(
+      throw new RejectedExecutionException(
           "Cannot proceed with task. This is most likely because impedance is runnning.");
     }
   }

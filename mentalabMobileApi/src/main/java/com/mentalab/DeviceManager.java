@@ -1,7 +1,8 @@
 package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.MentalabException;
+import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.RejectedExecutionException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ImpedanceConfigurationTask;
@@ -14,12 +15,12 @@ import java.util.concurrent.*;
 
 public class DeviceManager {
 
-  static Future<Boolean> submitTask(Callable<Boolean> task) throws MentalabException {
+  static Future<Boolean> submitTask(Callable<Boolean> task) throws RejectedExecutionException {
     return ExploreExecutor.getInstance().getExecutor().submit(task);
   }
 
   static Future<Boolean> submitTimeoutTask(Callable<Boolean> task, int millis, Runnable cleanup)
-      throws MentalabException {
+      throws RejectedExecutionException {
     final Future<Boolean> handler =
         ExploreExecutor.getInstance().getScheduledExecutor().submit(task);
     ExploreExecutor.getInstance()
@@ -41,7 +42,7 @@ public class DeviceManager {
    * @return Future<T>
    */
   static <T> CompletableFuture<T> submitCommand(SendCommandTask<T> task, T exceptionalReturn)
-      throws MentalabException {
+      throws RejectedExecutionException {
     return CompletableFuture.supplyAsync(task, ExploreExecutor.getInstance().getSerialExecutor())
         .exceptionally(e -> exceptionalReturn); // if throws an exception, return gracefully
   }
@@ -61,7 +62,8 @@ public class DeviceManager {
    * @throws InvalidCommandException If the command cannot be encoded.
    */
   static CompletableFuture<Boolean> submitConfigCommand(Command c)
-      throws IOException, MentalabException {
+      throws IOException, RejectedExecutionException, InvalidCommandException,
+          NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
     final DeviceConfigurationTask task =
         new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes);
@@ -83,7 +85,8 @@ public class DeviceManager {
    * @throws InvalidCommandException If the command cannot be encoded.
    */
   static CompletableFuture<Boolean> submitConfigCommand(Command c, Runnable... andThen)
-      throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final CompletableFuture<Boolean> submittedCmd = submitConfigCommand(c);
     submittedCmd.thenAccept(
         x -> { // only perform the runnable if the submittedCommand is accepted
@@ -104,7 +107,8 @@ public class DeviceManager {
    * @return ImpedanceInfo containing slope and offset, or else null.
    */
   static CompletableFuture<ImpedanceInfoPacket> submitImpCommand(Command c)
-      throws MentalabException, IOException {
+      throws RejectedExecutionException, IOException, InvalidCommandException,
+          NoBluetoothException {
     final byte[] encodedBytes = encodeCommand(c);
     return submitCommand(
         new ImpedanceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), null);
