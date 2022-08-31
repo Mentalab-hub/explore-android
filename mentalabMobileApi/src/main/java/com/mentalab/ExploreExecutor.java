@@ -1,6 +1,10 @@
 package com.mentalab;
 
-import java.util.concurrent.*;
+import com.mentalab.exception.MentalabException;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ExploreExecutor {
@@ -15,38 +19,38 @@ public final class ExploreExecutor {
     return ExploreExecutor.InstanceHolder.INSTANCE;
   }
 
-  ExecutorService getExecutor() {
+  ExecutorService getExecutor() throws MentalabException {
     testAvailablity();
     return parallelExecutor;
   }
 
-  ExecutorService getSerialExecutor() {
+  ExecutorService getSerialExecutor() throws MentalabException {
     testAvailablity();
     return serialExecutor;
   }
 
-  ScheduledExecutorService getScheduledExecutor() {
+  ScheduledExecutorService getScheduledExecutor() throws MentalabException {
     testAvailablity();
     return scheduledExecutor;
   }
 
   void resetExecutorServices() {
     shutDownNow();
-    serialExecutor = Executors.newSingleThreadExecutor();
-    parallelExecutor = Executors.newFixedThreadPool(5);
-    scheduledExecutor = Executors.newScheduledThreadPool(2);
+    this.serialExecutor = Executors.newSingleThreadExecutor();
+    this.parallelExecutor = Executors.newFixedThreadPool(5);
+    this.scheduledExecutor = Executors.newScheduledThreadPool(2);
   }
 
   void shutDownNow() {
-    serialExecutor.shutdownNow();
-    parallelExecutor.shutdownNow();
-    scheduledExecutor.shutdownNow();
+    this.serialExecutor.shutdownNow();
+    this.parallelExecutor.shutdownNow();
+    this.scheduledExecutor.shutdownNow();
   }
 
   void shutDown() {
-    serialExecutor.shutdown();
-    parallelExecutor.shutdown();
-    scheduledExecutor.shutdown();
+    this.serialExecutor.shutdown();
+    this.parallelExecutor.shutdown();
+    this.scheduledExecutor.shutdown();
   }
 
   private ExploreExecutor() {}
@@ -55,10 +59,10 @@ public final class ExploreExecutor {
     private static final ExploreExecutor INSTANCE = new ExploreExecutor();
   }
 
-  private synchronized void testAvailablity() {
+  private synchronized void testAvailablity() throws MentalabException {
     if (!isLocked.get()) {
-      throw new RejectedExecutionException(
-              "Cannot proceed with task. This is most likely because the impedance task is runnning.");
+      throw new MentalabException(
+          "Cannot proceed with task. This is most likely because impedance is runnning.");
     }
   }
 

@@ -1,7 +1,7 @@
 package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
-import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.MentalabException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ImpedanceConfigurationTask;
@@ -14,11 +14,12 @@ import java.util.concurrent.*;
 
 public class DeviceManager {
 
-  static Future<Boolean> submitTask(Callable<Boolean> task) {
+  static Future<Boolean> submitTask(Callable<Boolean> task) throws MentalabException {
     return ExploreExecutor.getInstance().getExecutor().submit(task);
   }
 
-  static Future<Boolean> submitTimeoutTask(Callable<Boolean> task, int millis, Runnable cleanup) {
+  static Future<Boolean> submitTimeoutTask(Callable<Boolean> task, int millis, Runnable cleanup)
+      throws MentalabException {
     final Future<Boolean> handler =
         ExploreExecutor.getInstance().getScheduledExecutor().submit(task);
     ExploreExecutor.getInstance()
@@ -39,8 +40,16 @@ public class DeviceManager {
    * @param task Task that will send command to the device.
    * @return Future<T>
    */
-  static <T> CompletableFuture<T> submitCommand(SendCommandTask<T> task, T exceptionalReturn) {
+  static <T> CompletableFuture<T> submitCommand(SendCommandTask<T> task, T exceptionalReturn)
+      throws MentalabException {
     return CompletableFuture.supplyAsync(task, ExploreExecutor.getInstance().getSerialExecutor())
+        .exceptionally(e -> exceptionalReturn); // if throws an exception, return gracefully
+  }
+
+  /** Submit a command on a dedicated thread. */
+  static <T> CompletableFuture<T> submitNewThreadCommand(
+      SendCommandTask<T> task, T exceptionalReturn) {
+    return CompletableFuture.supplyAsync(task, Executors.newSingleThreadExecutor())
         .exceptionally(e -> exceptionalReturn); // if throws an exception, return gracefully
   }
 
@@ -52,10 +61,15 @@ public class DeviceManager {
    * @throws InvalidCommandException If the command cannot be encoded.
    */
   static CompletableFuture<Boolean> submitConfigCommand(Command c)
-      throws IOException, NoBluetoothException, InvalidCommandException {
+      throws IOException, MentalabException {
     final byte[] encodedBytes = encodeCommand(c);
-    return submitCommand(
-        new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), false);
+    final DeviceConfigurationTask task =
+        new DeviceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes);
+    if (c == Command.CMD_ZM_DISABLE) {
+      // The impedance task blocks all threads. Stopping impedance requires a dedicated new thread.
+      return submitNewThreadCommand(task, false);
+    }
+    return submitCommand(task, false);
   }
 
   /**
@@ -69,7 +83,7 @@ public class DeviceManager {
    * @throws InvalidCommandException If the command cannot be encoded.
    */
   static CompletableFuture<Boolean> submitConfigCommand(Command c, Runnable... andThen)
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws MentalabException, IOException {
     final CompletableFuture<Boolean> submittedCmd = submitConfigCommand(c);
     submittedCmd.thenAccept(
         x -> { // only perform the runnable if the submittedCommand is accepted
@@ -90,7 +104,7 @@ public class DeviceManager {
    * @return ImpedanceInfo containing slope and offset, or else null.
    */
   static CompletableFuture<ImpedanceInfoPacket> submitImpCommand(Command c)
-      throws InvalidCommandException, IOException, NoBluetoothException {
+      throws MentalabException, IOException {
     final byte[] encodedBytes = encodeCommand(c);
     return submitCommand(
         new ImpedanceConfigurationTask(BluetoothManager.getOutputStream(), encodedBytes), null);

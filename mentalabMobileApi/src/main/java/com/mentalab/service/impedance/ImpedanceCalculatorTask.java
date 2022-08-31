@@ -1,6 +1,7 @@
 package com.mentalab.service.impedance;
 
 import com.mentalab.ExploreDevice;
+import com.mentalab.ExploreExecutor;
 import com.mentalab.packets.sensors.exg.EEGPacket;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.ImpedanceSubscriber;
@@ -20,6 +21,8 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
 
   @Override
   public Boolean call() throws ArithmeticException {
+    ExploreExecutor.getInstance().getLock().set(false);
+
     if (device.getSlope() == 0) {
       throw new ArithmeticException(
           "Cannot proceed with impedance calculation. Zero slope assigned.");
