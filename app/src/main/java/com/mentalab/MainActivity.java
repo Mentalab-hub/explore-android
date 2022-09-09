@@ -6,7 +6,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
@@ -19,7 +18,8 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      MentalabCommands.connect("CA4A").acquire();
+      ExploreDevice device = MentalabCommands.connect("CA26");
+      device.acquire();
     } catch (NoBluetoothException
         | NoConnectionException
         | IOException

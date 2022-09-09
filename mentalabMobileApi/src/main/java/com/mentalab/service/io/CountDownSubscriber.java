@@ -1,7 +1,6 @@
 package com.mentalab.service.io;
 
 import com.mentalab.utils.constants.Topic;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 

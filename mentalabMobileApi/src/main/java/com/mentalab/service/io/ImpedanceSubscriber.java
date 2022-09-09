@@ -4,7 +4,6 @@ import com.mentalab.packets.Packet;
 import com.mentalab.packets.sensors.exg.EEGPacket;
 import com.mentalab.service.impedance.ImpedanceCalculator;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.List;
 
 public class ImpedanceSubscriber extends Subscriber<EEGPacket> {

@@ -4,7 +4,6 @@ import android.util.Log;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.Topic;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +16,10 @@ public class RecordSubscriber extends Subscriber<Void> {
   public RecordSubscriber(Topic t, BufferedWriter w) {
     super(t);
     this.wr = w;
+  }
+
+  protected static boolean requireNewLine(int channelCount, int i) {
+    return i % channelCount == 0; // break line after 2, 4 or 8 entries
   }
 
   @Override
@@ -42,10 +45,6 @@ public class RecordSubscriber extends Subscriber<Void> {
   protected void writeDataPoint(Float v) throws IOException {
     wr.write(",");
     wr.write(v.toString());
-  }
-
-  protected static boolean requireNewLine(int channelCount, int i) {
-    return i % channelCount == 0; // break line after 2, 4 or 8 entries
   }
 
   protected void initNewLine(double ts) throws IOException {

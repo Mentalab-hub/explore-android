@@ -2,16 +2,19 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.RejectedExecutionException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ImpedanceConfigurationTask;
 import com.mentalab.service.SendCommandTask;
 import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.utils.commandtranslators.Command;
-
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class DeviceManager {
 

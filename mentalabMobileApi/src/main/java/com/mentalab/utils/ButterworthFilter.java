@@ -3,15 +3,13 @@ package com.mentalab.utils;
 import uk.me.berndporr.iirj.Butterworth;
 
 public class ButterworthFilter {
+  private static final int notchFreq = 50;
   /**
    * The Butterworth class implements low-pass, high-pass, band-pass and band-stop filter using the
    * Butterworth polynomials. Has the flattest pass-band but a poor roll-off rate. Reference:
    * https://en.wikipedia.org/wiki/Butterworth_filter
    */
   private final double samplingFreq;
-
-  private static final int notchFreq = 50;
-
   private final double nyquistFreq;
   private final int filterOrder = 5;
 

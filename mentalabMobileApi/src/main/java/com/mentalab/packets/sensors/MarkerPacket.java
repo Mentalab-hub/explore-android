@@ -6,7 +6,6 @@ import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketDataType;
 import com.mentalab.packets.PacketUtils;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.EnumSet;
 
 public class MarkerPacket extends Packet {

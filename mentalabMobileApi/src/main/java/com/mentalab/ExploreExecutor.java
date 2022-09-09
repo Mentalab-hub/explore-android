@@ -1,9 +1,8 @@
 package com.mentalab;
 
-import com.mentalab.exception.RejectedExecutionException;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -14,6 +13,8 @@ public final class ExploreExecutor {
   private ExecutorService serialExecutor = Executors.newSingleThreadExecutor();
   private ExecutorService parallelExecutor = Executors.newFixedThreadPool(5);
   private ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(2);
+
+  private ExploreExecutor() {}
 
   public static ExploreExecutor getInstance() {
     return ExploreExecutor.InstanceHolder.INSTANCE;
@@ -53,12 +54,6 @@ public final class ExploreExecutor {
     this.scheduledExecutor.shutdown();
   }
 
-  private ExploreExecutor() {}
-
-  private static class InstanceHolder { // Initialization-on-demand synchronization
-    private static final ExploreExecutor INSTANCE = new ExploreExecutor();
-  }
-
   /**
    * Checks to see whether the AtomicBoolean is set to false. If so, throws
    * RejectedExecutionException
@@ -72,5 +67,9 @@ public final class ExploreExecutor {
 
   public AtomicBoolean getLock() {
     return isLocked;
+  }
+
+  private static class InstanceHolder { // Initialization-on-demand synchronization
+    private static final ExploreExecutor INSTANCE = new ExploreExecutor();
   }
 }

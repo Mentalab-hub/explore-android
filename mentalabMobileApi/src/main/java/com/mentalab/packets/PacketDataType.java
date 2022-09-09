@@ -3,7 +3,6 @@ package com.mentalab.packets;
 import androidx.annotation.NonNull;
 
 public enum PacketDataType {
-
   ADS_MASK("Ads Mask"),
   SR("Sampling Rate"),
 

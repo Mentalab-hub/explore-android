@@ -6,7 +6,6 @@ import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.CountDownSubscriber;
 import com.mentalab.utils.CheckedExceptionSupplier;
 import com.mentalab.utils.Utils;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -33,6 +32,13 @@ public abstract class SendCommandTask<T> implements CheckedExceptionSupplier<T> 
     this.command = encodedBytes;
   }
 
+  private static void postCmdToOutputStream(byte[] command, OutputStream outputStream)
+      throws IOException {
+    outputStream.write(command);
+    outputStream.flush();
+    Log.d(Utils.TAG, "Command sent.");
+  }
+
   @Override
   public T accept() throws Exception {
     final CountDownSubscriber<T> sub = getSubscriber();
@@ -46,11 +52,4 @@ public abstract class SendCommandTask<T> implements CheckedExceptionSupplier<T> 
   }
 
   abstract CountDownSubscriber<T> getSubscriber();
-
-  private static void postCmdToOutputStream(byte[] command, OutputStream outputStream)
-      throws IOException {
-    outputStream.write(command);
-    outputStream.flush();
-    Log.d(Utils.TAG, "Command sent.");
-  }
 }

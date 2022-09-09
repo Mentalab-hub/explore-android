@@ -1,16 +1,15 @@
 package com.mentalab.packets.info;
 
+import static com.mentalab.packets.PacketDataType.ADS_MASK;
+import static com.mentalab.packets.PacketDataType.SR;
+
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.EnumSet;
-
-import static com.mentalab.packets.PacketDataType.ADS_MASK;
-import static com.mentalab.packets.PacketDataType.SR;
 
 /** Device related information packet to transmit firmware version, ADC mask and sampling rate */
 public class DeviceInfoPacket extends Packet {
