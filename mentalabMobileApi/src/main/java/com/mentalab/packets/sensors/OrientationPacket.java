@@ -1,21 +1,20 @@
 package com.mentalab.packets.sensors;
 
+import static com.mentalab.packets.PacketDataType.ACCX;
+import static com.mentalab.packets.PacketDataType.GYROZ;
+
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.EnumSet;
-
-import static com.mentalab.packets.PacketDataType.ACCX;
-import static com.mentalab.packets.PacketDataType.GYROZ;
 
 public class OrientationPacket extends Packet {
 
-  private final static double ACCELEROMETER_CONSTANT = 0.061;
-  private final static double GYROSCOPE_CONSTANT = 8.750;
-  private final static double MAGNETOMETER_CONSTANT = 1.52;
+  private static final double ACCELEROMETER_CONSTANT = 0.061;
+  private static final double GYROSCOPE_CONSTANT = 8.750;
+  private static final double MAGNETOMETER_CONSTANT = 1.52;
 
   public OrientationPacket(double timeStamp) {
     super(timeStamp);

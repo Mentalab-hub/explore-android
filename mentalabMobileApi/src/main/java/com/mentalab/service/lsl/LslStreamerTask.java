@@ -7,7 +7,6 @@ import com.mentalab.packets.Packet;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.Subscriber;
 import com.mentalab.utils.constants.Topic;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -16,12 +15,10 @@ public class LslStreamerTask implements Callable<Boolean> {
 
   private static final int nominalSamplingRateOrientation = 20;
   private static final int dataCountOrientation = 9;
-  private static int samplingRate;
-
   static StreamOutlet lslStreamOutletExg;
   static StreamOutlet lslStreamOutletOrn;
   static StreamOutlet lslStreamOutletMarker;
-
+  private static int samplingRate;
   private final ExploreDevice connectedDevice;
 
   private StreamInfo lslStreamInfoExg;

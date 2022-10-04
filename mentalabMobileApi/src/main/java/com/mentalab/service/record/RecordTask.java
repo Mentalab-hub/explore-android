@@ -14,7 +14,6 @@ import com.mentalab.utils.Utils;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
-
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -43,6 +42,26 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
     this.filename = filename;
     this.sr = e.getSamplingRate();
     this.count = e.getChannelCount();
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  private static void writeHeader(BufferedWriter wr, String header) throws IOException {
+    wr.write(header);
+    wr.flush();
+  }
+
+  private static String buildEEGHeader(int channelCount) {
+    final StringBuilder headerBuilder = new StringBuilder("TimeStamp,ch1,ch2,ch3,ch4");
+    for (int i = 5; i <= channelCount; i++) {
+      headerBuilder.append(",").append("ch").append(i);
+    }
+    return headerBuilder.toString();
+  }
+
+  private static BufferedWriter createNewBufferedWriter(Context c, Uri uri)
+      throws FileNotFoundException {
+    return new BufferedWriter(
+        new OutputStreamWriter(c.getContentResolver().openOutputStream(uri, "wa")));
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -85,26 +104,6 @@ public class RecordTask implements Callable<Boolean>, AutoCloseable {
 
     writeHeader(markerWr, "TimeStamp,Code");
     ContentServer.getInstance().registerSubscriber(markerSubscriber);
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.Q)
-  private static void writeHeader(BufferedWriter wr, String header) throws IOException {
-    wr.write(header);
-    wr.flush();
-  }
-
-  private static String buildEEGHeader(int channelCount) {
-    final StringBuilder headerBuilder = new StringBuilder("TimeStamp,ch1,ch2,ch3,ch4");
-    for (int i = 5; i <= channelCount; i++) {
-      headerBuilder.append(",").append("ch").append(i);
-    }
-    return headerBuilder.toString();
-  }
-
-  private static BufferedWriter createNewBufferedWriter(Context c, Uri uri)
-      throws FileNotFoundException {
-    return new BufferedWriter(
-        new OutputStreamWriter(c.getContentResolver().openOutputStream(uri, "wa")));
   }
 
   @Override

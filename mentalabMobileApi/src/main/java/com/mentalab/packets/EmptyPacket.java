@@ -6,23 +6,23 @@ import com.mentalab.utils.constants.Topic;
 
 public class EmptyPacket extends Packet {
 
-    public EmptyPacket(double timeStamp) {
-        super(timeStamp);
-    }
+  public EmptyPacket(double timeStamp) {
+    super(timeStamp);
+  }
 
-    @Override
-    public void populate(byte[] byteBuffer) throws InvalidDataException {
-        // ignored
-    }
+  @Override
+  public void populate(byte[] byteBuffer) throws InvalidDataException {
+    // ignored
+  }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return "PACKET: Empty";
-    }
+  @NonNull
+  @Override
+  public String toString() {
+    return "PACKET: Empty";
+  }
 
-    @Override
-    public Topic getTopic() {
-        return null;
-    }
+  @Override
+  public Topic getTopic() {
+    return null;
+  }
 }

@@ -5,7 +5,6 @@ import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
 import com.mentalab.utils.constants.Topic;
-
 import java.io.IOException;
 
 public abstract class EEGPacket extends Packet {
@@ -17,6 +16,13 @@ public abstract class EEGPacket extends Packet {
     this.noChannels = noChannels;
   }
 
+  private static Float adjustGain(double dataPoint) {
+    final double exgUnit = Math.pow(10, -6);
+    final double vRef = 2.4;
+    final double gain = (exgUnit * (Math.pow(2, 23) - 1)) * 6;
+    return (float) (dataPoint * (vRef / gain));
+  }
+
   @Override
   public void populate(byte[] dataBytes) throws InvalidDataException, IOException {
     double[] dataDoubles = PacketUtils.bytesToInt32s(dataBytes);
@@ -26,13 +32,6 @@ public abstract class EEGPacket extends Packet {
       }
       super.data.add(adjustGain(dataDoubles[i]));
     }
-  }
-
-  private static Float adjustGain(double dataPoint) {
-    final double exgUnit = Math.pow(10, -6);
-    final double vRef = 2.4;
-    final double gain = (exgUnit * (Math.pow(2, 23) - 1)) * 6;
-    return (float) (dataPoint * (vRef / gain));
   }
 
   @NonNull

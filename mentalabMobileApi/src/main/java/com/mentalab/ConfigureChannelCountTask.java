@@ -14,6 +14,12 @@ public class ConfigureChannelCountTask implements CheckedExceptionSupplier<Boole
     this.device = device;
   }
 
+  private static ChannelCountSubscriber registerSubscriber() {
+    final ChannelCountSubscriber sub = new ChannelCountSubscriber();
+    ContentServer.getInstance().registerSubscriber(sub);
+    return sub;
+  }
+
   /**
    * Computes a result, or throws an exception if unable to do so.
    *
@@ -26,12 +32,6 @@ public class ConfigureChannelCountTask implements CheckedExceptionSupplier<Boole
     final int channelCount = sub.awaitResult();
     ContentServer.getInstance().deRegisterSubscriber(sub);
     return configureExploreDevice(channelCount);
-  }
-
-  private static ChannelCountSubscriber registerSubscriber() {
-    final ChannelCountSubscriber sub = new ChannelCountSubscriber();
-    ContentServer.getInstance().registerSubscriber(sub);
-    return sub;
   }
 
   private Boolean configureExploreDevice(int channelCount) {

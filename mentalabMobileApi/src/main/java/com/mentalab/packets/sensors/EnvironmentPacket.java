@@ -1,14 +1,15 @@
 package com.mentalab.packets.sensors;
 
+import static com.mentalab.packets.PacketDataType.BATTERY;
+import static com.mentalab.packets.PacketDataType.LIGHT;
+import static com.mentalab.packets.PacketDataType.TEMP;
+
 import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketUtils;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.EnumSet;
-
-import static com.mentalab.packets.PacketDataType.*;
 
 public class EnvironmentPacket extends Packet {
 
@@ -18,13 +19,6 @@ public class EnvironmentPacket extends Packet {
   public EnvironmentPacket(double timeStamp) {
     super(timeStamp);
     super.type = EnumSet.of(TEMP, LIGHT, BATTERY);
-  }
-
-  @Override
-  public void populate(byte[] data) throws InvalidDataException {
-    super.data.add((float) PacketUtils.bytesToInt(data[0])); // temp
-    super.data.add((float) (PacketUtils.bytesToInt(data[1], data[2]) * LUX_CONSTANT)); // light
-    super.data.add((float) getBatteryPercentage(getRawBattery(data))); // battery
   }
 
   private static double getRawBattery(byte[] byteBuffer) throws InvalidDataException {
@@ -49,6 +43,13 @@ public class EnvironmentPacket extends Packet {
     } else {
       return 100d;
     }
+  }
+
+  @Override
+  public void populate(byte[] data) throws InvalidDataException {
+    super.data.add((float) PacketUtils.bytesToInt(data[0])); // temp
+    super.data.add((float) (PacketUtils.bytesToInt(data[1], data[2]) * LUX_CONSTANT)); // light
+    super.data.add((float) getBatteryPercentage(getRawBattery(data))); // battery
   }
 
   @NonNull

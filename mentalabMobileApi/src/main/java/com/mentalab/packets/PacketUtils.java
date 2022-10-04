@@ -2,8 +2,6 @@ package com.mentalab.packets;
 
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.utils.constants.SamplingRate;
-
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -61,8 +59,8 @@ public class PacketUtils {
   }
 
   private static byte[] addValsToArray(byte[] data, byte[] array) {
-      // fill-in with our data
-      System.arraycopy(data, 0, array, 0, data.length);
+    // fill-in with our data
+    System.arraycopy(data, 0, array, 0, data.length);
     return array;
   }
 

@@ -7,7 +7,6 @@ import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.ImpedanceSubscriber;
 import com.mentalab.service.io.Subscriber;
 import com.mentalab.utils.constants.Topic;
-
 import java.util.concurrent.Callable;
 
 public class ImpedanceCalculatorTask implements Callable<Boolean> {

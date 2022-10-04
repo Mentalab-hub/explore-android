@@ -19,7 +19,6 @@ import com.mentalab.utils.commandtranslators.Command;
 import com.mentalab.utils.constants.ChannelCount;
 import com.mentalab.utils.constants.ConfigProtocol;
 import com.mentalab.utils.constants.SamplingRate;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -36,19 +35,48 @@ public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
-
+  private final ImpedanceCalculatorTask calculateImpedanceTask = new ImpedanceCalculatorTask(this);
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
   private float slope = 0f;
   private double offset = 0d;
-
-  private final ImpedanceCalculatorTask calculateImpedanceTask = new ImpedanceCalculatorTask(this);
   private RecordTask recordTask;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
     this.deviceName = deviceName;
+  }
+
+  private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
+      throws ExecutionException, InterruptedException, IOException {
+    Log.i(Utils.TAG, "Waiting on initial configuration.");
+    for (CompletableFuture<Boolean> f : deviceConfig) {
+      if (!f.get()) {
+        MentalabCommands.shutdown();
+        throw new IOException("Unable to initialise device. Cannot proceed.");
+      }
+    }
+  }
+
+  private static int bitShift(int binaryArg, ConfigSwitch s) {
+    final int channelID = s.getProtocol().getID();
+    final int on = s.isOn() ? 1 : 0; // on = 1, off = 0
+    if ((binaryArg >> channelID & on) != 1) { // if binaryArg at channel id is on or off
+      binaryArg ^= (1 << channelID); // flip bit if necessary at the channel id
+    }
+    return binaryArg;
+  }
+
+  private static Command generateModuleCommand(ConfigSwitch module) {
+    final Command c = module.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
+    c.setArg(module.getProtocol().getID());
+    return c;
+  }
+
+  /** Returns the device data stream. */
+  public static InputStream getInputStream() throws NoBluetoothException, IOException {
+    return BluetoothManager.getInputStream();
   }
 
   BluetoothDevice getBluetoothDevice() {
@@ -71,17 +99,6 @@ public class ExploreDevice {
     MentalabCodec.getInstance().decodeInputStream(getInputStream());
     waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
     return this;
-  }
-
-  private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)
-      throws ExecutionException, InterruptedException, IOException {
-    Log.i(Utils.TAG, "Waiting on initial configuration.");
-    for (CompletableFuture<Boolean> f : deviceConfig) {
-      if (!f.get()) {
-        MentalabCommands.shutdown();
-        throw new IOException("Unable to initialise device. Cannot proceed.");
-      }
-    }
   }
 
   /**
@@ -115,15 +132,6 @@ public class ExploreDevice {
     return channelMask;
   }
 
-  private static int bitShift(int binaryArg, ConfigSwitch s) {
-    final int channelID = s.getProtocol().getID();
-    final int on = s.isOn() ? 1 : 0; // on = 1, off = 0
-    if ((binaryArg >> channelID & on) != 1) { // if binaryArg at channel id is on or off
-      binaryArg ^= (1 << channelID); // flip bit if necessary at the channel id
-    }
-    return binaryArg;
-  }
-
   /** Set a single channel on or off. */
   public Future<Boolean> setChannel(ConfigSwitch channel)
       throws RejectedExecutionException, IOException, InvalidCommandException,
@@ -145,12 +153,6 @@ public class ExploreDevice {
     Utils.checkSwitchType(mSwitch, ConfigProtocol.Type.Module);
     final Command c = generateModuleCommand(mSwitch);
     return DeviceManager.submitConfigCommand(c);
-  }
-
-  private static Command generateModuleCommand(ConfigSwitch module) {
-    final Command c = module.isOn() ? Command.CMD_MODULE_ENABLE : Command.CMD_MODULE_DISABLE;
-    c.setArg(module.getProtocol().getID());
-    return c;
   }
 
   /**
@@ -182,11 +184,6 @@ public class ExploreDevice {
       throws RejectedExecutionException, IOException, InvalidCommandException,
           NoBluetoothException {
     return DeviceManager.submitConfigCommand(Command.CMD_SOFT_RESET);
-  }
-
-  /** Returns the device data stream. */
-  public static InputStream getInputStream() throws NoBluetoothException, IOException {
-    return BluetoothManager.getInputStream();
   }
 
   @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -261,6 +258,11 @@ public class ExploreDevice {
     return this.channelCount;
   }
 
+  public void setChannelCount(ChannelCount count) {
+    Log.d(Utils.TAG, "Channel count set to: " + count);
+    this.channelCount = count;
+  }
+
   public SamplingRate getSamplingRate() {
     return this.samplingRate;
   }
@@ -269,22 +271,22 @@ public class ExploreDevice {
     return this.slope;
   }
 
+  private void setSlope(float slope) {
+    Log.d(Utils.TAG, "Impedance slope set to: " + slope);
+    this.slope = slope;
+  }
+
   public double getOffset() {
     return this.offset;
   }
 
+  private void setOffset(double offset) {
+    Log.d(Utils.TAG, "Impedance offset set to: " + offset);
+    this.offset = offset;
+  }
+
   public int getChannelMask() {
     return this.channelMask;
-  }
-
-  public void setChannelCount(ChannelCount count) {
-    Log.d(Utils.TAG, "Channel count set to: " + count);
-    this.channelCount = count;
-  }
-
-  public void setSR(SamplingRate sr) {
-    Log.d(Utils.TAG, "Sampling rate set to: " + sr);
-    this.samplingRate = sr;
   }
 
   public void setChannelMask(int mask) {
@@ -293,13 +295,8 @@ public class ExploreDevice {
     this.channelMask = mask;
   }
 
-  private void setSlope(float slope) {
-    Log.d(Utils.TAG, "Impedance slope set to: " + slope);
-    this.slope = slope;
-  }
-
-  private void setOffset(double offset) {
-    Log.d(Utils.TAG, "Impedance offset set to: " + offset);
-    this.offset = offset;
+  public void setSR(SamplingRate sr) {
+    Log.d(Utils.TAG, "Sampling rate set to: " + sr);
+    this.samplingRate = sr;
   }
 }

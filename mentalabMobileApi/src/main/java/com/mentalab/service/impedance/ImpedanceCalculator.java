@@ -2,7 +2,6 @@ package com.mentalab.service.impedance;
 
 import com.mentalab.ExploreDevice;
 import com.mentalab.utils.ButterworthFilter;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +18,22 @@ public class ImpedanceCalculator {
     this.offset = device.getOffset();
     this.channelCount = device.getChannelCount().getAsInt();
     this.butterworthFilter = new ButterworthFilter(device.getSamplingRate().getAsInt());
+  }
+
+  private static double[] toDoubleArray(List<Float> floats) {
+    final double[] doubleArray = new double[floats.size()];
+    for (int i = 0; i < floats.size(); i++) {
+      doubleArray[i] = floats.get(i).doubleValue();
+    }
+    return doubleArray;
+  }
+
+  private static List<Float> toFloatList(double[] doubles) {
+    ArrayList<Float> list = new ArrayList<>();
+    for (double v : doubles) {
+      list.add((float) v);
+    }
+    return list;
   }
 
   public List<Float> calculate(List<Float> data) {
@@ -50,21 +65,5 @@ public class ImpedanceCalculator {
       result[i] = diff * (slope / Math.pow(10, 6)) - offset;
     }
     return result;
-  }
-
-  private static double[] toDoubleArray(List<Float> floats) {
-    final double[] doubleArray = new double[floats.size()];
-    for (int i = 0; i < floats.size(); i++) {
-      doubleArray[i] = floats.get(i).doubleValue();
-    }
-    return doubleArray;
-  }
-
-  private static List<Float> toFloatList(double[] doubles) {
-    ArrayList<Float> list = new ArrayList<>();
-    for (double v : doubles) {
-      list.add((float) v);
-    }
-    return list;
   }
 }

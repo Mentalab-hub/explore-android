@@ -8,9 +8,13 @@ import com.mentalab.service.ImpedanceConfigurationTask;
 import com.mentalab.service.SendCommandTask;
 import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.utils.commandtranslators.Command;
-
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class DeviceManager {
 
