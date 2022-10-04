@@ -2,7 +2,6 @@ package com.mentalab;
 
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.RejectedExecutionException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.DeviceConfigurationTask;
 import com.mentalab.service.ImpedanceConfigurationTask;

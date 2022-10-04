@@ -8,7 +8,6 @@ import androidx.annotation.RequiresApi;
 import com.mentalab.exception.CommandFailedException;
 import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
-import com.mentalab.exception.RejectedExecutionException;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.service.decode.MentalabCodec;
 import com.mentalab.service.impedance.ImpedanceCalculatorTask;
@@ -30,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 
 /** A wrapper around BluetoothDevice */
 public class ExploreDevice {

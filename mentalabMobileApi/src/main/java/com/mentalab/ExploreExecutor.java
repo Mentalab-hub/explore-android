@@ -1,9 +1,9 @@
 package com.mentalab;
 
-import com.mentalab.exception.RejectedExecutionException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
