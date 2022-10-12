@@ -302,6 +302,6 @@ public class ExploreDevice {
 
   /* Gets bluetooth packet sample size depending on number of channels*/
   public int getSampleSize() {
-    this.channelCount.getSampleSize();
+    return this.channelCount.getSampleSize();
   }
 }
