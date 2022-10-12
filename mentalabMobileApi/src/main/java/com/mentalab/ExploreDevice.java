@@ -299,4 +299,9 @@ public class ExploreDevice {
     Log.d(Utils.TAG, "Sampling rate set to: " + sr);
     this.samplingRate = sr;
   }
+
+  /* Gets bluetooth packet sample size depending on number of channels*/
+  public int getSampleSize() {
+    this.channelCount.getSampleSize();
+  }
 }

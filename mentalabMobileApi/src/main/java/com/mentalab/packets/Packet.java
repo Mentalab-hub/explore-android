@@ -36,6 +36,7 @@ public abstract class Packet {
     return this.data;
   }
 
+  /** Get timestamp of data retrieval from device*/
   public double getTimeStamp() {
     return this.timeStamp;
   }
