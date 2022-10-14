@@ -2,6 +2,7 @@ package com.mentalab;
 
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mentalab.exception.NoBluetoothException;
@@ -19,12 +20,13 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      MentalabCommands.connect("CA4A").acquire();
+      MentalabCommands.connect("CA26").acquire();
     } catch (NoBluetoothException
         | NoConnectionException
         | IOException
         | ExecutionException
         | InterruptedException e) {
+      Log.d("HELLO__", "-----------------------------------");
       e.printStackTrace();
     }
   }
