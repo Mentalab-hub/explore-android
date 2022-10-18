@@ -7,7 +7,11 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
-
+import com.mentalab.packets.Packet;
+import com.mentalab.packets.sensors.exg.EEGPacket;
+import com.mentalab.service.io.ContentServer;
+import com.mentalab.service.io.Subscriber;
+import com.mentalab.utils.constants.Topic;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
@@ -20,13 +24,22 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      MentalabCommands.connect("CA26").acquire();
+      ExploreDevice device = MentalabCommands.connect("CA4C");
+      device.acquire();
+
+      Subscriber<EEGPacket> subscriber = new Subscriber<EEGPacket>(Topic.EXG) {
+        @Override
+        public void accept(Packet packet) {
+          Log.d("HELLO__", "----packet time" + packet.getTimeStamp());
+        }
+      };
+      ContentServer.getInstance().registerSubscriber(subscriber);
+      // device.formatMemory();
     } catch (NoBluetoothException
         | NoConnectionException
         | IOException
         | ExecutionException
         | InterruptedException e) {
-      Log.d("HELLO__", "-----------------------------------");
       e.printStackTrace();
     }
   }

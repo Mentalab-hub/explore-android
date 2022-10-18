@@ -1,6 +1,7 @@
 package com.mentalab.service.decode;
 
 import android.util.Log;
+import com.mentalab.BluetoothManager;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
@@ -64,12 +65,14 @@ class ParseRawDataTask implements Callable<Void> {
   public Void call() {
     while (!Thread.currentThread().isInterrupted()) {
       try {
+        while(btInputStream.available() == 0);
         final int pID = readToInt(btInputStream, 1); // package identification
         final int count = readToInt(btInputStream, 1); // package count
         final int length = readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
         final double timeStamp = readToInt(btInputStream, 4);
 
         final Packet packet = createPacket(pID, length, timeStamp / 10_000); // to seconds
+        //Log.d("HELLO__", "from packet::::" + packet.getTimeStamp());
         ContentServer.getInstance().publish(packet.getTopic(), packet);
       } catch (IOException e) {
         Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);

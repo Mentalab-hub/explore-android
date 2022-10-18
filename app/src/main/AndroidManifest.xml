@@ -9,7 +9,7 @@
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
     android:theme="@style/Theme.MobileApiDemo">
-    <activity android:name=".MainActivity">
+    <activity android:name=".MainActivity" android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 
@@ -23,10 +23,10 @@
 
   <!-- Request legacy Bluetooth permissions on older devices. -->
   <uses-permission
-    android:maxSdkVersion="30"
+    android:maxSdkVersion="33"
     android:name="android.permission.BLUETOOTH" />
   <uses-permission
-    android:maxSdkVersion="30"
+    android:maxSdkVersion="33"
     android:name="android.permission.BLUETOOTH_ADMIN" />
 
   <!-- Include "neverForLocation" only if you can strongly assert that
