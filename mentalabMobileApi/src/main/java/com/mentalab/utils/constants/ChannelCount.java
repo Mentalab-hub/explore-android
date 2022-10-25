@@ -2,7 +2,8 @@ package com.mentalab.utils.constants;
 
 public enum ChannelCount {
   CC_4(4, 33),
-  CC_8(8, 16);
+  CC_8(8, 16),
+  CC_32(32, 4);
 
   private final int integerRepresentation;
   private final int sampleSize;

@@ -7,6 +7,7 @@ import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.packets.sensors.EnvironmentPacket;
 import com.mentalab.packets.sensors.MarkerPacket;
 import com.mentalab.packets.sensors.OrientationPacket;
+import com.mentalab.packets.sensors.exg.Eeg32Packet;
 import com.mentalab.packets.sensors.exg.Eeg94Packet;
 import com.mentalab.packets.sensors.exg.Eeg98Packet;
 
@@ -51,6 +52,12 @@ public enum PacketId {
     @Override
     public Packet createInstance(double timeStamp) {
       return new Eeg98Packet(timeStamp);
+    }
+  },
+  EEG32(148) {
+    @Override
+    public Packet createInstance(double timeStamp) {
+      return new Eeg32Packet(timeStamp);
     }
   },
   EEG99S(30) {
