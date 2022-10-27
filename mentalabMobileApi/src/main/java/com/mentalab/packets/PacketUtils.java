@@ -15,6 +15,11 @@ public class PacketUtils {
     return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getInt();
   }
 
+  public static int bytesToIntInverted(byte... data) throws InvalidDataException {
+    final byte[] array = bytesToArray(4, data);
+    return ByteBuffer.wrap(array).order(ByteOrder.BIG_ENDIAN).getInt();
+  }
+
   public static short bytesToShort(byte... data) throws InvalidDataException {
     final byte[] array = bytesToArray(2, data);
     return ByteBuffer.wrap(array).order(ByteOrder.LITTLE_ENDIAN).getShort();
@@ -48,6 +53,26 @@ public class PacketUtils {
     int arraySize = data.length / BUFFER_LENGTH;
     double[] array = new double[arraySize];
     return addValsToArray32(data, array);
+  }
+
+  public static double[] convertBigEndien(byte[] data) throws InvalidDataException {
+    if (data.length % BUFFER_LENGTH != 0) {
+      throw new InvalidDataException("Illegal byte array length");
+    }
+
+    int arraySize = data.length / BUFFER_LENGTH;
+
+    double[] array = new double[arraySize];
+    for (int i = 3; i < data.length; i += 3) { // skip first byte because 0 is the ads mask
+      final int bitSign = data[i + 2] >> 7;
+      if (bitSign == 0) {
+        array[i / 3] = PacketUtils.bytesToIntInverted(data[i], data[i + 1], data[i + 2], (byte) 0);
+      } else {
+        int twosComplimentValue = PacketUtils.bytesToIntInverted(data[i], data[i + 1], data[i + 2], (byte) 0);
+        array[i / 3] = -1 * (Math.pow(2, 24) - twosComplimentValue);
+      }
+    }
+    return array;
   }
 
   private static byte[] bytesToArray(int arrayLength, byte... data) throws InvalidDataException {

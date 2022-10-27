@@ -25,7 +25,14 @@ public abstract class EEGPacket extends Packet {
 
   @Override
   public void populate(byte[] dataBytes) throws InvalidDataException, IOException {
-    double[] dataDoubles = PacketUtils.verifyLength(dataBytes);
+    double[] dataDoubles;
+    if (this instanceof Eeg32Packet){
+      dataDoubles = PacketUtils.convertBigEndien(dataBytes);
+    }
+    else{
+      dataDoubles = PacketUtils.verifyLength(dataBytes);
+    }
+
     for (int i = 0; i < dataDoubles.length; i++) {
       if (i % (noChannels + 1) == 0) {
         continue; // skip status bit

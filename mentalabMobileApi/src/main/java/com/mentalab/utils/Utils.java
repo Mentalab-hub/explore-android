@@ -64,6 +64,7 @@ public class Utils {
   }
 
   public static ChannelCount getChannelCountFromInt(int i) {
+    //TODO Simplify
     if (i == 4) {
       return ChannelCount.CC_4;
     }
