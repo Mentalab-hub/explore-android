@@ -64,10 +64,15 @@ public class Utils {
   }
 
   public static ChannelCount getChannelCountFromInt(int i) {
-    if (i < 5) {
+    if (i == 4) {
       return ChannelCount.CC_4;
     }
-    return ChannelCount.CC_8;
+    else if ( i == 8){
+      return ChannelCount.CC_8;
+    }
+    else{
+      return ChannelCount.CC_32;
+    }
   }
 
   public static Set<ConfigSwitch> removeRedundantSwitches(
