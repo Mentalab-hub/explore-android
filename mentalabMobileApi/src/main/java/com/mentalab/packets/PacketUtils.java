@@ -68,7 +68,8 @@ public class PacketUtils {
       if (bitSign == 0) {
         array[i / 3] = PacketUtils.bytesToIntInverted(data[i], data[i + 1], data[i + 2], (byte) 0);
       } else {
-        int twosComplimentValue = PacketUtils.bytesToIntInverted(data[i], data[i + 1], data[i + 2], (byte) 0);
+        int twosComplimentValue =
+            PacketUtils.bytesToIntInverted(data[i], data[i + 1], data[i + 2], (byte) 0);
         array[i / 3] = -1 * (Math.pow(2, 24) - twosComplimentValue);
       }
     }

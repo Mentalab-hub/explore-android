@@ -10,17 +10,17 @@ import java.io.IOException;
 public abstract class EEGPacket extends Packet {
 
   private final int noChannels;
+  private double vRef = 2.4;
 
   public EEGPacket(double timeStamp, int noChannels) {
     super(timeStamp);
     this.noChannels = noChannels;
   }
 
-  private static Float adjustGain(double dataPoint) {
+  private Float adjustGain(double dataPoint) {
     final double exgUnit = Math.pow(10, -6);
-    final double vRef = 2.4;
     final double gain = (exgUnit * (Math.pow(2, 23) - 1)) * 6;
-    return (float) (dataPoint * (vRef / gain));
+    return (float) (dataPoint * (this.vRef / gain));
   }
 
   @Override
@@ -28,6 +28,7 @@ public abstract class EEGPacket extends Packet {
     double[] dataDoubles;
     if (this instanceof Eeg32Packet){
       dataDoubles = PacketUtils.convertBigEndien(dataBytes);
+      this.setReferenceVoltage(4.0);
     }
     else{
       dataDoubles = PacketUtils.verifyLength(dataBytes);
@@ -55,5 +56,10 @@ public abstract class EEGPacket extends Packet {
   @Override
   public Topic getTopic() {
     return Topic.EXG;
+  }
+
+  private void setReferenceVoltage(double vRef)
+  {
+    this.vRef = vRef;
   }
 }
