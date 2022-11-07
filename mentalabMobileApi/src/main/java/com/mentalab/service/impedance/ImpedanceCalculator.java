@@ -68,7 +68,7 @@ public class ImpedanceCalculator {
     for (int i = 0; i < channelCount; i++) {
       //double[] slice = Arrays.copyOfRange(values, i, i + channelCount);
       ArrayList<Float> slice = new ArrayList<>();
-      for (int j = 0; j< values.length; j = j + channelCount){
+      for (int j = i; j< values.length; j = j + channelCount){
         slice.add((float) values[j]);
       }
       Collections.sort(slice);
