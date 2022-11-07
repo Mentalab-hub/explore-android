@@ -11,7 +11,7 @@ import java.io.OutputStream;
 
 public abstract class SendCommandTask<T> implements CheckedExceptionSupplier<T> {
 
-  private static final int TIMEOUT = 3000;
+  private static final int TIMEOUT = 10000;
 
   private final byte[] command;
   private final OutputStream outputStream;

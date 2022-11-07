@@ -11,7 +11,7 @@ public class ButterworthFilter {
    */
   private final double samplingFreq;
   private final double nyquistFreq;
-  private final int filterOrder = 5;
+  private final int filterOrder = 2;
 
   /**
    * This constructor initialises the prerequisites required to use Butterworth filter.
@@ -87,10 +87,11 @@ public class ButterworthFilter {
           "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
     }
     double centreFreq = (highCutoff + lowCutoff) / 2.0;
+
     double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
     Butterworth bp = new Butterworth();
-    bp.bandPass(this.filterOrder, this.samplingFreq, centreFreq, width);
+    bp.bandPass(this.filterOrder, 125, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
       output[i] = bp.filter(signal[i]);
     }
@@ -119,7 +120,7 @@ public class ButterworthFilter {
     double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
     Butterworth bs = new Butterworth();
-    bs.bandStop(order, this.samplingFreq, centreFreq, width);
+    bs.bandStop(order, 125, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
       output[i] = bs.filter(signal[i]);
     }

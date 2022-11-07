@@ -1,9 +1,11 @@
 package com.mentalab.service.impedance;
 
+import com.github.psambit9791.jdsp.filter.Butterworth;
 import com.mentalab.ExploreDevice;
 import com.mentalab.utils.ButterworthFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ImpedanceCalculator {
@@ -45,14 +47,32 @@ public class ImpedanceCalculator {
     return toFloatList(denoisedData);
   }
 
+  public List<Float> calculate2(List<Float> data) {
+    Butterworth butterNotch = new Butterworth(250);
+    final double[] notchedValues  = butterNotch.bandStopFilter(toDoubleArray(data), 5, 48, 52);
+    //final double[] notchedValues = butterworthFilter.bandStopFilter(toDoubleArray(data));
+    Butterworth butterNoise = new Butterworth(250);
+    final double[] values = butterNoise.bandPassFilter(notchedValues, 5, 65, 68);
+    //final double[] values = butterworthFilter.bandPassFilter(notchedValues, false);
+    final double[] noiseLevel = getPeakToPeak(values);
+    Butterworth butterBandpass = new Butterworth(250);
+    final double[] bandpassedValues = butterBandpass.bandPassFilter(notchedValues, 5, 61, 64);
+    //final double[] bandpassedValues = butterworthFilter.bandPassFilter(notchedValues, true);
+    final double[] denoisedData = calculateImpedance(getPeakToPeak(bandpassedValues), noiseLevel);
+    return toFloatList(denoisedData);
+  }
   private double[] getPeakToPeak(double[] values) {
-    int columnSize = values.length / channelCount;
+    int sampleNumbers = values.length / channelCount;
     double[] peakToPeakValues = new double[channelCount];
 
-    for (int i = 0; i < values.length - 1; i += columnSize) {
-      double[] slice = Arrays.copyOfRange(values, i, i + columnSize);
-      Arrays.sort(slice);
-      peakToPeakValues[i / columnSize] = slice[slice.length - 1] - slice[0];
+    for (int i = 0; i < channelCount; i++) {
+      //double[] slice = Arrays.copyOfRange(values, i, i + channelCount);
+      ArrayList<Float> slice = new ArrayList<>();
+      for (int j = 0; j< values.length; j = j + channelCount){
+        slice.add((float) values[j]);
+      }
+      Collections.sort(slice);
+      peakToPeakValues[i] = slice.get(slice.size() - 1) - slice.get(0);
     }
     return peakToPeakValues;
   }

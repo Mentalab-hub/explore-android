@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.Packet;
@@ -24,13 +26,14 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      ExploreDevice device = MentalabCommands.connect("CA4C");
+      ExploreDevice device = MentalabCommands.connect("CA26");
       device.acquire();
+      device.calculateImpedance();
 
-      Subscriber<EEGPacket> subscriber = new Subscriber<EEGPacket>(Topic.EXG) {
+      Subscriber<EEGPacket> subscriber = new Subscriber<EEGPacket>(Topic.IMPEDANCE) {
         @Override
         public void accept(Packet packet) {
-          Log.d("HELLO__", "----packet time" + packet.getTimeStamp());
+          Log.d("HELLO__", "----packet time" + packet.getData());
         }
       };
       ContentServer.getInstance().registerSubscriber(subscriber);
@@ -40,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
         | IOException
         | ExecutionException
         | InterruptedException e) {
+      e.printStackTrace();
+    } catch (InvalidCommandException e) {
+      e.printStackTrace();
+    } catch (CommandFailedException e) {
       e.printStackTrace();
     }
   }
