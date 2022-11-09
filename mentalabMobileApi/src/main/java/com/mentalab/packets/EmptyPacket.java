@@ -23,6 +23,6 @@ public class EmptyPacket extends Packet {
 
   @Override
   public Topic getTopic() {
-    return null;
+    return Topic.MARKER;
   }
 }

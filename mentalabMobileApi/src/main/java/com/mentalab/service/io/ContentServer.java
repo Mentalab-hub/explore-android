@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ContentServer {
 
-  private static ContentServer INSTANCE;
+  private volatile static ContentServer INSTANCE;
   private final Map<Topic, Set<Subscriber>> topicSubscribers = new ConcurrentHashMap<>();
 
   private ContentServer() {}
