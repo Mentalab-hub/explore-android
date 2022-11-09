@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ContentServer {
 
-  private static ContentServer INSTANCE;
+  private volatile static ContentServer INSTANCE;
   private final Map<Topic, Set<Subscriber>> topicSubscribers = new ConcurrentHashMap<>();
 
   private ContentServer() {}
@@ -26,7 +26,7 @@ public final class ContentServer {
     if (subscribers == null) {
       return;
     }
-
+    
     for (Subscriber s : subscribers) {
       s.accept(message);
     }
