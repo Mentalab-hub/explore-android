@@ -2,6 +2,7 @@ package com.mentalab.service.decode;
 
 import android.util.Log;
 import com.mentalab.BluetoothManager;
+import com.mentalab.PubSubManager;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
@@ -18,8 +19,6 @@ import java.util.concurrent.Callable;
 class ParseRawDataTask implements Callable<Void> {
 
   private InputStream btInputStream;
-  private boolean impReceived;
-  ImpedanceCalculator calculator = new ImpedanceCalculator();
   int packetCount;
 
   private static int readToInt(InputStream i, int noBytesToRead) throws IOException {
@@ -73,20 +72,11 @@ class ParseRawDataTask implements Callable<Void> {
       try {
         while(btInputStream.available() == 0);
         final int pID = readToInt(btInputStream, 1); // package identification
-        if (pID == 195){
-          impReceived = true;
-        }
         final int count = readToInt(btInputStream, 1); // package count
-        packetCount = packetCount + 1;
         final int length = readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
         final double timeStamp = readToInt(btInputStream, 4);
 
         final Packet packet = createPacket(pID, length, timeStamp / 10_000); // to seconds
-        if (impReceived && packet instanceof EEGPacket)
-        {
-          calculator.calculate2(packet.getData());
-        }
-        //Log.d("HELLO__", "from packet::::" + packet.getTimeStamp());
         ContentServer.getInstance().publish(packet.getTopic(), packet);
       } catch (IOException e) {
         Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
