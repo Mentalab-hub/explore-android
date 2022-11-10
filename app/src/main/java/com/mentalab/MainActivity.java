@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      ExploreDevice device = MentalabCommands.connect("XXXX"); // replace with actual device name
+      ExploreDevice device = MentalabCommands.connect("1C32"); // replace with actual device name
       device.acquire();
 
       device.calculateImpedance();
