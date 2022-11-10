@@ -73,7 +73,6 @@ class ParseRawDataTask implements Callable<Void> {
         final double timeStamp = readToInt(btInputStream, 4);
 
         final Packet packet = createPacket(pID, length, timeStamp / 10_000); // to seconds
-        Log.d("DEBUG_PACKET", packet.getData().toString());
         ContentServer.getInstance().publish(packet.getTopic(), packet);
       } catch (IOException e) {
         Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
