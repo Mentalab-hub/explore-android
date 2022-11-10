@@ -26,7 +26,7 @@ public final class ContentServer {
     if (subscribers == null) {
       return;
     }
-
+    
     for (Subscriber s : subscribers) {
       s.accept(message);
     }
