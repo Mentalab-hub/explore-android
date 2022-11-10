@@ -73,14 +73,11 @@ class ParseRawDataTask implements Callable<Void> {
       try {
         while(btInputStream.available() == 0);
         final int pID = readToInt(btInputStream, 1); // package identification
-        Log.e("DEBUG_IMP", "PID is ######" + pID);
         if (pID == 195){
           impReceived = true;
         }
         final int count = readToInt(btInputStream, 1); // package count
-        Log.e("DEBUG_IMP", "count is ######" + count);
         packetCount = packetCount + 1;
-        Log.e("DEBUG_IMP", "count is ######" + packetCount);
         final int length = readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
         final double timeStamp = readToInt(btInputStream, 4);
 
