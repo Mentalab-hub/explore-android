@@ -2,7 +2,7 @@ package com.mentalab.utils;
 
 import uk.me.berndporr.iirj.Butterworth;
 
-public class ButterworthFilter {
+public class MentalabButterworthFilter {
   private static final int notchFreq = 50;
   /**
    * The Butterworth class implements low-pass, high-pass, band-pass and band-stop filter using the
@@ -10,17 +10,27 @@ public class ButterworthFilter {
    * https://en.wikipedia.org/wiki/Butterworth_filter
    */
   private final double samplingFreq;
+
   private final double nyquistFreq;
   private final int filterOrder = 5;
+  private int channelNumber;
+  Butterworth filterManager = new Butterworth();
 
   /**
    * This constructor initialises the prerequisites required to use Butterworth filter.
    *
    * @param Fs Sampling frequency of input signal
    */
-  public ButterworthFilter(double Fs) {
+
+  public MentalabButterworthFilter(double Fs, int channelNumber, boolean isBandpass, double lc, double hc) {
     this.samplingFreq = Fs;
-    nyquistFreq = samplingFreq / 2;
+    this.nyquistFreq = samplingFreq / 2;
+    this.channelNumber = channelNumber;
+    if (isBandpass) {
+      filterManager.bandPass(5, 250, (hc + lc)/2, hc - lc);
+    } else {
+      filterManager.bandStop(5, 250, (hc + lc)/2, hc - lc);
+    }
   }
 
   /**
@@ -51,48 +61,30 @@ public class ButterworthFilter {
    * @param cutoffFreq The cutoff frequency for the filter in Hz
    * @return double[] Filtered signal
    */
-  public double[] highPassFilter(double[] signal, int order, double cutoffFreq) {
+/*  public double[] highPassFilter(double[] signal, int order, double cutoffFreq) {
     double[] output = new double[signal.length];
-    Butterworth hp = new Butterworth();
     hp.highPass(this.filterOrder, this.samplingFreq, cutoffFreq);
     for (int i = 0; i < output.length; i++) {
       output[i] = hp.filter(signal[i]);
     }
     return output;
-  }
+  }*/
 
   /**
    * This method implements a band pass filter with given parameters, filters the signal and returns
    * it.
    *
    * @param signal Signal to be filtered
-   * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
+   * @throws IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
-  public double[] bandPassFilter(double[] signal, boolean isDemodulationFilter)
+  public double[] bandPassFilter(double[] signal)
       throws IllegalArgumentException {
 
-    double lowCutoff;
-    double highCutoff;
-    if (isDemodulationFilter) {
-      lowCutoff = (samplingFreq / 4 - 1.5) / nyquistFreq;
-      highCutoff = (samplingFreq / 4 + 1.5) / nyquistFreq;
-    } else {
-      lowCutoff = (samplingFreq / 4 + 2.5) / nyquistFreq;
-      highCutoff = (samplingFreq / 4 + 5.5) / nyquistFreq;
-    }
-    if (lowCutoff >= highCutoff) {
-      throw new IllegalArgumentException(
-          "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
-    }
-    double centreFreq = (highCutoff + lowCutoff) / 2.0;
-    double width = Math.abs(highCutoff - lowCutoff);
     double[] output = new double[signal.length];
-    Butterworth bp = new Butterworth();
-    bp.bandPass(this.filterOrder, this.samplingFreq, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
-      output[i] = bp.filter(signal[i]);
+      output[i] = filterManager.filter(signal[i]);
     }
     return output;
   }
@@ -102,26 +94,15 @@ public class ButterworthFilter {
    * it.
    *
    * @param signal Signal to be filtered
-   * @throws java.lang.IllegalArgumentException The lower cutoff frequency is greater than the
+   * @throws IllegalArgumentException The lower cutoff frequency is greater than the
    *     higher cutoff frequency
    * @return double[] Filtered signal
    */
   public double[] bandStopFilter(double[] signal) throws IllegalArgumentException {
-    int order = 5;
-    double nyquistFreq = samplingFreq / 2;
-    double lowCutoff = (notchFreq - 2) / nyquistFreq;
-    double highCutoff = (notchFreq + 2) / nyquistFreq;
-    if (lowCutoff >= highCutoff) {
-      throw new IllegalArgumentException(
-          "Lower Cutoff Frequency cannot be more than the Higher Cutoff Frequency");
-    }
-    double centreFreq = (highCutoff + lowCutoff) / 2.0;
-    double width = Math.abs(highCutoff - lowCutoff);
+
     double[] output = new double[signal.length];
-    Butterworth bs = new Butterworth();
-    bs.bandStop(order, this.samplingFreq, centreFreq, width);
     for (int i = 0; i < output.length; i++) {
-      output[i] = bs.filter(signal[i]);
+      output[i] = filterManager.filter(signal[i]);
     }
     return output;
   }

@@ -1,23 +1,36 @@
 package com.mentalab.service.impedance;
 
 import com.mentalab.ExploreDevice;
-import com.mentalab.utils.ButterworthFilter;
+import com.mentalab.utils.MentalabButterworthFilter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ImpedanceCalculator {
 
-  private final ButterworthFilter butterworthFilter;
   private final double slope;
   private final double offset;
   private final int channelCount;
+  ArrayList<MentalabButterworthFilter> notchFilterList = new ArrayList<>();
+  ArrayList<MentalabButterworthFilter> noiseFilterList = new ArrayList<>();
+  ArrayList<MentalabButterworthFilter> impedanceFilterList = new ArrayList<>();
 
   public ImpedanceCalculator(ExploreDevice device) {
     this.slope = device.getSlope();
     this.offset = device.getOffset();
     this.channelCount = device.getChannelCount().getAsInt();
-    this.butterworthFilter = new ButterworthFilter(device.getSamplingRate().getAsInt());
+    initializeFilters();
+  }
+
+  public ImpedanceCalculator() {
+    this.slope = 223660;
+    this.offset = 42.218;
+    this.channelCount = 4;
+    // The following code assumes there no change in ADS mask.
+    // TODO adapt code to dynamic channel mask
+    initializeFilters();
   }
 
   private static double[] toDoubleArray(List<Float> floats) {
@@ -36,23 +49,48 @@ public class ImpedanceCalculator {
     return list;
   }
 
-  public List<Float> calculate(List<Float> data) {
-    final double[] notchedValues = butterworthFilter.bandStopFilter(toDoubleArray(data));
-    final double[] values = butterworthFilter.bandPassFilter(notchedValues, false);
-    final double[] noiseLevel = getPeakToPeak(values);
-    final double[] bandpassedValues = butterworthFilter.bandPassFilter(notchedValues, true);
-    final double[] denoisedData = calculateImpedance(getPeakToPeak(bandpassedValues), noiseLevel);
-    return toFloatList(denoisedData);
+  private double[] transpose(List<Float> data) {
+    int count = 0;
+    final double[] doubleArray = new double[data.size()];
+    for (int i = 0; i < channelCount; i++) {
+      for (int j = i; j < data.size(); j += channelCount) {
+        doubleArray[count] =
+            new BigDecimal(data.get(j)).setScale(2, RoundingMode.HALF_UP).doubleValue();
+        count++;
+      }
+    }
+    return doubleArray;
   }
 
-  private double[] getPeakToPeak(double[] values) {
-    int columnSize = values.length / channelCount;
+  public List<Float> calculate2(List<Float> data) {
+
+    double[] transposedData = transpose(data);
+    // for bandstop we need to iterate over every channel data
+    // double[] notchedValues = butterNotch.bandStopFilter(transposedData);
+    double[] notchedValues = applyFilterByChannels(transposedData, "notch");
+    // double[] noisedata = butterNoise.bandPassFilter(notchedValues);
+    double[] noisedata = applyFilterByChannels(notchedValues, "noise");
+    final double[] noiseLevel = getPeakToPeak(noisedata);
+
+    // double[] impedanceSignal = butterBandpass.bandPassFilter(notchedValues);
+    double[] impedanceSignal = applyFilterByChannels(notchedValues, "impedance");
+    final double[] impPeakToPeak = getPeakToPeak(impedanceSignal);
+    final double[] impedanceValue = calculateImpedance(impPeakToPeak, noiseLevel);
+    return toFloatList(impedanceValue);
+  }
+
+  public double[] getPeakToPeak(double[] values) {
+    int sampleNumbers = values.length / channelCount;
     double[] peakToPeakValues = new double[channelCount];
 
-    for (int i = 0; i < values.length - 1; i += columnSize) {
-      double[] slice = Arrays.copyOfRange(values, i, i + columnSize);
-      Arrays.sort(slice);
-      peakToPeakValues[i / columnSize] = slice[slice.length - 1] - slice[0];
+    for (int i = 0; i < channelCount; i++) {
+
+      final double[] sorted =
+          Arrays.stream(
+                  Arrays.copyOfRange(values, i * sampleNumbers, i * sampleNumbers + sampleNumbers))
+              .sorted()
+              .toArray();
+      peakToPeakValues[i] = sorted[sorted.length - 1] - sorted[0];
     }
     return peakToPeakValues;
   }
@@ -60,10 +98,42 @@ public class ImpedanceCalculator {
   private double[] calculateImpedance(double[] first, double[] second) {
     final int length = first.length;
     final double[] result = new double[length];
+
     for (int i = 0; i < length; i++) {
       double diff = first[i] - second[i];
-      result[i] = diff * (slope / Math.pow(10, 6)) - offset;
+      result[i] = Math.round((diff * (slope / Math.pow(10, 6))) - offset);
     }
     return result;
+  }
+
+  private double[] applyFilterByChannels(double[] data, String type) {
+
+    int sampleNumbers = data.length / channelCount;
+    double[] result = new double[data.length];
+    for (int i = 0; i < channelCount; i++) {
+      double[] channelData =
+          Arrays.stream(
+                  Arrays.copyOfRange(data, i * sampleNumbers, i * sampleNumbers + sampleNumbers))
+              .toArray();
+      double[] channelFiltered = new double[channelData.length];
+      if (type.equals("notch")) {
+        channelFiltered = notchFilterList.get(i).bandPassFilter(channelData);
+      } else if (type.equals("noise")) {
+        channelFiltered = noiseFilterList.get(i).bandPassFilter(channelData);
+      } else if (type.equals("impedance")) {
+        channelFiltered = impedanceFilterList.get(i).bandPassFilter(channelData);
+      }
+
+      System.arraycopy(channelFiltered, 0, result, i * sampleNumbers, channelFiltered.length);
+    }
+    return result;
+  }
+
+  private void initializeFilters() {
+    for (int i = 0; i < channelCount; i++) {
+      notchFilterList.add(new MentalabButterworthFilter(250, channelCount, false, 48, 52));
+      noiseFilterList.add(new MentalabButterworthFilter(250, channelCount, true, 65, 68));
+      impedanceFilterList.add(new MentalabButterworthFilter(250, channelCount, true, 61, 64));
+    }
   }
 }

@@ -17,7 +17,7 @@ public class ImpedanceSubscriber extends Subscriber<EEGPacket> {
 
   @Override
   public void accept(Packet packet) {
-    final List<Float> impedanceData = impedanceCalculator.calculate(packet.getData());
+    final List<Float> impedanceData = impedanceCalculator.calculate2(packet.getData());
     packet.overwriteData(impedanceData);
     ContentServer.getInstance().publish(Topic.IMPEDANCE, packet);
   }
