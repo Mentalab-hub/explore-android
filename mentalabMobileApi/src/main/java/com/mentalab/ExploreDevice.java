@@ -39,8 +39,8 @@ public class ExploreDevice {
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
-  private float slope = 0f;
-  private double offset = 0d;
+  private volatile float slope = 223660;
+  private volatile double offset = 42.218;
   private RecordTask recordTask;
 
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
@@ -234,9 +234,6 @@ public class ExploreDevice {
     if (slopeOffset != null) {
       this.setSlope(slopeOffset.getSlope());
       this.setOffset(slopeOffset.getOffset());
-    } else {
-      throw new CommandFailedException(
-          "Slope and offset not received. Unable to calculate impedance.");
     }
   }
 
