@@ -13,6 +13,7 @@ public class ImpedanceCalculator {
   private final double slope;
   private final double offset;
   private final int channelCount;
+  volatile int impCount;
   ArrayList<MentalabButterworthFilter> notchFilterList = new ArrayList<>();
   ArrayList<MentalabButterworthFilter> noiseFilterList = new ArrayList<>();
   ArrayList<MentalabButterworthFilter> impedanceFilterList = new ArrayList<>();
@@ -64,6 +65,11 @@ public class ImpedanceCalculator {
 
   public List<Float> calculate2(List<Float> data) {
 
+    impCount += 1;
+    if (impCount == 20)
+    {
+      initializeFilters();
+    }
     double[] transposedData = transpose(data);
     // for bandstop we need to iterate over every channel data
     // double[] notchedValues = butterNotch.bandStopFilter(transposedData);
@@ -130,6 +136,9 @@ public class ImpedanceCalculator {
   }
 
   private void initializeFilters() {
+    notchFilterList.clear();
+    noiseFilterList.clear();
+    impedanceFilterList.clear();
     for (int i = 0; i < channelCount; i++) {
       notchFilterList.add(new MentalabButterworthFilter(250, channelCount, false, 48, 52));
       noiseFilterList.add(new MentalabButterworthFilter(250, channelCount, true, 65, 68));
