@@ -66,7 +66,6 @@ class ParseRawDataTask implements Callable<Void> {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         final int pID = readToInt(btInputStream, 1); // package identification
-        Log.d("HELLO__", "imp result: " + pID);
         final int count = readToInt(btInputStream, 1); // package count
         final int length = readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
         final double timeStamp = readToInt(btInputStream, 4); // in ms * 10
