@@ -4,6 +4,8 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import com.mentalab.exception.CommandFailedException;
+import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 
@@ -19,12 +21,10 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      MentalabCommands.connect("CA4A").acquire();
-    } catch (NoBluetoothException
-        | NoConnectionException
-        | IOException
-        | ExecutionException
-        | InterruptedException e) {
+      final ExploreDevice connect = MentalabCommands.connect("1C32");
+      connect.acquire();
+      //connect.calculateImpedance();
+    } catch (NoBluetoothException | NoConnectionException | IOException | ExecutionException | InterruptedException e) {
       e.printStackTrace();
     }
   }

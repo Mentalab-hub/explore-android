@@ -1,5 +1,6 @@
 package com.mentalab.service.impedance;
 
+import android.util.Log;
 import com.mentalab.ExploreDevice;
 import com.mentalab.utils.MentalabButterworthFilter;
 import java.math.BigDecimal;
@@ -13,7 +14,6 @@ public class ImpedanceCalculator {
   private final double slope;
   private final double offset;
   private final int channelCount;
-  volatile int impCount;
   ArrayList<MentalabButterworthFilter> notchFilterList = new ArrayList<>();
   ArrayList<MentalabButterworthFilter> noiseFilterList = new ArrayList<>();
   ArrayList<MentalabButterworthFilter> impedanceFilterList = new ArrayList<>();
@@ -65,11 +65,6 @@ public class ImpedanceCalculator {
 
   public List<Float> calculate2(List<Float> data) {
 
-    impCount += 1;
-    if (impCount == 20)
-    {
-      initializeFilters();
-    }
     double[] transposedData = transpose(data);
     // for bandstop we need to iterate over every channel data
     // double[] notchedValues = butterNotch.bandStopFilter(transposedData);
@@ -109,6 +104,7 @@ public class ImpedanceCalculator {
       double diff = first[i] - second[i];
       result[i] = Math.round((diff * (slope / Math.pow(10, 6))) - offset);
     }
+
     return result;
   }
 

@@ -6,6 +6,7 @@ import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.utils.Utils;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -14,7 +15,7 @@ import java.util.concurrent.Callable;
 
 class ParseRawDataTask implements Callable<Void> {
 
-  private InputStream btInputStream;
+  private BufferedInputStream btInputStream;
 
   private static int readToInt(InputStream i, int noBytesToRead) throws IOException {
     final byte[] buffer = readStream(i, noBytesToRead, 1024);
@@ -58,13 +59,14 @@ class ParseRawDataTask implements Callable<Void> {
   }
 
   void setInputStream(InputStream inputStream) {
-    this.btInputStream = inputStream;
+    this.btInputStream = new BufferedInputStream(inputStream);
   }
 
   public Void call() {
     while (!Thread.currentThread().isInterrupted()) {
       try {
         final int pID = readToInt(btInputStream, 1); // package identification
+        Log.d("HELLO__", "imp result: " + pID);
         final int count = readToInt(btInputStream, 1); // package count
         final int length = readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
         final double timeStamp = readToInt(btInputStream, 4); // in ms * 10
@@ -72,7 +74,14 @@ class ParseRawDataTask implements Callable<Void> {
         final Packet packet = createPacket(pID, length, timeStamp / 10_000); // to seconds
         ContentServer.getInstance().publish(packet.getTopic(), packet);
       } catch (IOException e) {
-        Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
+        if(Thread.currentThread().isInterrupted())
+        {
+          Log.d(Utils.TAG, "Shutdown called. Parser will exit", e);
+        }
+        else
+        {
+          Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
+        }
         break;
       }
     }

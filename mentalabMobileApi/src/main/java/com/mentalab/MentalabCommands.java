@@ -75,8 +75,9 @@ public final class MentalabCommands {
   }
 
   public static void shutdown() throws IOException {
+    MentalabCodec.getInstance().shutdown();
     BluetoothManager.closeSocket();
     ExploreExecutor.getInstance().shutDown();
-    MentalabCodec.getInstance().shutdown();
+
   }
 }
