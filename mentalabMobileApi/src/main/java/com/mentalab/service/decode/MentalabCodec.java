@@ -3,7 +3,11 @@ package com.mentalab.service.decode;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 import com.mentalab.BluetoothManager;
+import com.mentalab.ExploreDevice;
+import com.mentalab.MentalabCommands;
 import com.mentalab.exception.InvalidDataException;
+import com.mentalab.exception.NoBluetoothException;
+import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.Packet;
 import com.mentalab.packets.PacketId;
 import com.mentalab.service.io.ContentServer;
@@ -17,13 +21,14 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class MentalabCodec {
 
   // runs independently of all else
-  private static final ExecutorService DECODE_EXECUTOR = Executors.newSingleThreadExecutor();
+  private static final ExecutorService DECODE_EXECUTOR = Executors.newFixedThreadPool(2);
   private final ParserInner DECODER_TASK = new ParserInner();
   static final BluetoothSocket mmsocket = BluetoothManager.getBtSocket();;
 
@@ -119,7 +124,7 @@ public final class MentalabCodec {
     }
 
     void setInputStream(InputStream inputStream) {
-      this.btInputStream = new BufferedInputStream(inputStream, 4*1024);
+      this.btInputStream = new BufferedInputStream(inputStream, 10 *1024);
     }
 
     public void run() {
@@ -128,6 +133,7 @@ public final class MentalabCodec {
 
           synchronized (mmsocket) {
             final int pID = readToInt(btInputStream, 1); // package identification
+            Log.d("HELLO__", "Getting PID:" + pID);
             final int count = readToInt(btInputStream, 1); // package count
             final int length =
                 readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
@@ -145,6 +151,12 @@ public final class MentalabCodec {
           else
           {
             Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
+            try {
+              ExploreDevice d = MentalabCommands.connect("855E");
+              d.acquire();
+            } catch (NoBluetoothException | NoConnectionException | IOException | ExecutionException | InterruptedException ex) {
+              ex.printStackTrace();
+            }
           }
           break;
         }
