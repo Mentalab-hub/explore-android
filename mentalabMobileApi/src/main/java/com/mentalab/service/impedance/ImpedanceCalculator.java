@@ -100,7 +100,6 @@ public class ImpedanceCalculator {
       double diff = first[i] - second[i];
       result[i] = Math.round((diff * (slope / Math.pow(10, 6))) - offset);
     }
-    Log.d("IMP__", Arrays.toString(result));
     return result;
   }
 

@@ -28,9 +28,11 @@ import java.util.concurrent.Executors;
 public final class MentalabCodec {
 
   // runs independently of all else
-  private static final ExecutorService DECODE_EXECUTOR = Executors.newFixedThreadPool(2);
+  private static final ExecutorService DECODE_EXECUTOR = Executors.newFixedThreadPool(5);
   private final ParserInner DECODER_TASK = new ParserInner();
-  static final BluetoothSocket mmsocket = BluetoothManager.getBtSocket();;
+  static final BluetoothSocket mmsocket = BluetoothManager.getBtSocket();
+  private static String deviceName;
+  private static ExploreDevice device;
 
   private MentalabCodec() {}
 
@@ -62,7 +64,8 @@ public final class MentalabCodec {
    *
    * @param rawData InputStream of device bytes
    */
-  public void decodeInputStream(InputStream rawData) {
+  public void decodeInputStream(InputStream rawData, ExploreDevice exploreDevice) {
+    device = exploreDevice;
     DECODER_TASK.setInputStream(rawData);
     DECODE_EXECUTOR.submit(DECODER_TASK);
   }
@@ -133,7 +136,6 @@ public final class MentalabCodec {
 
           synchronized (mmsocket) {
             final int pID = readToInt(btInputStream, 1); // package identification
-            Log.d("HELLO__", "Getting PID:" + pID);
             final int count = readToInt(btInputStream, 1); // package count
             final int length =
                 readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
@@ -152,8 +154,8 @@ public final class MentalabCodec {
           {
             Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
             try {
-              ExploreDevice d = MentalabCommands.connect("855E");
-              d.acquire();
+              MentalabCodec.device = MentalabCommands.connect(MentalabCodec.device.getDeviceName());
+              device.acquire();
             } catch (NoBluetoothException | NoConnectionException | IOException | ExecutionException | InterruptedException ex) {
               ex.printStackTrace();
             }
@@ -173,5 +175,9 @@ public final class MentalabCodec {
           readStream(btInputStream, length - 4, length - 4); // already read timestamp
       return Arrays.copyOfRange(buffer, 0, buffer.length - 4); // ignore last 4 byte Fletcher
     }
+  }
+
+  public static ExploreDevice getLastConnectedDevice(){
+      return device;
   }
 }

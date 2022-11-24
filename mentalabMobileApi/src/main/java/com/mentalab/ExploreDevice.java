@@ -96,7 +96,7 @@ public class ExploreDevice {
         Arrays.asList(
             CompletableFuture.supplyAsync(new ConfigureChannelCountTask(this)),
             CompletableFuture.supplyAsync(new ConfigureDeviceInfoTask(this))); // start config first
-    MentalabCodec.getInstance().decodeInputStream(getInputStream());
+    MentalabCodec.getInstance().decodeInputStream(getInputStream(), this);
     waitOnConfig(deviceConfig); // wait on config, otherwise connection failed
     return this;
   }
