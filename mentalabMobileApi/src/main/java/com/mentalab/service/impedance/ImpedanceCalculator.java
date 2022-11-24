@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ImpedanceCalculator {
@@ -64,16 +65,11 @@ public class ImpedanceCalculator {
   }
 
   public List<Float> calculate2(List<Float> data) {
-
+    //return Arrays.asList(new Float[]{1F, 1F, 1F, 1F, 1F, 1F, 1F, 1F});
     double[] transposedData = transpose(data);
-    // for bandstop we need to iterate over every channel data
-    // double[] notchedValues = butterNotch.bandStopFilter(transposedData);
     double[] notchedValues = applyFilterByChannels(transposedData, "notch");
-    // double[] noisedata = butterNoise.bandPassFilter(notchedValues);
     double[] noisedata = applyFilterByChannels(notchedValues, "noise");
     final double[] noiseLevel = getPeakToPeak(noisedata);
-
-    // double[] impedanceSignal = butterBandpass.bandPassFilter(notchedValues);
     double[] impedanceSignal = applyFilterByChannels(notchedValues, "impedance");
     final double[] impPeakToPeak = getPeakToPeak(impedanceSignal);
     final double[] impedanceValue = calculateImpedance(impPeakToPeak, noiseLevel);
@@ -104,7 +100,6 @@ public class ImpedanceCalculator {
       double diff = first[i] - second[i];
       result[i] = Math.round((diff * (slope / Math.pow(10, 6))) - offset);
     }
-
     return result;
   }
 

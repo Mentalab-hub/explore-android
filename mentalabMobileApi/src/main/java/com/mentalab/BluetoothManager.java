@@ -107,4 +107,8 @@ public class BluetoothManager {
     }
     return mmSocket.getOutputStream();
   }
+
+  public static BluetoothSocket getBtSocket(){
+    return mmSocket;
+  }
 }
