@@ -1,5 +1,6 @@
 package com.mentalab.service.impedance;
 
+import android.util.Log;
 import com.mentalab.ExploreDevice;
 import com.mentalab.ExploreExecutor;
 import com.mentalab.packets.sensors.exg.EEGPacket;
@@ -7,6 +8,7 @@ import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.ImpedanceSubscriber;
 import com.mentalab.service.io.Subscriber;
 import com.mentalab.utils.constants.Topic;
+import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 
 public class ImpedanceCalculatorTask implements Callable<Boolean> {
@@ -28,6 +30,7 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
     }
     final ImpedanceCalculator calculator = new ImpedanceCalculator(device);
     this.impedanceSubscriber = new ImpedanceSubscriber(Topic.EXG, calculator);
+    Log.d("HELLO_ ", "Registering subscriber for Imp calculation");
     ContentServer.getInstance().registerSubscriber(impedanceSubscriber);
     return true;
   }
