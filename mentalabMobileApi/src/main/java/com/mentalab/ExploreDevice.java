@@ -35,7 +35,7 @@ public class ExploreDevice {
 
   private final BluetoothDevice btDevice;
   private final String deviceName;
-  private final ImpedanceCalculatorTask calculateImpedanceTask = new ImpedanceCalculatorTask(this);
+  private ImpedanceCalculatorTask calculateImpedanceTask = new ImpedanceCalculatorTask(this);
   private ChannelCount channelCount = ChannelCount.CC_8;
   private SamplingRate samplingRate = SamplingRate.SR_250;
   private int channelMask = 0b11111111; // Initialization assumes the device has 8 channels
@@ -46,6 +46,19 @@ public class ExploreDevice {
   public ExploreDevice(BluetoothDevice btDevice, String deviceName) {
     this.btDevice = btDevice;
     this.deviceName = deviceName;
+  }
+
+  public ExploreDevice(ExploreDevice device) {
+    this.btDevice = device.btDevice;
+    this.deviceName = device.deviceName;
+    this.calculateImpedanceTask = device.calculateImpedanceTask;
+    this.channelCount = device.channelCount;
+    this.channelMask = device.channelMask; // Initialization assumes the device has 8 channels
+    this.slope = 223660;
+    this.offset = device.offset;
+    this.samplingRate = device.samplingRate;
+    this.recordTask = device.recordTask;
+
   }
 
   private static void waitOnConfig(List<CompletableFuture<Boolean>> deviceConfig)

@@ -154,8 +154,9 @@ public final class MentalabCodec {
           {
             Log.e(Utils.TAG, "Error reading input stream. Exiting.", e);
             try {
-              MentalabCodec.device = MentalabCommands.connect(MentalabCodec.device.getDeviceName());
-              device.acquire();
+              MentalabCommands.connect(MentalabCodec.device.getDeviceName());
+              MentalabCodec.device = new ExploreDevice(MentalabCodec.device);;
+              MentalabCodec.device.acquire();
             } catch (NoBluetoothException | NoConnectionException | IOException | ExecutionException | InterruptedException ex) {
               ex.printStackTrace();
             }
