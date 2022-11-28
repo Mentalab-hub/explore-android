@@ -62,10 +62,6 @@ public final class ExploreExecutor {
     if (!isLocked.get()) {
       this.serialExecutor.shutdownNow();
       this.serialExecutor = Executors.newSingleThreadExecutor();
-      if (!isLocked.get()) {
-        throw new RejectedExecutionException(
-            "Cannot proceed with task. This is most likely because impedance is runnning.");
-      }
     }
   }
 
