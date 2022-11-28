@@ -1,5 +1,7 @@
 package com.mentalab.service.impedance;
 
+import static android.os.SystemClock.sleep;
+
 import android.util.Log;
 import com.mentalab.ExploreDevice;
 import com.mentalab.ExploreExecutor;
@@ -36,7 +38,6 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
   }
 
   public void cancelTask() {
-    ContentServer.getInstance().deRegisterSubscriber(impedanceSubscriber);
-    this.impedanceSubscriber = null;
+    ContentServer.getInstance().deRegisterSubscriber(this.impedanceSubscriber);
   }
 }
