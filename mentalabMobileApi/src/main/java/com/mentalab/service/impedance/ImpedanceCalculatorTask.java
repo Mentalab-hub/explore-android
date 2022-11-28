@@ -39,5 +39,6 @@ public class ImpedanceCalculatorTask implements Callable<Boolean> {
 
   public void cancelTask() {
     ContentServer.getInstance().deRegisterSubscriber(this.impedanceSubscriber);
+    this.impedanceSubscriber = null;
   }
 }

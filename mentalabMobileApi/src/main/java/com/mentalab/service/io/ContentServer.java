@@ -36,7 +36,6 @@ public final class ContentServer {
   }
 
   public void deRegisterSubscriber(Subscriber<?> sub) {
-    Log.d("HELLO__", "Deregister subscriber of topic" + sub.getTopic());
     final Set<Subscriber<?>> topicSubscribers = this.topicSubscribers.get(sub.getTopic());
     if (topicSubscribers != null) {
       topicSubscribers.remove(sub);
