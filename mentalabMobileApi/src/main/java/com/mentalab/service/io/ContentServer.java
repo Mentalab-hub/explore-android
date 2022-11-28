@@ -1,5 +1,6 @@
 package com.mentalab.service.io;
 
+import android.util.Log;
 import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.Topic;
 import java.util.Map;
@@ -35,6 +36,7 @@ public final class ContentServer {
   }
 
   public void deRegisterSubscriber(Subscriber<?> sub) {
+    Log.d("HELLO__", "Deregister subscriber of topic" + sub.getTopic());
     final Set<Subscriber<?>> topicSubscribers = this.topicSubscribers.get(sub.getTopic());
     if (topicSubscribers != null) {
       topicSubscribers.remove(sub);

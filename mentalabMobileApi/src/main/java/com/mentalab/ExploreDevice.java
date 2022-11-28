@@ -241,10 +241,9 @@ public class ExploreDevice {
       throws RejectedExecutionException, IOException, InvalidCommandException,
           NoBluetoothException {
     final Command c = Command.CMD_ZM_DISABLE;
+    calculateImpedanceTask.cancelTask();
     return DeviceManager.submitConfigCommand(
-        c,
-        calculateImpedanceTask::cancelTask,
-        () -> ExploreExecutor.getInstance().getLock().set(true));
+        c);
   }
 
   public String getDeviceName() {

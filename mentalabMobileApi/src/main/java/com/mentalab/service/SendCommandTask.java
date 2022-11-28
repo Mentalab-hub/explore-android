@@ -36,9 +36,7 @@ public abstract class SendCommandTask<T> implements CheckedExceptionSupplier<T> 
   }
 
   private static void postCmdToOutputStream(byte[] command, OutputStream outputStream)
-      throws IOException {/*
-    outputStream.write(command);
-    outputStream.flush();*/
+      throws IOException {
     MentalabCodec.writeToOutputStreamInner(command);
     Log.d(Utils.TAG, "Command sent.");
   }
