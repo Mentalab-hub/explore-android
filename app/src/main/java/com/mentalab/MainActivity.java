@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
 
     try {
-      final ExploreDevice connect = MentalabCommands.connect("855E");
+      final ExploreDevice connect = MentalabCommands.connect("8526");
       connect.acquire();
       connect.calculateImpedance();
       Subscriber<EEGPacket> sub =
