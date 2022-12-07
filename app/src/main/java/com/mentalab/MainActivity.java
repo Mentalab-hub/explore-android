@@ -28,14 +28,13 @@ public class MainActivity extends AppCompatActivity {
     try {
       final ExploreDevice connect = MentalabCommands.connect("8526");
       connect.acquire();
-      connect.calculateImpedance();
       Subscriber<EEGPacket> sub =
-          new Subscriber<EEGPacket>(Topic.IMPEDANCE) {
-            @Override
-            public void accept(Packet packet) {
-              Log.d("DEBUG__ZZ", packet.getData().toString());
-            }
-          };
+              new Subscriber<EEGPacket>(Topic.EXG) {
+                @Override
+                public void accept(Packet packet) {
+                  Log.d("DEBUG__ZZ", packet.getData().toString());
+                }
+              };
       ContentServer.getInstance().registerSubscriber(sub);
 
       // To get last connected device after sending any command/connection drop: use
@@ -47,9 +46,7 @@ public class MainActivity extends AppCompatActivity {
         | NoConnectionException
         | IOException
         | ExecutionException
-        | InterruptedException
-        | InvalidCommandException
-        | CommandFailedException e) {
+        | InterruptedException e) {
       e.printStackTrace();
     }
   }

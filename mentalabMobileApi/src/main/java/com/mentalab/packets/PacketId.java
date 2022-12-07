@@ -2,7 +2,7 @@ package com.mentalab.packets;
 
 import com.mentalab.packets.command.CmdReceivedPacket;
 import com.mentalab.packets.command.CmdStatusPacket;
-import com.mentalab.packets.info.DeviceInfoPacket;
+import com.mentalab.packets.info.DeviceInfoPacketV1;
 import com.mentalab.packets.info.DeviceInfoPacketV2;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
 import com.mentalab.packets.sensors.EnvironmentPacket;
@@ -39,9 +39,7 @@ public enum PacketId {
   },
   INFO(99) {
     @Override
-    public Packet createInstance(double timeStamp) {
-      return new DeviceInfoPacket(timeStamp);
-    }
+    public Packet createInstance(double timeStamp) { return new DeviceInfoPacketV1(timeStamp); }
   },
   INFO_V2(97) {
     @Override

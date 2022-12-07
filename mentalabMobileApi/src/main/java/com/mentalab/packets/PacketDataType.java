@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 public enum PacketDataType {
   ADS_MASK("Ads Mask"),
   SR("Sampling Rate"),
+  BOARD_ID("Board ID"),
+  MEMORY_INFO("Memory info"),
 
   TEMP("Temperature"),
   LIGHT("Light"),

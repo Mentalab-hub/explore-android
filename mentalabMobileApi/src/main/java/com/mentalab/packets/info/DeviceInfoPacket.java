@@ -1,55 +1,41 @@
 package com.mentalab.packets.info;
 
-import static com.mentalab.packets.PacketDataType.ADS_MASK;
-import static com.mentalab.packets.PacketDataType.SR;
-
-import androidx.annotation.NonNull;
 import com.mentalab.exception.InvalidDataException;
 import com.mentalab.packets.Packet;
-import com.mentalab.packets.PacketUtils;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
-import java.util.EnumSet;
 
-/** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-public class DeviceInfoPacket extends Packet {
+import java.io.IOException;
 
-  private SamplingRate samplingRate;
-  private int adsMask;
+import androidx.annotation.NonNull;
 
-  public DeviceInfoPacket(double timeStamp) {
-    super(timeStamp);
-    super.type = EnumSet.of(ADS_MASK, SR);
-  }
+public abstract class DeviceInfoPacket extends Packet {
+    protected SamplingRate samplingRate;
+    protected int adsMask;
 
-  @Override
-  public void populate(byte[] data) throws InvalidDataException {
-    final int adsSamplingRateCode = PacketUtils.bytesToInt(data[2]); // 4, 5, or 6
-    this.samplingRate = PacketUtils.adsCodeToSamplingRate(adsSamplingRateCode);
-    this.adsMask = data[3] & 0xFF;
-  }
+    protected DeviceInfoPacket(double timeStamp) {
+        super(timeStamp);
+    }
 
-  @NonNull
-  @Override
-  public String toString() {
-    return "PACKET: DeviceInfo";
-  }
+    @Override
+    public abstract void populate(byte[] data) throws InvalidDataException, IOException;
 
-  @Override
-  public int getDataCount() {
-    return 2;
-  }
+    @NonNull
+    @Override
+    public String toString() {
+        return "PACKET: DeviceInfo";
+    }
 
-  public int getChannelMask() {
-    return this.adsMask;
-  }
+    @Override
+    public Topic getTopic() {
+        return Topic.DEVICE_INFO;
+    }
 
-  public SamplingRate getSamplingRate() {
-    return samplingRate;
-  }
+    public int getChannelMask() {
+        return this.adsMask;
+    }
 
-  @Override
-  public Topic getTopic() {
-    return Topic.DEVICE_INFO;
-  }
+    public SamplingRate getSamplingRate() {
+        return samplingRate;
+    }
 }

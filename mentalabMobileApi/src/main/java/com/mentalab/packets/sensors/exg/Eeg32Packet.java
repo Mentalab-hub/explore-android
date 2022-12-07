@@ -12,6 +12,5 @@ public class Eeg32Packet extends EEGPacket{
     public Eeg32Packet(double timeStamp) {
         super(timeStamp, NO_CHANNELS);
         super.type = EnumSet.range(PacketDataType.CH1, PacketDataType.CH32);
-        Log.i("EEG32Packet", "EnumSet: " + super.type.toString());
     }
 }
