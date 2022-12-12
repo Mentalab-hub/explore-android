@@ -5,6 +5,8 @@ import com.mentalab.packets.command.CmdStatusPacket;
 import com.mentalab.packets.info.DeviceInfoPacketV1;
 import com.mentalab.packets.info.DeviceInfoPacketV2;
 import com.mentalab.packets.info.ImpedanceInfoPacket;
+import com.mentalab.packets.info.ImpedanceInfoPacketV1;
+import com.mentalab.packets.info.ImpedanceInfoPacket_USBC;
 import com.mentalab.packets.sensors.EnvironmentPacket;
 import com.mentalab.packets.sensors.MarkerPacket;
 import com.mentalab.packets.sensors.OrientationPacket;
@@ -111,7 +113,19 @@ public enum PacketId {
   CALIBINFO(195) {
     @Override
     public Packet createInstance(double timeStamp) {
-      return new ImpedanceInfoPacket(timeStamp);
+      return new ImpedanceInfoPacketV1(timeStamp);
+    }
+  },
+  CALIBINFO_USBC(197) {
+    @Override
+    public Packet createInstance(double timeStamp) {
+      return new ImpedanceInfoPacket_USBC(timeStamp);
+    }
+  },
+  TRIGGER_OUT(177) {
+    @Override
+    public Packet createInstance(double timeStamp) {
+      return new EmptyPacket(timeStamp);
     }
   };
 

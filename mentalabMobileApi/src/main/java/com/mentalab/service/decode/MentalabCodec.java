@@ -133,16 +133,14 @@ public final class MentalabCodec {
     public void run() {
       while (!Thread.currentThread().isInterrupted()) {
         try {
-
           synchronized (mmsocket) {
             final int pID = readToInt(btInputStream, 1); // package identification
             final int count = readToInt(btInputStream, 1); // package count
             final int length =
                 readToInt(btInputStream, 2); // bytes = timestamp + payload + fletcher
             final double timeStamp = readToInt(btInputStream, 4); // in ms * 10
-
             final Packet packet = createPacket(pID, length, timeStamp / 10_000); // to seconds
-            ContentServer.getInstance().publish(packet.getTopic(), packet);
+            if(pID != 177) ContentServer.getInstance().publish(packet.getTopic(), packet);
             }
 
         } catch (IOException e) {
