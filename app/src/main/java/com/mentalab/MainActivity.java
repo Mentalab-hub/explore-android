@@ -13,6 +13,7 @@ import com.mentalab.exception.InvalidCommandException;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.packets.Packet;
+import com.mentalab.packets.sensors.MarkerPacket;
 import com.mentalab.packets.sensors.exg.EEGPacket;
 import com.mentalab.service.io.ContentServer;
 import com.mentalab.service.io.Subscriber;
@@ -39,6 +40,13 @@ public class MainActivity extends AppCompatActivity {
       else throw new IllegalArgumentException("Device ID unknown");
       connect.acquire();
       Subscriber<EEGPacket> sub = null;
+      Subscriber<MarkerPacket> markerSub = new Subscriber<MarkerPacket>(Topic.MARKER) {
+        @Override
+        public void accept(Packet packet) {
+          Log.d("Got marker", packet.getData().toString());
+        }
+      };
+
       if(impMode) {
         connect.calculateImpedance(); // something here is wrong for 32 channels
         sub = new Subscriber<EEGPacket>(Topic.IMPEDANCE) {
@@ -57,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         };
       }
       ContentServer.getInstance().registerSubscriber(sub);
+      ContentServer.getInstance().registerSubscriber(markerSub);
 
       // To get last connected device after sending any command/connection drop: use
       // getLastConnectedDevice() method of MentalabCodec
