@@ -15,7 +15,7 @@ Explore Android API is Mentalab's open-source biosignal acquisition API for use 
 * Measure impedance
 * Filter and stream raw data 
 
-Please not that the API is not guranteed in all Android versions. The API functionality is tested in Pixel phones with Android 13 OS.
+Please note that the API is not guranteed in all Android versions. The API functionality is tested in Pixel phones with Android 13 OS.
 
 Requirements
 ==================
