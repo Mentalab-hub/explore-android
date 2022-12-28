@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class StreamOutlet {
 
-  private Pointer obj;
+  private final Pointer obj;
 
   public StreamOutlet(StreamInfo info, int chunk_size, int max_buffered) throws IOException {
     obj = LslLoader.instance.lsl_create_outlet(info.handle(), chunk_size, max_buffered);

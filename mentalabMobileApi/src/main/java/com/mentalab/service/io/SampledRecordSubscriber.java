@@ -1,7 +1,6 @@
 package com.mentalab.service.io;
 
 import com.mentalab.utils.constants.Topic;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;

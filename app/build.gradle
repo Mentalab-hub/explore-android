@@ -33,6 +33,7 @@ android {
             includeAndroidResources = true
         }
     }
+    namespace 'com.mentalab'
 }
 
 dependencies {

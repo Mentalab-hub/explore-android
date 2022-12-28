@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import androidx.annotation.RequiresApi;
 import com.mentalab.service.record.RecordFile;
-
 import java.io.IOException;
 
 public class FileGenerator {
@@ -28,14 +27,6 @@ public class FileGenerator {
     }
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.Q)
-  public Uri generateFile(String filename) throws IOException {
-    validateFilename(filename);
-
-    final RecordFile file = new RecordFile(filename);
-    return file.createFile(directory, context);
-  }
-
   private static void validateFilename(String filename) throws IOException {
     if (filename.length() < 1) {
       throw new IOException("Filename is empty.");
@@ -54,5 +45,13 @@ public class FileGenerator {
     if (RESERVED_CHARS.indexOf(c) > -1) {
       throw new IOException("Invalid filename, contains character: " + c);
     }
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.Q)
+  public Uri generateFile(String filename) throws IOException {
+    validateFilename(filename);
+
+    final RecordFile file = new RecordFile(filename);
+    return file.createFile(directory, context);
   }
 }

@@ -1,5 +1,7 @@
 package com.mentalab;
 
+import static com.mentalab.utils.Utils.TAG;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -7,15 +9,12 @@ import android.util.Log;
 import com.mentalab.exception.NoBluetoothException;
 import com.mentalab.exception.NoConnectionException;
 import com.mentalab.utils.Utils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import static com.mentalab.utils.Utils.TAG;
 
 public class BluetoothManager {
 
@@ -107,5 +106,9 @@ public class BluetoothManager {
       throw new NoBluetoothException("No Bluetooth socket available.");
     }
     return mmSocket.getOutputStream();
+  }
+
+  public static BluetoothSocket getBtSocket(){
+    return mmSocket;
   }
 }

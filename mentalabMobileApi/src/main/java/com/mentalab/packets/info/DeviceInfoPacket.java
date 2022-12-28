@@ -1,77 +1,41 @@
 package com.mentalab.packets.info;
 
-import static com.mentalab.packets.Attributes.ADS_MASK;
-import static com.mentalab.packets.Attributes.SR;
-
-import androidx.annotation.NonNull;
-import com.mentalab.packets.Publishable;
+import com.mentalab.exception.InvalidDataException;
+import com.mentalab.packets.Packet;
 import com.mentalab.utils.constants.SamplingRate;
 import com.mentalab.utils.constants.Topic;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
 
-/** Device related information packet to transmit firmware version, ADC mask and sampling rate */
-public class DeviceInfoPacket extends InfoPacket implements Publishable {
+import java.io.IOException;
 
-  private SamplingRate samplingRate;
-  private int adsMask;
+import androidx.annotation.NonNull;
 
-  public DeviceInfoPacket(double timeStamp) {
-    super(timeStamp);
-    super.attributes = EnumSet.of(ADS_MASK, SR);
-  }
+public abstract class DeviceInfoPacket extends Packet {
+    protected SamplingRate samplingRate;
+    protected int adsMask;
 
-  @Override
-  public void convertData(byte[] byteBuffer) {
-    final int samplingRateMultiplier =
-        ByteBuffer.wrap(new byte[] {byteBuffer[2], 0, 0, 0})
-            .order(ByteOrder.LITTLE_ENDIAN)
-            .getInt();
-
-    final double sr = 16000 / (Math.pow(2, samplingRateMultiplier));
-    if (sr < 300) {
-      this.samplingRate = SamplingRate.SR_250;
-    } else if (sr < 600) {
-      this.samplingRate = SamplingRate.SR_500;
-    } else {
-      this.samplingRate = SamplingRate.SR_1000;
+    protected DeviceInfoPacket(double timeStamp) {
+        super(timeStamp);
     }
 
-    this.adsMask = byteBuffer[3] & 0xFF;
+    @Override
+    public abstract void populate(byte[] data) throws InvalidDataException, IOException;
 
-    super.data = new ArrayList<>(Arrays.asList((float) adsMask, (float) sr));
-  }
+    @NonNull
+    @Override
+    public String toString() {
+        return "PACKET: DeviceInfo";
+    }
 
-  @Override
-  public List<Float> getData() {
-    return super.data;
-  }
+    @Override
+    public Topic getTopic() {
+        return Topic.DEVICE_INFO;
+    }
 
-  @NonNull
-  @Override
-  public String toString() {
-    return "DeviceInfoPacket";
-  }
+    public int getChannelMask() {
+        return this.adsMask;
+    }
 
-  @Override
-  public int getDataCount() {
-    return 2;
-  }
-
-  public int getChannelMask() {
-    return this.adsMask;
-  }
-
-  public SamplingRate getSamplingRate() {
-    return samplingRate;
-  }
-
-  @Override
-  public Topic getTopic() {
-    return Topic.DEVICE_INFO;
-  }
+    public SamplingRate getSamplingRate() {
+        return samplingRate;
+    }
 }
