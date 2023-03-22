@@ -92,6 +92,12 @@ public enum PacketId {
       return new Eeg32Packet(timeStamp);
     }
   },
+  EEG98_USBC(150) {
+    @Override
+    public Packet createInstance(double timeStamp) {
+      return new Eeg98Packet(timeStamp);
+    }
+  },
   CMDRCV(192) {
     @Override
     public Packet createInstance(double timeStamp) {
