@@ -39,16 +39,27 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation group: 'uk.me.berndporr', name: 'iirj', version: '1.4'
 }
-apply plugin: 'maven-publish'
+
+
+
+task myJavadocs(type: Javadoc) {
+    source = sourceSets
+}
+
+task generateRestApiDocs(type: Javadoc) {
+    source = sourceSets
+    destinationDir = reporting.file("rest-api-docs")
+}
 
 afterEvaluate {
     publishing {
         publications {
+            // Creates a Maven publication called "release".
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.mentalab-hub.explore-android'
+                groupId = 'com.github.Mentalab-hub.explore-android'
                 artifactId = 'mentalabMobileApi'
-                version = '1.1.1'
+                version = '1.0'
             }
         }
     }
