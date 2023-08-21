@@ -46,10 +46,9 @@ dependencies {
 
 
 
+// Generate Javadoc
 task javadoc(type: Javadoc) {
-    options.charSet = 'UTF-8'
-    failOnError false
-    source = sourceSets
+    source = android.sourceSets.main.java.srcDirs
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
